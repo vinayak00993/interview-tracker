@@ -52,9 +52,31 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const [ocrStatus, setOcrStatus] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Search & filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterPriority, setFilterPriority] = useState("");
+  const [filterTier, setFilterTier] = useState("");
+
+  // Apply search and filters
+  const filtered = opportunities.filter((o) => {
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matches =
+        o.company.toLowerCase().includes(q) ||
+        o.role.toLowerCase().includes(q) ||
+        (o.location && o.location.toLowerCase().includes(q));
+      if (!matches) return false;
+    }
+    if (filterPriority && o.priority !== filterPriority) return false;
+    if (filterTier && o.tier !== parseInt(filterTier, 10)) return false;
+    return true;
+  });
+
+  const hasActiveFilters = searchQuery || filterPriority || filterTier;
+
   const grouped = COLUMNS.map((col) => ({
     ...col,
-    items: opportunities.filter((o) => o.status === col.status),
+    items: filtered.filter((o) => o.status === col.status),
   }));
 
   const handleDragStart = useCallback((e: React.DragEvent, id: string) => {
@@ -255,7 +277,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   return (
     <div>
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-medium text-warm-600 uppercase tracking-wider">
           Pipeline
         </h2>
@@ -265,6 +287,55 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         >
           + Add Opportunity
         </button>
+      </div>
+
+      {/* Search & Filter bar */}
+      <div className="flex items-center gap-3 mb-5">
+        <div className="relative flex-1 max-w-sm">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by company, role, or location..."
+            className="w-full pl-8 pr-3 py-1.5 bg-white border border-warm-300 rounded-lg text-warm-900 text-xs focus:outline-none focus:border-terra transition-colors placeholder:text-warm-400"
+          />
+          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <select
+          value={filterPriority}
+          onChange={(e) => setFilterPriority(e.target.value)}
+          className="px-2.5 py-1.5 bg-white border border-warm-300 rounded-lg text-warm-700 text-xs focus:outline-none focus:border-terra transition-colors"
+        >
+          <option value="">All priorities</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <select
+          value={filterTier}
+          onChange={(e) => setFilterTier(e.target.value)}
+          className="px-2.5 py-1.5 bg-white border border-warm-300 rounded-lg text-warm-700 text-xs focus:outline-none focus:border-terra transition-colors"
+        >
+          <option value="">All tiers</option>
+          <option value="1">Tier 1</option>
+          <option value="2">Tier 2</option>
+          <option value="3">Tier 3</option>
+        </select>
+        {hasActiveFilters && (
+          <button
+            onClick={() => { setSearchQuery(""); setFilterPriority(""); setFilterTier(""); }}
+            className="px-2.5 py-1.5 text-xs text-warm-500 hover:text-warm-800 transition-colors"
+          >
+            Clear filters
+          </button>
+        )}
+        {hasActiveFilters && (
+          <span className="text-xs text-warm-500">
+            {filtered.length} of {opportunities.length} shown
+          </span>
+        )}
       </div>
 
       {/* Add form */}
