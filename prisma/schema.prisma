@@ -1,0 +1,192 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  opportunities Opportunity[]
+  contacts      Contact[]
+  activities    Activity[]
+  documents     Document[]
+}
+
+model Opportunity {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Core fields
+  company     String
+  role        String
+  jdLink      String?
+  compMin     Int?          // in thousands (e.g., 176 = $176K)
+  compMax     Int?          // in thousands
+  location    String?
+  remote      Boolean       @default(false)
+
+  // Assessment
+  fitScore    Int?          // 0-100
+  priority    String        @default("medium") // high, medium, low
+  tier        Int?          // 1, 2, 3
+
+  // Status tracking
+  status      String        @default("saved") // saved, applied, interviewing, offer, rejected, withdrawn, archived
+  appliedDate DateTime?
+  source      String?       // referral, direct, recruiter, job_board
+
+  // Notes
+  notes       String?       // general notes, markdown supported
+  prosConsNotes String?     // structured pros/cons
+  keyGaps     String?       // known gaps to address
+
+  // Timestamps
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  // Relations
+  interviews  Interview[]
+  activities  Activity[]
+  opportunityContacts OpportunityContact[]
+  documentsSent       OpportunityDocument[]
+
+  @@index([userId, status])
+  @@index([userId, company])
+}
+
+model Interview {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  // Event details
+  round         String      // "Recruiter Screen", "Hiring Manager", "Panel", "Technical", "Final"
+  roundNumber   Int         @default(1)
+  dateTime      DateTime?
+  durationMin   Int?        // expected duration in minutes
+  format        String      @default("video") // phone, video, onsite, async
+
+  // People
+  interviewerName  String?
+  interviewerTitle String?
+  interviewerLinkedIn String?
+
+  // Prep and follow-up
+  prepNotes     String?     // markdown: what to prepare, key talking points
+  debriefNotes  String?     // markdown: how it went, questions asked, vibe
+  questionsAsked String?    // questions they asked you
+  questionsToAsk String?    // questions you want to ask them
+
+  // Outcome
+  status        String      @default("scheduled") // scheduled, completed, cancelled, rescheduled
+  sentiment     String?     // positive, neutral, negative
+  nextSteps     String?     // what they said happens next
+
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([opportunityId])
+}
+
+model Contact {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Info
+  name        String
+  title       String?
+  company     String?
+  email       String?
+  phone       String?
+  linkedIn    String?
+
+  // Relationship
+  type        String      @default("other") // recruiter, hiring_manager, referral, peer, mentor, other
+  warmth      String?     // cold, warm, hot — how strong is the connection
+  notes       String?
+
+  // Tracking
+  lastContactedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  opportunityContacts OpportunityContact[]
+
+  @@index([userId])
+}
+
+model OpportunityContact {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  contactId     String
+  contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  role          String?     // their role in this specific opportunity: "recruiter", "hiring_manager", "referral"
+
+  @@unique([opportunityId, contactId])
+}
+
+model Activity {
+  id            String       @id @default(cuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  opportunityId String?
+  opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+
+  // Event
+  type          String       // applied, emailed, interviewed, followed_up, researched, offer_received, rejected, withdrew, note
+  description   String
+  date          DateTime     @default(now())
+
+  // Timestamps
+  createdAt     DateTime     @default(now())
+
+  @@index([userId, date])
+  @@index([opportunityId])
+}
+
+model Document {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Doc info
+  type        String      // resume, cover_letter, portfolio, references, other
+  name        String      // "Resume v3 - AI Companies", "Anthropic Cover Letter"
+  version     String?     // "v1", "v2", "final"
+  notes       String?     // what's different about this version
+  filePath    String?     // local file path if stored
+
+  // Timestamps
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  sentTo      OpportunityDocument[]
+
+  @@index([userId])
+}
+
+model OpportunityDocument {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  documentId    String
+  document      Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  sentAt        DateTime    @default(now())
+
+  @@unique([opportunityId, documentId])
+}

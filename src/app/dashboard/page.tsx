@@ -1,0 +1,121 @@
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "@/lib/auth";
+import { findOpportunities, findUpcomingInterviews, findRecentActivities } from "@/lib/db";
+import KanbanBoard from "./KanbanBoard";
+
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+  if (!session) redirect("/login");
+
+  const userId = (session.user as any).id;
+
+  const opportunities = findOpportunities(userId);
+  const upcomingInterviews = findUpcomingInterviews(userId);
+  const recentActivity = findRecentActivities(userId);
+
+  const stats = {
+    total: opportunities.length,
+    interviewing: opportunities.filter((o) => o.status === "interviewing").length,
+    upcoming: upcomingInterviews.length,
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f]">
+      {/* Header */}
+      <header className="border-b border-[#2a2a3a] px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-white tracking-tight">
+            Interview Tracker
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {stats.total} opportunities · {stats.interviewing} active · {stats.upcoming} upcoming
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-slate-400">{session.user?.name}</span>
+        </div>
+      </header>
+
+      <div className="flex">
+        {/* Main content — Kanban */}
+        <main className="flex-1 p-6 overflow-x-auto">
+          <KanbanBoard opportunities={opportunities} />
+        </main>
+
+        {/* Right sidebar */}
+        <aside className="w-80 border-l border-[#2a2a3a] p-5 space-y-6 shrink-0">
+          {/* Upcoming Interviews */}
+          <div>
+            <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
+              Upcoming Interviews
+            </h2>
+            {upcomingInterviews.length === 0 ? (
+              <p className="text-sm text-slate-600">No interviews scheduled.</p>
+            ) : (
+              <div className="space-y-2">
+                {upcomingInterviews.map((interview: any) => (
+                  <div
+                    key={interview.id}
+                    className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-3"
+                  >
+                    <p className="text-sm text-white font-medium">
+                      {interview.opportunity.company}
+                    </p>
+                    <p className="text-xs text-slate-400">{interview.round}</p>
+                    {interview.dateTime && (
+                      <p className="text-xs text-indigo-400 mt-1">
+                        {new Date(interview.dateTime).toLocaleDateString(
+                          "en-US",
+                          {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Recent Activity */}
+          <div>
+            <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
+              Recent Activity
+            </h2>
+            <div className="space-y-2">
+              {recentActivity.map((activity: any) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-2 text-xs"
+                >
+                  <span className="text-slate-600 shrink-0 w-14">
+                    {new Date(activity.date).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                  <div>
+                    <span className="text-slate-400">
+                      {activity.description}
+                    </span>
+                    {activity.opportunity && (
+                      <span className="text-slate-600 block">
+                        {activity.opportunity.company} — {activity.opportunity.role}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
+}
