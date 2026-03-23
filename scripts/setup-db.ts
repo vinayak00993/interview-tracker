@@ -4,7 +4,7 @@
  *   npx tsx scripts/setup-db.ts          # local dev (file:./prisma/dev.db)
  *   TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... npx tsx scripts/setup-db.ts  # Turso
  */
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/web";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 

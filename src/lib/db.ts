@@ -141,8 +141,9 @@ function createLocalBackend(): DbBackend {
 // ── @libsql/client backend (Turso production) ──
 
 function createTursoBackend(): DbBackend {
+  // Use web client (HTTP) — avoids native binary issues on ARM64
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createClient } = require("@libsql/client");
+  const { createClient } = require("@libsql/client/web");
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
     authToken: process.env.TURSO_AUTH_TOKEN!,
