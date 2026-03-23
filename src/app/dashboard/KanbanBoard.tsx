@@ -26,7 +26,7 @@ interface KanbanBoardProps {
 const COLUMNS = [
   { status: "saved", label: "Saved", color: "#8a7d6d" },
   { status: "applied", label: "Applied", color: "#d4a03c" },
-  { status: "interviewing", label: "Interviewing", color: "#c45a3c" },
+  { status: "interviewing", label: "Interviewing", color: "#b33a3a" },
   { status: "offer", label: "Offer", color: "#6b9e5c" },
   { status: "rejected", label: "Rejected", color: "#c44848" },
   { status: "withdrawn", label: "Withdrawn", color: "#9b7bb8" },
@@ -176,7 +176,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
     <div>
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-sm font-medium text-warm-400 uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-warm-600 uppercase tracking-wider">
           Pipeline
         </h2>
         <button
@@ -189,8 +189,8 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
 
       {/* Add form */}
       {showAddForm && (
-        <div className="mb-6 bg-warm-800 border border-warm-600 rounded-lg p-5">
-          <h3 className="text-sm font-medium text-warm-100 mb-4">New Opportunity</h3>
+        <div className="mb-6 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
+          <h3 className="text-sm font-medium text-warm-900 mb-4">New Opportunity</h3>
 
           {/* JD URL paste bar */}
           <div className="mb-4 flex gap-2">
@@ -199,7 +199,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
               value={jdUrl}
               onChange={(e) => setJdUrl(e.target.value)}
               placeholder="Paste a job description URL to auto-fill fields..."
-              className="flex-1 px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors placeholder:text-warm-500"
+              className="flex-1 px-3 py-2 bg-warm-100 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors placeholder:text-warm-500"
             />
             <button
               type="button"
@@ -236,29 +236,29 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             />
             <Input name="fitScore" label="Fit Score (0-100)" type="number" />
             <div className="flex items-end gap-2 pb-1">
-              <label className="flex items-center gap-2 text-xs text-warm-300 cursor-pointer">
+              <label className="flex items-center gap-2 text-xs text-warm-700 cursor-pointer">
                 <input
                   type="checkbox"
                   name="remote"
                   value="true"
-                  className="rounded border-warm-600 bg-warm-900"
+                  className="rounded border-warm-300 bg-warm-100"
                 />
                 Remote
               </label>
             </div>
             <div className="col-span-3">
-              <label className="block text-xs font-medium text-warm-400 mb-1">Notes</label>
+              <label className="block text-xs font-medium text-warm-600 mb-1">Notes</label>
               <textarea
                 name="notes"
                 rows={2}
-                className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                className="w-full px-3 py-2 bg-warm-100 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
               />
             </div>
             <div className="col-span-3 flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setShowAddForm(false)}
-                className="px-3 py-1.5 text-xs text-warm-300 hover:text-warm-100 transition-colors"
+                className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors"
               >
                 Cancel
               </button>
@@ -281,8 +281,8 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             key={col.status}
             className={`flex-1 min-w-[220px] flex flex-col rounded-lg transition-colors ${
               dragOverColumn === col.status
-                ? "bg-warm-700"
-                : "bg-warm-900/50"
+                ? "bg-warm-200"
+                : "bg-warm-100/60"
             }`}
             onDragOver={(e) => handleDragOver(e, col.status)}
             onDragLeave={handleDragLeave}
@@ -294,7 +294,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                 className="w-2 h-2 rounded-full"
                 style={{ backgroundColor: col.color }}
               />
-              <span className="text-xs font-medium text-warm-300 uppercase tracking-wider">
+              <span className="text-xs font-medium text-warm-700 uppercase tracking-wider">
                 {col.label}
               </span>
               <span className="text-xs text-warm-500 ml-auto">
@@ -309,17 +309,17 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                   key={opp.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, opp.id)}
-                  className={`group bg-warm-800 border border-warm-600 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-warm-500 transition-all ${
+                  className={`group bg-white border border-warm-300 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-warm-400 hover:shadow-sm transition-all ${
                     draggedId === opp.id ? "opacity-40" : ""
                   }`}
                 >
                   <Link href={`/opportunities/${opp.id}`} className="block">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <h3 className="text-sm font-medium text-warm-100 truncate">
+                        <h3 className="text-sm font-medium text-warm-900 truncate">
                           {opp.company}
                         </h3>
-                        <p className="text-xs text-warm-300 truncate mt-0.5">
+                        <p className="text-xs text-warm-600 truncate mt-0.5">
                           {opp.role}
                         </p>
                       </div>
@@ -327,10 +327,10 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                         <span
                           className={`text-xs shrink-0 ${
                             opp.priority === "high"
-                              ? "text-terra-light"
+                              ? "text-terra"
                               : opp.priority === "low"
-                              ? "text-warm-500"
-                              : "text-warm-400"
+                              ? "text-warm-400"
+                              : "text-warm-500"
                           }`}
                           title={`${opp.priority} priority`}
                         >
@@ -341,17 +341,17 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
 
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                       {opp.fitScore != null && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra-light border border-terra/20">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra border border-terra/20">
                           {opp.fitScore}%
                         </span>
                       )}
                       {opp.tier != null && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-warm-600/50 text-warm-300 border border-warm-600">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-warm-200 text-warm-700 border border-warm-300">
                           T{opp.tier}
                         </span>
                       )}
                       {opp._count.interviews > 0 && (
-                        <span className="text-[10px] text-warm-400">
+                        <span className="text-[10px] text-warm-500">
                           {opp._count.interviews} int.
                         </span>
                       )}
@@ -394,14 +394,14 @@ function Input({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-warm-400 mb-1">
+      <label className="block text-xs font-medium text-warm-600 mb-1">
         {label}
       </label>
       <input
         name={name}
         type={type}
         required={required}
-        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors"
+        className="w-full px-3 py-2 bg-warm-100 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
       />
     </div>
   );
@@ -420,13 +420,13 @@ function Select({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-warm-400 mb-1">
+      <label className="block text-xs font-medium text-warm-600 mb-1">
         {label}
       </label>
       <select
         name={name}
         defaultValue={defaultValue}
-        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors"
+        className="w-full px-3 py-2 bg-warm-100 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
       >
         <option value="">—</option>
         {options.map((opt) => (

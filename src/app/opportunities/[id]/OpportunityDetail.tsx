@@ -5,25 +5,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  saved: { bg: "bg-warm-600/20", text: "text-warm-300", border: "border-warm-600/30" },
-  applied: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20" },
-  interviewing: { bg: "bg-terra/10", text: "text-terra-light", border: "border-terra/20" },
-  offer: { bg: "bg-green-500/10", text: "text-green-400", border: "border-green-500/20" },
-  rejected: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
-  withdrawn: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
+  saved: { bg: "bg-warm-200", text: "text-warm-700", border: "border-warm-300" },
+  applied: { bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200" },
+  interviewing: { bg: "bg-terra/10", text: "text-terra-dark", border: "border-terra/20" },
+  offer: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  rejected: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+  withdrawn: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
 };
 
 const SENTIMENT_COLORS: Record<string, string> = {
-  positive: "text-green-400",
-  neutral: "text-yellow-400",
-  negative: "text-red-400",
+  positive: "text-green-700",
+  neutral: "text-yellow-700",
+  negative: "text-red-700",
 };
 
 const INTERVIEW_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  scheduled: { bg: "bg-terra/10", text: "text-terra-light" },
-  completed: { bg: "bg-green-500/10", text: "text-green-400" },
-  cancelled: { bg: "bg-red-500/10", text: "text-red-400" },
-  rescheduled: { bg: "bg-yellow-500/10", text: "text-yellow-400" },
+  scheduled: { bg: "bg-terra/10", text: "text-terra-dark" },
+  completed: { bg: "bg-green-50", text: "text-green-700" },
+  cancelled: { bg: "bg-red-50", text: "text-red-700" },
+  rescheduled: { bg: "bg-yellow-50", text: "text-yellow-700" },
 };
 
 interface Interview {
@@ -176,17 +176,17 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-warm-900">
+    <div className="min-h-screen bg-warm-100">
       {/* Top bar */}
-      <header className="border-b border-warm-600 px-6 py-3 flex items-center gap-4">
+      <header className="border-b border-warm-300 px-6 py-3 flex items-center gap-4 bg-warm-50">
         <Link
           href="/dashboard"
-          className="text-xs text-warm-400 hover:text-warm-200 transition-colors"
+          className="text-xs text-warm-600 hover:text-warm-900 transition-colors"
         >
           ← Dashboard
         </Link>
-        <div className="h-4 w-px bg-warm-600" />
-        <span className="text-xs text-warm-400">{opp.company}</span>
+        <div className="h-4 w-px bg-warm-300" />
+        <span className="text-xs text-warm-600">{opp.company}</span>
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
@@ -194,21 +194,21 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-semibold text-warm-100">{opp.company}</h1>
+              <h1 className="text-2xl font-semibold text-warm-900">{opp.company}</h1>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}
               >
                 {opp.status}
               </span>
               {opp.tier && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-warm-600/20 text-warm-300 border border-warm-600/30">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-warm-200 text-warm-700 border border-warm-300">
                   Tier {opp.tier}
                 </span>
               )}
             </div>
-            <p className="text-base text-warm-300">{opp.role}</p>
+            <p className="text-base text-warm-600">{opp.role}</p>
 
-            <div className="flex items-center gap-4 mt-3 text-xs text-warm-400">
+            <div className="flex items-center gap-4 mt-3 text-xs text-warm-500">
               {opp.location && (
                 <span>{opp.location}{opp.remote ? " · Remote" : ""}</span>
               )}
@@ -216,7 +216,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <span>${opp.compMin}K – ${opp.compMax}K</span>
               )}
               {opp.fitScore != null && (
-                <span className="text-terra-light">{opp.fitScore}% fit</span>
+                <span className="text-terra">{opp.fitScore}% fit</span>
               )}
               {opp.source && (
                 <span>via {opp.source}</span>
@@ -226,7 +226,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   href={opp.jdLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-terra-light hover:text-terra transition-colors"
+                  className="text-terra hover:text-terra transition-colors"
                 >
                   View JD →
                 </a>
@@ -238,7 +238,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             <select
               value={opp.status}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-warm-800 border border-warm-600 rounded-lg text-warm-100 focus:outline-none focus:border-terra"
+              className="px-3 py-1.5 text-xs bg-white border border-warm-300 rounded-lg text-warm-900 focus:outline-none focus:border-terra"
             >
               {["saved", "applied", "interviewing", "offer", "rejected", "withdrawn", "archived"].map(
                 (s) => (
@@ -250,7 +250,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </select>
             <button
               onClick={handleDeleteOpportunity}
-              className="px-3 py-1.5 text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 rounded-lg transition-colors"
+              className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
             >
               Delete
             </button>
@@ -258,7 +258,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-warm-600 mb-6">
+        <div className="flex gap-1 border-b border-warm-300 mb-6">
           {(
             [
               { key: "interviews", label: "Interviews", count: opp.interviews.length },
@@ -272,8 +272,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px ${
                 activeTab === tab.key
-                  ? "text-warm-100 border-terra"
-                  : "text-warm-400 border-transparent hover:text-warm-200"
+                  ? "text-warm-900 border-terra"
+                  : "text-warm-500 border-transparent hover:text-warm-800"
               }`}
             >
               {tab.label}
@@ -288,7 +288,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {activeTab === "interviews" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-warm-300">Interview Timeline</h2>
+              <h2 className="text-sm font-medium text-warm-700">Interview Timeline</h2>
               <button
                 onClick={() => setShowAddInterview(!showAddInterview)}
                 className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg transition-colors"
@@ -298,7 +298,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </div>
 
             {showAddInterview && (
-              <div className="mb-6 bg-warm-800 border border-warm-600 rounded-lg p-5">
+              <div className="mb-6 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
                 <form onSubmit={handleAddInterview} className="grid grid-cols-3 gap-4">
                   <FormInput name="round" label="Round Name" required placeholder='e.g. "Recruiter Screen"' />
                   <FormInput name="roundNumber" label="Round #" type="number" defaultValue="1" />
@@ -320,24 +320,24 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   <FormInput name="interviewerTitle" label="Interviewer Title" />
                   <FormInput name="interviewerLinkedIn" label="Interviewer LinkedIn" />
                   <div className="col-span-3">
-                    <label className="block text-xs font-medium text-warm-400 mb-1">Prep Notes</label>
+                    <label className="block text-xs font-medium text-warm-600 mb-1">Prep Notes</label>
                     <textarea
                       name="prepNotes"
                       rows={3}
-                      className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                      className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                       placeholder="Key talking points, things to prepare..."
                     />
                   </div>
                   <div className="col-span-3">
-                    <label className="block text-xs font-medium text-warm-400 mb-1">Questions to Ask</label>
+                    <label className="block text-xs font-medium text-warm-600 mb-1">Questions to Ask</label>
                     <textarea
                       name="questionsToAsk"
                       rows={2}
-                      className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                      className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                     />
                   </div>
                   <div className="col-span-3 flex gap-2 justify-end">
-                    <button type="button" onClick={() => setShowAddInterview(false)} className="px-3 py-1.5 text-xs text-warm-300 hover:text-warm-100 transition-colors">Cancel</button>
+                    <button type="button" onClick={() => setShowAddInterview(false)} className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors">
                       {isSubmitting ? "Adding..." : "Add Interview"}
                     </button>
@@ -355,19 +355,19 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
 
                   return (
-                    <div key={interview.id} className="bg-warm-800 border border-warm-600 rounded-lg overflow-hidden">
+                    <div key={interview.id} className="bg-white border border-warm-300 rounded-lg overflow-hidden">
                       <button
                         onClick={() => setExpandedInterview(isExpanded ? null : interview.id)}
-                        className="w-full p-4 flex items-center justify-between text-left hover:bg-warm-700 transition-colors"
+                        className="w-full p-4 flex items-center justify-between text-left hover:bg-warm-100 transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-warm-700 flex items-center justify-center text-xs font-medium text-warm-300">
+                          <div className="w-8 h-8 rounded-full bg-warm-200 flex items-center justify-center text-xs font-medium text-warm-700">
                             {interview.roundNumber}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-warm-100">{interview.round}</p>
+                            <p className="text-sm font-medium text-warm-900">{interview.round}</p>
                             {interview.interviewerName && (
-                              <span className="text-xs text-warm-300">
+                              <span className="text-xs text-warm-700">
                                 {interview.interviewerName}
                                 {interview.interviewerTitle && ` · ${interview.interviewerTitle}`}
                               </span>
@@ -376,7 +376,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                         </div>
                         <div className="flex items-center gap-3">
                           {interview.sentiment && (
-                            <span className={`text-xs ${SENTIMENT_COLORS[interview.sentiment] || "text-warm-300"}`}>
+                            <span className={`text-xs ${SENTIMENT_COLORS[interview.sentiment] || "text-warm-700"}`}>
                               {interview.sentiment}
                             </span>
                           )}
@@ -384,7 +384,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                             {interview.status}
                           </span>
                           {interview.dateTime && (
-                            <span className="text-xs text-warm-400">
+                            <span className="text-xs text-warm-600">
                               {new Date(interview.dateTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           )}
@@ -393,67 +393,67 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                       </button>
 
                       {isExpanded && (
-                        <div className="px-4 pb-4 border-t border-warm-600">
+                        <div className="px-4 pb-4 border-t border-warm-300">
                           <div className="grid grid-cols-2 gap-6 pt-4">
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-3 text-xs">
                                 {interview.dateTime && (
                                   <div>
                                     <span className="text-warm-500">When</span>
-                                    <p className="text-warm-200 mt-0.5">
+                                    <p className="text-warm-800 mt-0.5">
                                       {new Date(interview.dateTime).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}
                                     </p>
                                   </div>
                                 )}
                                 <div>
                                   <span className="text-warm-500">Format</span>
-                                  <p className="text-warm-200 mt-0.5">{interview.format}</p>
+                                  <p className="text-warm-800 mt-0.5">{interview.format}</p>
                                 </div>
                                 {interview.durationMin && (
                                   <div>
                                     <span className="text-warm-500">Duration</span>
-                                    <p className="text-warm-200 mt-0.5">{interview.durationMin} min</p>
+                                    <p className="text-warm-800 mt-0.5">{interview.durationMin} min</p>
                                   </div>
                                 )}
                                 {interview.interviewerLinkedIn && (
                                   <div>
                                     <span className="text-warm-500">LinkedIn</span>
                                     <p className="mt-0.5">
-                                      <a href={interview.interviewerLinkedIn} target="_blank" rel="noopener noreferrer" className="text-terra-light hover:text-terra transition-colors">View Profile →</a>
+                                      <a href={interview.interviewerLinkedIn} target="_blank" rel="noopener noreferrer" className="text-terra hover:text-terra transition-colors">View Profile →</a>
                                     </p>
                                   </div>
                                 )}
                               </div>
                               {interview.nextSteps && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Next Steps</h4>
-                                  <p className="text-xs text-warm-200">{interview.nextSteps}</p>
+                                  <h4 className="text-xs font-medium text-warm-600 mb-1">Next Steps</h4>
+                                  <p className="text-xs text-warm-800">{interview.nextSteps}</p>
                                 </div>
                               )}
                             </div>
                             <div className="space-y-4">
                               {interview.prepNotes && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Prep Notes</h4>
-                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.prepNotes}</div>
+                                  <h4 className="text-xs font-medium text-warm-600 mb-1">Prep Notes</h4>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.prepNotes}</div>
                                 </div>
                               )}
                               {interview.debriefNotes && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Debrief</h4>
-                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.debriefNotes}</div>
+                                  <h4 className="text-xs font-medium text-warm-600 mb-1">Debrief</h4>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.debriefNotes}</div>
                                 </div>
                               )}
                               {interview.questionsAsked && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Questions They Asked</h4>
-                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsAsked}</div>
+                                  <h4 className="text-xs font-medium text-warm-600 mb-1">Questions They Asked</h4>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsAsked}</div>
                                 </div>
                               )}
                               {interview.questionsToAsk && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Questions to Ask</h4>
-                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsToAsk}</div>
+                                  <h4 className="text-xs font-medium text-warm-600 mb-1">Questions to Ask</h4>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsToAsk}</div>
                                 </div>
                               )}
                             </div>
@@ -472,31 +472,31 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
           <div className="space-y-6">
             {opp.notes && (
               <div>
-                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">General Notes</h3>
-                <div className="bg-warm-800 border border-warm-600 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.notes}</div>
+                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">General Notes</h3>
+                <div className="bg-white border border-warm-300 rounded-lg p-4 text-sm text-warm-800 whitespace-pre-wrap">{opp.notes}</div>
               </div>
             )}
             {opp.keyGaps && (
               <div>
-                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Key Gaps</h3>
-                <div className="bg-warm-800 border border-red-500/20 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.keyGaps}</div>
+                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Key Gaps</h3>
+                <div className="bg-warm-800 border border-red-500/20 rounded-lg p-4 text-sm text-warm-800 whitespace-pre-wrap">{opp.keyGaps}</div>
               </div>
             )}
             {opp.prosConsNotes && (
               <div>
-                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Pros & Cons</h3>
-                <div className="bg-warm-800 border border-warm-600 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.prosConsNotes}</div>
+                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Pros & Cons</h3>
+                <div className="bg-white border border-warm-300 rounded-lg p-4 text-sm text-warm-800 whitespace-pre-wrap">{opp.prosConsNotes}</div>
               </div>
             )}
             {opp.documentsSent.length > 0 && (
               <div>
-                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Documents Sent</h3>
+                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Documents Sent</h3>
                 <div className="space-y-2">
                   {opp.documentsSent.map((doc) => (
-                    <div key={doc.id} className="bg-warm-800 border border-warm-600 rounded-lg p-3 flex items-center justify-between">
+                    <div key={doc.id} className="bg-white border border-warm-300 rounded-lg p-3 flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-warm-100">{doc.document.name}</p>
-                        <p className="text-xs text-warm-400">{doc.document.type} {doc.document.version && `· ${doc.document.version}`}</p>
+                        <p className="text-sm text-warm-900">{doc.document.name}</p>
+                        <p className="text-xs text-warm-600">{doc.document.type} {doc.document.version && `· ${doc.document.version}`}</p>
                       </div>
                       <span className="text-xs text-warm-500">{new Date(doc.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                     </div>
@@ -517,38 +517,38 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {opp.opportunityContacts.map(({ id, role, contact }) => (
-                  <div key={id} className="bg-warm-800 border border-warm-600 rounded-lg p-4">
+                  <div key={id} className="bg-white border border-warm-300 rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-sm font-medium text-warm-100">{contact.name}</h3>
-                        <p className="text-xs text-warm-300 mt-0.5">{contact.title}{contact.company && ` at ${contact.company}`}</p>
+                        <h3 className="text-sm font-medium text-warm-900">{contact.name}</h3>
+                        <p className="text-xs text-warm-700 mt-0.5">{contact.title}{contact.company && ` at ${contact.company}`}</p>
                       </div>
                       <div className="flex gap-1.5">
                         {role && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra-light border border-terra/20">{role}</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra border border-terra/20">{role}</span>
                         )}
                         {contact.warmth && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
                             contact.warmth === "hot" ? "bg-red-500/10 text-red-400 border-red-500/20"
                             : contact.warmth === "warm" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-                            : "bg-warm-600/30 text-warm-300 border-warm-600"
+                            : "bg-warm-200 text-warm-700 border-warm-300"
                           }`}>{contact.warmth}</span>
                         )}
                       </div>
                     </div>
                     <div className="mt-3 space-y-1 text-xs">
                       {contact.email && (
-                        <p className="text-warm-300"><span className="text-warm-500">Email:</span> <a href={`mailto:${contact.email}`} className="text-terra-light hover:text-terra">{contact.email}</a></p>
+                        <p className="text-warm-700"><span className="text-warm-500">Email:</span> <a href={`mailto:${contact.email}`} className="text-terra hover:text-terra">{contact.email}</a></p>
                       )}
                       {contact.phone && (
-                        <p className="text-warm-300"><span className="text-warm-500">Phone:</span> {contact.phone}</p>
+                        <p className="text-warm-700"><span className="text-warm-500">Phone:</span> {contact.phone}</p>
                       )}
                       {contact.linkedIn && (
-                        <p><a href={contact.linkedIn} target="_blank" rel="noopener noreferrer" className="text-terra-light hover:text-terra">LinkedIn →</a></p>
+                        <p><a href={contact.linkedIn} target="_blank" rel="noopener noreferrer" className="text-terra hover:text-terra">LinkedIn →</a></p>
                       )}
                     </div>
                     {contact.notes && (
-                      <p className="text-xs text-warm-400 mt-3 border-t border-warm-600 pt-2">{contact.notes}</p>
+                      <p className="text-xs text-warm-600 mt-3 border-t border-warm-300 pt-2">{contact.notes}</p>
                     )}
                   </div>
                 ))}
@@ -567,11 +567,11 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   <div key={activity.id} className="flex items-start gap-3 py-2 text-xs">
                     <span className="text-warm-500 shrink-0 w-16">{new Date(activity.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                     <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] ${
-                      activity.type === "interviewed" ? "bg-terra/10 text-terra-light"
+                      activity.type === "interviewed" ? "bg-terra/10 text-terra"
                       : activity.type === "applied" ? "bg-yellow-500/10 text-yellow-400"
-                      : "bg-warm-600/30 text-warm-300"
+                      : "bg-warm-200 text-warm-700"
                     }`}>{activity.type}</span>
-                    <span className="text-warm-200">{activity.description}</span>
+                    <span className="text-warm-800">{activity.description}</span>
                   </div>
                 ))}
               </div>
@@ -588,9 +588,9 @@ function FormInput({ name, label, type = "text", required = false, placeholder, 
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-warm-400 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-warm-600 mb-1">{label}</label>
       <input name={name} type={type} required={required} placeholder={placeholder} defaultValue={defaultValue}
-        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors" />
+        className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors" />
     </div>
   );
 }
@@ -600,9 +600,9 @@ function FormSelect({ name, label, options, defaultValue }: {
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-warm-400 mb-1">{label}</label>
+      <label className="block text-xs font-medium text-warm-600 mb-1">{label}</label>
       <select name={name} defaultValue={defaultValue}
-        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors">
+        className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors">
         {options.map((opt) => (
           <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
         ))}

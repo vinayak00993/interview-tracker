@@ -21,19 +21,19 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-warm-900">
+    <div className="min-h-screen bg-warm-100">
       {/* Header */}
-      <header className="border-b border-warm-600 px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-warm-300 px-6 py-4 flex items-center justify-between bg-warm-50">
         <div>
-          <h1 className="text-lg font-semibold text-warm-100 tracking-tight">
+          <h1 className="text-lg font-semibold text-warm-900 tracking-tight">
             Interview Tracker
           </h1>
-          <p className="text-xs text-warm-400 mt-0.5">
+          <p className="text-xs text-warm-600 mt-0.5">
             {stats.total} opportunities · {stats.interviewing} active · {stats.upcoming} upcoming
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-warm-300">{session.user?.name}</span>
+          <span className="text-sm text-warm-700">{session.user?.name}</span>
         </div>
       </header>
 
@@ -44,10 +44,10 @@ export default async function DashboardPage() {
         </main>
 
         {/* Right sidebar */}
-        <aside className="w-80 border-l border-warm-600 p-5 space-y-6 shrink-0">
+        <aside className="w-80 border-l border-warm-300 p-5 space-y-6 shrink-0 bg-warm-50">
           {/* Upcoming Interviews */}
           <div>
-            <h2 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">
+            <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
               Upcoming Interviews
             </h2>
             {upcomingInterviews.length === 0 ? (
@@ -57,12 +57,12 @@ export default async function DashboardPage() {
                 {upcomingInterviews.map((interview: any) => (
                   <div
                     key={interview.id}
-                    className="bg-warm-800 border border-warm-600 rounded-lg p-3"
+                    className="bg-white border border-warm-300 rounded-lg p-3"
                   >
-                    <p className="text-sm text-warm-100 font-medium">
+                    <p className="text-sm text-warm-900 font-medium">
                       {interview.opportunity.company}
                     </p>
-                    <p className="text-xs text-warm-300">{interview.round}</p>
+                    <p className="text-xs text-warm-600">{interview.round}</p>
                     {interview.dateTime && (
                       <p className="text-xs text-terra-light mt-1">
                         {new Date(interview.dateTime).toLocaleDateString(
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
 
           {/* Recent Activity */}
           <div>
-            <h2 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">
+            <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
               Recent Activity
             </h2>
             <div className="space-y-2">
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
                     })}
                   </span>
                   <div>
-                    <span className="text-warm-300">
+                    <span className="text-warm-800">
                       {activity.description}
                     </span>
                     {activity.opportunity && (
