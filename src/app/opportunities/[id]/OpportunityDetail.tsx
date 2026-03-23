@@ -4,11 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-// Status and sentiment color mappings
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  saved: { bg: "bg-gray-500/10", text: "text-gray-400", border: "border-gray-500/20" },
-  applied: { bg: "bg-amber-500/10", text: "text-amber-400", border: "border-amber-500/20" },
-  interviewing: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20" },
+  saved: { bg: "bg-warm-600/20", text: "text-warm-300", border: "border-warm-600/30" },
+  applied: { bg: "bg-yellow-500/10", text: "text-yellow-400", border: "border-yellow-500/20" },
+  interviewing: { bg: "bg-terra/10", text: "text-terra-light", border: "border-terra/20" },
   offer: { bg: "bg-green-500/10", text: "text-green-400", border: "border-green-500/20" },
   rejected: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20" },
   withdrawn: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20" },
@@ -16,15 +15,15 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
 
 const SENTIMENT_COLORS: Record<string, string> = {
   positive: "text-green-400",
-  neutral: "text-amber-400",
+  neutral: "text-yellow-400",
   negative: "text-red-400",
 };
 
 const INTERVIEW_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  scheduled: { bg: "bg-blue-500/10", text: "text-blue-400" },
+  scheduled: { bg: "bg-terra/10", text: "text-terra-light" },
   completed: { bg: "bg-green-500/10", text: "text-green-400" },
   cancelled: { bg: "bg-red-500/10", text: "text-red-400" },
-  rescheduled: { bg: "bg-amber-500/10", text: "text-amber-400" },
+  rescheduled: { bg: "bg-yellow-500/10", text: "text-yellow-400" },
 };
 
 interface Interview {
@@ -177,17 +176,17 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-warm-900">
       {/* Top bar */}
-      <header className="border-b border-[#2a2a3a] px-6 py-3 flex items-center gap-4">
+      <header className="border-b border-warm-600 px-6 py-3 flex items-center gap-4">
         <Link
           href="/dashboard"
-          className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          className="text-xs text-warm-400 hover:text-warm-200 transition-colors"
         >
           ← Dashboard
         </Link>
-        <div className="h-4 w-px bg-[#2a2a3a]" />
-        <span className="text-xs text-slate-500">{opp.company}</span>
+        <div className="h-4 w-px bg-warm-600" />
+        <span className="text-xs text-warm-400">{opp.company}</span>
       </header>
 
       <div className="max-w-5xl mx-auto px-6 py-8">
@@ -195,21 +194,21 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-semibold text-white">{opp.company}</h1>
+              <h1 className="text-2xl font-semibold text-warm-100">{opp.company}</h1>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}
               >
                 {opp.status}
               </span>
               {opp.tier && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-warm-600/20 text-warm-300 border border-warm-600/30">
                   Tier {opp.tier}
                 </span>
               )}
             </div>
-            <p className="text-base text-slate-400">{opp.role}</p>
+            <p className="text-base text-warm-300">{opp.role}</p>
 
-            <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
+            <div className="flex items-center gap-4 mt-3 text-xs text-warm-400">
               {opp.location && (
                 <span>{opp.location}{opp.remote ? " · Remote" : ""}</span>
               )}
@@ -217,7 +216,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <span>${opp.compMin}K – ${opp.compMax}K</span>
               )}
               {opp.fitScore != null && (
-                <span className="text-indigo-400">{opp.fitScore}% fit</span>
+                <span className="text-terra-light">{opp.fitScore}% fit</span>
               )}
               {opp.source && (
                 <span>via {opp.source}</span>
@@ -227,7 +226,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   href={opp.jdLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-indigo-400 hover:text-indigo-300 transition-colors"
+                  className="text-terra-light hover:text-terra transition-colors"
                 >
                   View JD →
                 </a>
@@ -239,7 +238,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             <select
               value={opp.status}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-[#111118] border border-[#2a2a3a] rounded-lg text-white focus:outline-none focus:border-indigo-500"
+              className="px-3 py-1.5 text-xs bg-warm-800 border border-warm-600 rounded-lg text-warm-100 focus:outline-none focus:border-terra"
             >
               {["saved", "applied", "interviewing", "offer", "rejected", "withdrawn", "archived"].map(
                 (s) => (
@@ -259,7 +258,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-[#2a2a3a] mb-6">
+        <div className="flex gap-1 border-b border-warm-600 mb-6">
           {(
             [
               { key: "interviews", label: "Interviews", count: opp.interviews.length },
@@ -273,13 +272,13 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               onClick={() => setActiveTab(tab.key)}
               className={`px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px ${
                 activeTab === tab.key
-                  ? "text-white border-indigo-500"
-                  : "text-slate-500 border-transparent hover:text-slate-300"
+                  ? "text-warm-100 border-terra"
+                  : "text-warm-400 border-transparent hover:text-warm-200"
               }`}
             >
               {tab.label}
               {"count" in tab && tab.count != null && (
-                <span className="ml-1.5 text-slate-600">{tab.count}</span>
+                <span className="ml-1.5 text-warm-500">{tab.count}</span>
               )}
             </button>
           ))}
@@ -289,17 +288,17 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {activeTab === "interviews" && (
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-slate-400">Interview Timeline</h2>
+              <h2 className="text-sm font-medium text-warm-300">Interview Timeline</h2>
               <button
                 onClick={() => setShowAddInterview(!showAddInterview)}
-                className="px-3 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-colors"
+                className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg transition-colors"
               >
                 + Add Interview
               </button>
             </div>
 
             {showAddInterview && (
-              <div className="mb-6 bg-[#111118] border border-[#2a2a3a] rounded-lg p-5">
+              <div className="mb-6 bg-warm-800 border border-warm-600 rounded-lg p-5">
                 <form onSubmit={handleAddInterview} className="grid grid-cols-3 gap-4">
                   <FormInput name="round" label="Round Name" required placeholder='e.g. "Recruiter Screen"' />
                   <FormInput name="roundNumber" label="Round #" type="number" defaultValue="1" />
@@ -321,35 +320,25 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   <FormInput name="interviewerTitle" label="Interviewer Title" />
                   <FormInput name="interviewerLinkedIn" label="Interviewer LinkedIn" />
                   <div className="col-span-3">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Prep Notes</label>
+                    <label className="block text-xs font-medium text-warm-400 mb-1">Prep Notes</label>
                     <textarea
                       name="prepNotes"
                       rows={3}
-                      className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                      className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                       placeholder="Key talking points, things to prepare..."
                     />
                   </div>
                   <div className="col-span-3">
-                    <label className="block text-xs font-medium text-slate-500 mb-1">Questions to Ask</label>
+                    <label className="block text-xs font-medium text-warm-400 mb-1">Questions to Ask</label>
                     <textarea
                       name="questionsToAsk"
                       rows={2}
-                      className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors resize-none"
+                      className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                     />
                   </div>
                   <div className="col-span-3 flex gap-2 justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddInterview(false)}
-                      className="px-3 py-1.5 text-xs text-slate-400 hover:text-white transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="px-4 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg transition-colors"
-                    >
+                    <button type="button" onClick={() => setShowAddInterview(false)} className="px-3 py-1.5 text-xs text-warm-300 hover:text-warm-100 transition-colors">Cancel</button>
+                    <button type="submit" disabled={isSubmitting} className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors">
                       {isSubmitting ? "Adding..." : "Add Interview"}
                     </button>
                   </div>
@@ -358,9 +347,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             )}
 
             {opp.interviews.length === 0 ? (
-              <p className="text-sm text-slate-600 py-8 text-center">
-                No interviews yet. Add one to start tracking.
-              </p>
+              <p className="text-sm text-warm-500 py-8 text-center">No interviews yet. Add one to start tracking.</p>
             ) : (
               <div className="space-y-3">
                 {opp.interviews.map((interview) => {
@@ -368,34 +355,28 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
 
                   return (
-                    <div
-                      key={interview.id}
-                      className="bg-[#111118] border border-[#2a2a3a] rounded-lg overflow-hidden"
-                    >
-                      {/* Interview header — always visible */}
+                    <div key={interview.id} className="bg-warm-800 border border-warm-600 rounded-lg overflow-hidden">
                       <button
                         onClick={() => setExpandedInterview(isExpanded ? null : interview.id)}
-                        className="w-full p-4 flex items-center justify-between text-left hover:bg-[#1a1a24] transition-colors"
+                        className="w-full p-4 flex items-center justify-between text-left hover:bg-warm-700 transition-colors"
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#1a1a24] flex items-center justify-center text-xs font-medium text-slate-400">
+                          <div className="w-8 h-8 rounded-full bg-warm-700 flex items-center justify-center text-xs font-medium text-warm-300">
                             {interview.roundNumber}
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-white">{interview.round}</p>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {interview.interviewerName && (
-                                <span className="text-xs text-slate-400">
-                                  {interview.interviewerName}
-                                  {interview.interviewerTitle && ` · ${interview.interviewerTitle}`}
-                                </span>
-                              )}
-                            </div>
+                            <p className="text-sm font-medium text-warm-100">{interview.round}</p>
+                            {interview.interviewerName && (
+                              <span className="text-xs text-warm-300">
+                                {interview.interviewerName}
+                                {interview.interviewerTitle && ` · ${interview.interviewerTitle}`}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           {interview.sentiment && (
-                            <span className={`text-xs ${SENTIMENT_COLORS[interview.sentiment] || "text-slate-400"}`}>
+                            <span className={`text-xs ${SENTIMENT_COLORS[interview.sentiment] || "text-warm-300"}`}>
                               {interview.sentiment}
                             </span>
                           )}
@@ -403,105 +384,76 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                             {interview.status}
                           </span>
                           {interview.dateTime && (
-                            <span className="text-xs text-slate-500">
-                              {new Date(interview.dateTime).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                              })}
+                            <span className="text-xs text-warm-400">
+                              {new Date(interview.dateTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </span>
                           )}
-                          <span className="text-slate-600 text-xs">{isExpanded ? "▲" : "▼"}</span>
+                          <span className="text-warm-500 text-xs">{isExpanded ? "▲" : "▼"}</span>
                         </div>
                       </button>
 
-                      {/* Expanded content */}
                       {isExpanded && (
-                        <div className="px-4 pb-4 border-t border-[#2a2a3a]">
+                        <div className="px-4 pb-4 border-t border-warm-600">
                           <div className="grid grid-cols-2 gap-6 pt-4">
-                            {/* Left column — details */}
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-3 text-xs">
                                 {interview.dateTime && (
                                   <div>
-                                    <span className="text-slate-600">When</span>
-                                    <p className="text-slate-300 mt-0.5">
-                                      {new Date(interview.dateTime).toLocaleDateString("en-US", {
-                                        weekday: "long",
-                                        month: "long",
-                                        day: "numeric",
-                                        hour: "numeric",
-                                        minute: "2-digit",
-                                      })}
+                                    <span className="text-warm-500">When</span>
+                                    <p className="text-warm-200 mt-0.5">
+                                      {new Date(interview.dateTime).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })}
                                     </p>
                                   </div>
                                 )}
                                 <div>
-                                  <span className="text-slate-600">Format</span>
-                                  <p className="text-slate-300 mt-0.5">{interview.format}</p>
+                                  <span className="text-warm-500">Format</span>
+                                  <p className="text-warm-200 mt-0.5">{interview.format}</p>
                                 </div>
                                 {interview.durationMin && (
                                   <div>
-                                    <span className="text-slate-600">Duration</span>
-                                    <p className="text-slate-300 mt-0.5">{interview.durationMin} min</p>
+                                    <span className="text-warm-500">Duration</span>
+                                    <p className="text-warm-200 mt-0.5">{interview.durationMin} min</p>
                                   </div>
                                 )}
                                 {interview.interviewerLinkedIn && (
                                   <div>
-                                    <span className="text-slate-600">LinkedIn</span>
+                                    <span className="text-warm-500">LinkedIn</span>
                                     <p className="mt-0.5">
-                                      <a
-                                        href={interview.interviewerLinkedIn}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-indigo-400 hover:text-indigo-300 transition-colors"
-                                      >
-                                        View Profile →
-                                      </a>
+                                      <a href={interview.interviewerLinkedIn} target="_blank" rel="noopener noreferrer" className="text-terra-light hover:text-terra transition-colors">View Profile →</a>
                                     </p>
                                   </div>
                                 )}
                               </div>
-
                               {interview.nextSteps && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-slate-500 mb-1">Next Steps</h4>
-                                  <p className="text-xs text-slate-300">{interview.nextSteps}</p>
+                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Next Steps</h4>
+                                  <p className="text-xs text-warm-200">{interview.nextSteps}</p>
                                 </div>
                               )}
                             </div>
-
-                            {/* Right column — notes */}
                             <div className="space-y-4">
                               {interview.prepNotes && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-slate-500 mb-1">Prep Notes</h4>
-                                  <div className="text-xs text-slate-300 whitespace-pre-wrap bg-[#0a0a0f] rounded-lg p-3 max-h-48 overflow-y-auto">
-                                    {interview.prepNotes}
-                                  </div>
+                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Prep Notes</h4>
+                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.prepNotes}</div>
                                 </div>
                               )}
                               {interview.debriefNotes && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-slate-500 mb-1">Debrief</h4>
-                                  <div className="text-xs text-slate-300 whitespace-pre-wrap bg-[#0a0a0f] rounded-lg p-3 max-h-48 overflow-y-auto">
-                                    {interview.debriefNotes}
-                                  </div>
+                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Debrief</h4>
+                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.debriefNotes}</div>
                                 </div>
                               )}
                               {interview.questionsAsked && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-slate-500 mb-1">Questions They Asked</h4>
-                                  <div className="text-xs text-slate-300 whitespace-pre-wrap bg-[#0a0a0f] rounded-lg p-3">
-                                    {interview.questionsAsked}
-                                  </div>
+                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Questions They Asked</h4>
+                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsAsked}</div>
                                 </div>
                               )}
                               {interview.questionsToAsk && (
                                 <div>
-                                  <h4 className="text-xs font-medium text-slate-500 mb-1">Questions to Ask</h4>
-                                  <div className="text-xs text-slate-300 whitespace-pre-wrap bg-[#0a0a0f] rounded-lg p-3">
-                                    {interview.questionsToAsk}
-                                  </div>
+                                  <h4 className="text-xs font-medium text-warm-400 mb-1">Questions to Ask</h4>
+                                  <div className="text-xs text-warm-200 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsToAsk}</div>
                                 </div>
                               )}
                             </div>
@@ -520,53 +472,40 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
           <div className="space-y-6">
             {opp.notes && (
               <div>
-                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">General Notes</h3>
-                <div className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-4 text-sm text-slate-300 whitespace-pre-wrap">
-                  {opp.notes}
-                </div>
+                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">General Notes</h3>
+                <div className="bg-warm-800 border border-warm-600 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.notes}</div>
               </div>
             )}
             {opp.keyGaps && (
               <div>
-                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Key Gaps</h3>
-                <div className="bg-[#111118] border border-red-500/20 rounded-lg p-4 text-sm text-slate-300 whitespace-pre-wrap">
-                  {opp.keyGaps}
-                </div>
+                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Key Gaps</h3>
+                <div className="bg-warm-800 border border-red-500/20 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.keyGaps}</div>
               </div>
             )}
             {opp.prosConsNotes && (
               <div>
-                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Pros & Cons</h3>
-                <div className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-4 text-sm text-slate-300 whitespace-pre-wrap">
-                  {opp.prosConsNotes}
-                </div>
+                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Pros & Cons</h3>
+                <div className="bg-warm-800 border border-warm-600 rounded-lg p-4 text-sm text-warm-200 whitespace-pre-wrap">{opp.prosConsNotes}</div>
               </div>
             )}
             {opp.documentsSent.length > 0 && (
               <div>
-                <h3 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Documents Sent</h3>
+                <h3 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-2">Documents Sent</h3>
                 <div className="space-y-2">
                   {opp.documentsSent.map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-3 flex items-center justify-between"
-                    >
+                    <div key={doc.id} className="bg-warm-800 border border-warm-600 rounded-lg p-3 flex items-center justify-between">
                       <div>
-                        <p className="text-sm text-white">{doc.document.name}</p>
-                        <p className="text-xs text-slate-500">
-                          {doc.document.type} {doc.document.version && `· ${doc.document.version}`}
-                        </p>
+                        <p className="text-sm text-warm-100">{doc.document.name}</p>
+                        <p className="text-xs text-warm-400">{doc.document.type} {doc.document.version && `· ${doc.document.version}`}</p>
                       </div>
-                      <span className="text-xs text-slate-600">
-                        {new Date(doc.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      </span>
+                      <span className="text-xs text-warm-500">{new Date(doc.sentAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
             {!opp.notes && !opp.keyGaps && !opp.prosConsNotes && opp.documentsSent.length === 0 && (
-              <p className="text-sm text-slate-600 py-8 text-center">No notes yet.</p>
+              <p className="text-sm text-warm-500 py-8 text-center">No notes yet.</p>
             )}
           </div>
         )}
@@ -574,76 +513,42 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {activeTab === "contacts" && (
           <div>
             {opp.opportunityContacts.length === 0 ? (
-              <p className="text-sm text-slate-600 py-8 text-center">No contacts linked to this opportunity.</p>
+              <p className="text-sm text-warm-500 py-8 text-center">No contacts linked to this opportunity.</p>
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 {opp.opportunityContacts.map(({ id, role, contact }) => (
-                  <div
-                    key={id}
-                    className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-4"
-                  >
+                  <div key={id} className="bg-warm-800 border border-warm-600 rounded-lg p-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="text-sm font-medium text-white">{contact.name}</h3>
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          {contact.title}
-                          {contact.company && ` at ${contact.company}`}
-                        </p>
+                        <h3 className="text-sm font-medium text-warm-100">{contact.name}</h3>
+                        <p className="text-xs text-warm-300 mt-0.5">{contact.title}{contact.company && ` at ${contact.company}`}</p>
                       </div>
                       <div className="flex gap-1.5">
                         {role && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-                            {role}
-                          </span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra-light border border-terra/20">{role}</span>
                         )}
                         {contact.warmth && (
-                          <span
-                            className={`text-[10px] px-1.5 py-0.5 rounded border ${
-                              contact.warmth === "hot"
-                                ? "bg-red-500/10 text-red-400 border-red-500/20"
-                                : contact.warmth === "warm"
-                                ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                                : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-                            }`}
-                          >
-                            {contact.warmth}
-                          </span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                            contact.warmth === "hot" ? "bg-red-500/10 text-red-400 border-red-500/20"
+                            : contact.warmth === "warm" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                            : "bg-warm-600/30 text-warm-300 border-warm-600"
+                          }`}>{contact.warmth}</span>
                         )}
                       </div>
                     </div>
-
                     <div className="mt-3 space-y-1 text-xs">
                       {contact.email && (
-                        <p className="text-slate-400">
-                          <span className="text-slate-600">Email:</span>{" "}
-                          <a href={`mailto:${contact.email}`} className="text-indigo-400 hover:text-indigo-300">
-                            {contact.email}
-                          </a>
-                        </p>
+                        <p className="text-warm-300"><span className="text-warm-500">Email:</span> <a href={`mailto:${contact.email}`} className="text-terra-light hover:text-terra">{contact.email}</a></p>
                       )}
                       {contact.phone && (
-                        <p className="text-slate-400">
-                          <span className="text-slate-600">Phone:</span> {contact.phone}
-                        </p>
+                        <p className="text-warm-300"><span className="text-warm-500">Phone:</span> {contact.phone}</p>
                       )}
                       {contact.linkedIn && (
-                        <p>
-                          <a
-                            href={contact.linkedIn}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-indigo-400 hover:text-indigo-300"
-                          >
-                            LinkedIn →
-                          </a>
-                        </p>
+                        <p><a href={contact.linkedIn} target="_blank" rel="noopener noreferrer" className="text-terra-light hover:text-terra">LinkedIn →</a></p>
                       )}
                     </div>
-
                     {contact.notes && (
-                      <p className="text-xs text-slate-500 mt-3 border-t border-[#2a2a3a] pt-2">
-                        {contact.notes}
-                      </p>
+                      <p className="text-xs text-warm-400 mt-3 border-t border-warm-600 pt-2">{contact.notes}</p>
                     )}
                   </div>
                 ))}
@@ -655,32 +560,18 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {activeTab === "activity" && (
           <div>
             {opp.activities.length === 0 ? (
-              <p className="text-sm text-slate-600 py-8 text-center">No activity recorded.</p>
+              <p className="text-sm text-warm-500 py-8 text-center">No activity recorded.</p>
             ) : (
               <div className="space-y-1">
                 {opp.activities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    className="flex items-start gap-3 py-2 text-xs"
-                  >
-                    <span className="text-slate-600 shrink-0 w-16">
-                      {new Date(activity.date).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                    <span
-                      className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] ${
-                        activity.type === "interviewed"
-                          ? "bg-blue-500/10 text-blue-400"
-                          : activity.type === "applied"
-                          ? "bg-amber-500/10 text-amber-400"
-                          : "bg-slate-500/10 text-slate-400"
-                      }`}
-                    >
-                      {activity.type}
-                    </span>
-                    <span className="text-slate-300">{activity.description}</span>
+                  <div key={activity.id} className="flex items-start gap-3 py-2 text-xs">
+                    <span className="text-warm-500 shrink-0 w-16">{new Date(activity.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] ${
+                      activity.type === "interviewed" ? "bg-terra/10 text-terra-light"
+                      : activity.type === "applied" ? "bg-yellow-500/10 text-yellow-400"
+                      : "bg-warm-600/30 text-warm-300"
+                    }`}>{activity.type}</span>
+                    <span className="text-warm-200">{activity.description}</span>
                   </div>
                 ))}
               </div>
@@ -692,60 +583,28 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   );
 }
 
-// Helper form components
-function FormInput({
-  name,
-  label,
-  type = "text",
-  required = false,
-  placeholder,
-  defaultValue,
-}: {
-  name: string;
-  label: string;
-  type?: string;
-  required?: boolean;
-  placeholder?: string;
-  defaultValue?: string;
+function FormInput({ name, label, type = "text", required = false, placeholder, defaultValue }: {
+  name: string; label: string; type?: string; required?: boolean; placeholder?: string; defaultValue?: string;
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
-      <input
-        name={name}
-        type={type}
-        required={required}
-        placeholder={placeholder}
-        defaultValue={defaultValue}
-        className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-      />
+      <label className="block text-xs font-medium text-warm-400 mb-1">{label}</label>
+      <input name={name} type={type} required={required} placeholder={placeholder} defaultValue={defaultValue}
+        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors" />
     </div>
   );
 }
 
-function FormSelect({
-  name,
-  label,
-  options,
-  defaultValue,
-}: {
-  name: string;
-  label: string;
-  options: string[];
-  defaultValue?: string;
+function FormSelect({ name, label, options, defaultValue }: {
+  name: string; label: string; options: string[]; defaultValue?: string;
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-slate-500 mb-1">{label}</label>
-      <select
-        name={name}
-        defaultValue={defaultValue}
-        className="w-full px-3 py-2 bg-[#0a0a0f] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
-      >
+      <label className="block text-xs font-medium text-warm-400 mb-1">{label}</label>
+      <select name={name} defaultValue={defaultValue}
+        className="w-full px-3 py-2 bg-warm-900 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors">
         {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt.charAt(0).toUpperCase() + opt.slice(1)}
-          </option>
+          <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1)}</option>
         ))}
       </select>
     </div>

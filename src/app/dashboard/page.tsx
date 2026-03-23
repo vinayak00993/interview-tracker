@@ -21,19 +21,19 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen bg-warm-900">
       {/* Header */}
-      <header className="border-b border-[#2a2a3a] px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-warm-600 px-6 py-4 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-white tracking-tight">
+          <h1 className="text-lg font-semibold text-warm-100 tracking-tight">
             Interview Tracker
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-warm-400 mt-0.5">
             {stats.total} opportunities · {stats.interviewing} active · {stats.upcoming} upcoming
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-slate-400">{session.user?.name}</span>
+          <span className="text-sm text-warm-300">{session.user?.name}</span>
         </div>
       </header>
 
@@ -44,27 +44,27 @@ export default async function DashboardPage() {
         </main>
 
         {/* Right sidebar */}
-        <aside className="w-80 border-l border-[#2a2a3a] p-5 space-y-6 shrink-0">
+        <aside className="w-80 border-l border-warm-600 p-5 space-y-6 shrink-0">
           {/* Upcoming Interviews */}
           <div>
-            <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
+            <h2 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">
               Upcoming Interviews
             </h2>
             {upcomingInterviews.length === 0 ? (
-              <p className="text-sm text-slate-600">No interviews scheduled.</p>
+              <p className="text-sm text-warm-500">No interviews scheduled.</p>
             ) : (
               <div className="space-y-2">
                 {upcomingInterviews.map((interview: any) => (
                   <div
                     key={interview.id}
-                    className="bg-[#111118] border border-[#2a2a3a] rounded-lg p-3"
+                    className="bg-warm-800 border border-warm-600 rounded-lg p-3"
                   >
-                    <p className="text-sm text-white font-medium">
+                    <p className="text-sm text-warm-100 font-medium">
                       {interview.opportunity.company}
                     </p>
-                    <p className="text-xs text-slate-400">{interview.round}</p>
+                    <p className="text-xs text-warm-300">{interview.round}</p>
                     {interview.dateTime && (
-                      <p className="text-xs text-indigo-400 mt-1">
+                      <p className="text-xs text-terra-light mt-1">
                         {new Date(interview.dateTime).toLocaleDateString(
                           "en-US",
                           {
@@ -85,7 +85,7 @@ export default async function DashboardPage() {
 
           {/* Recent Activity */}
           <div>
-            <h2 className="text-xs font-medium text-slate-500 uppercase tracking-wider mb-3">
+            <h2 className="text-xs font-medium text-warm-400 uppercase tracking-wider mb-3">
               Recent Activity
             </h2>
             <div className="space-y-2">
@@ -94,18 +94,18 @@ export default async function DashboardPage() {
                   key={activity.id}
                   className="flex items-start gap-2 text-xs"
                 >
-                  <span className="text-slate-600 shrink-0 w-14">
+                  <span className="text-warm-500 shrink-0 w-14">
                     {new Date(activity.date).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })}
                   </span>
                   <div>
-                    <span className="text-slate-400">
+                    <span className="text-warm-300">
                       {activity.description}
                     </span>
                     {activity.opportunity && (
-                      <span className="text-slate-600 block">
+                      <span className="text-warm-500 block">
                         {activity.opportunity.company} — {activity.opportunity.role}
                       </span>
                     )}

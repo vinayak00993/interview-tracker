@@ -8,20 +8,40 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Pipeline status colors
+        // Warm base palette
+        warm: {
+          50: "#faf6f0",
+          100: "#f0e6d6",
+          200: "#d9c9ae",
+          300: "#b8a990",
+          400: "#7d6f5e",
+          500: "#5c5044",
+          600: "#3d3428",
+          700: "#2a2318",
+          800: "#211c16",
+          900: "#1a1410",
+        },
+        // Accent — terracotta red
+        terra: {
+          DEFAULT: "#c45a3c",
+          light: "#d4715a",
+          dark: "#a44830",
+          bg: "#2d1f18",
+        },
+        // Pipeline status colors (warm-shifted)
         pipeline: {
-          saved: { DEFAULT: "#6b7280", light: "#374151", bg: "#1f2937" },
-          applied: { DEFAULT: "#f59e0b", light: "#fbbf24", bg: "#451a03" },
-          interviewing: { DEFAULT: "#3b82f6", light: "#60a5fa", bg: "#172554" },
-          offer: { DEFAULT: "#22c55e", light: "#4ade80", bg: "#052e16" },
-          rejected: { DEFAULT: "#ef4444", light: "#f87171", bg: "#450a0a" },
-          withdrawn: { DEFAULT: "#8b5cf6", light: "#a78bfa", bg: "#2e1065" },
+          saved: { DEFAULT: "#8a7d6d", light: "#a89b8b", bg: "#2a2318" },
+          applied: { DEFAULT: "#d4a03c", light: "#e0b85c", bg: "#2d2412" },
+          interviewing: { DEFAULT: "#c45a3c", light: "#d4715a", bg: "#2d1f18" },
+          offer: { DEFAULT: "#6b9e5c", light: "#85b874", bg: "#1e2a16" },
+          rejected: { DEFAULT: "#c44848", light: "#d46a6a", bg: "#2d1616" },
+          withdrawn: { DEFAULT: "#9b7bb8", light: "#b298ca", bg: "#251e2d" },
         },
         // Sentiment colors
         sentiment: {
-          positive: "#22c55e",
-          neutral: "#f59e0b",
-          negative: "#ef4444",
+          positive: "#6b9e5c",
+          neutral: "#d4a03c",
+          negative: "#c44848",
         },
       },
     },

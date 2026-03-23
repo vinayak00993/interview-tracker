@@ -34,37 +34,37 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-warm-100">
             Interview Tracker
           </h1>
-          <p className="text-sm text-slate-400 mt-2">
+          <p className="text-sm text-warm-300 mt-2">
             Sign in to manage your pipeline
           </p>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-warm-300 mb-1.5">
               Email
             </label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-[#111118] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-3 py-2 bg-warm-800 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors"
               placeholder="you@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">
+            <label className="block text-xs font-medium text-warm-300 mb-1.5">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-[#111118] border border-[#2a2a3a] rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+              className="w-full px-3 py-2 bg-warm-800 border border-warm-600 rounded-lg text-warm-100 text-sm focus:outline-none focus:border-terra transition-colors"
               placeholder="••••••••"
             />
           </div>
@@ -76,7 +76,7 @@ export default function LoginPage() {
           <button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="w-full py-2.5 bg-terra hover:bg-terra-light disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
