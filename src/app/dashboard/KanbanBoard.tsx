@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -46,6 +46,11 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [jdUrl, setJdUrl] = useState("");
   const [isFetchingJd, setIsFetchingJd] = useState(false);
+  const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
+  const [isProcessingScreenshots, setIsProcessingScreenshots] = useState(false);
+  const [ocrStatus, setOcrStatus] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const grouped = COLUMNS.map((col) => ({
     ...col,
@@ -112,28 +117,100 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       });
       if (res.ok) {
         const parsed = await res.json();
-        // Fill form fields with parsed data
-        const form = document.querySelector("form") as HTMLFormElement;
-        if (form) {
-          const fields = ["company", "role", "location", "compMin", "compMax", "jdLink"];
-          for (const field of fields) {
-            const input = form.querySelector(`[name="${field}"]`) as HTMLInputElement;
-            if (input && parsed[field]) {
-              input.value = String(parsed[field]);
-              input.dispatchEvent(new Event("input", { bubbles: true }));
-            }
-          }
-          // Set select fields
-          if (parsed.remote) {
-            const checkbox = form.querySelector('[name="remote"]') as HTMLInputElement;
-            if (checkbox) checkbox.checked = true;
-          }
-        }
+        fillFormFields(parsed);
       }
     } catch (err) {
       console.error("Failed to parse JD:", err);
     }
     setIsFetchingJd(false);
+  };
+
+  const fillFormFields = (parsed: Record<string, any>) => {
+    const form = document.querySelector("form") as HTMLFormElement;
+    if (!form) return;
+    const fields = ["company", "role", "location", "compMin", "compMax", "jdLink"];
+    for (const field of fields) {
+      const input = form.querySelector(`[name="${field}"]`) as HTMLInputElement;
+      if (input && parsed[field]) {
+        input.value = String(parsed[field]);
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    }
+    if (parsed.remote) {
+      const checkbox = form.querySelector('[name="remote"]') as HTMLInputElement;
+      if (checkbox) checkbox.checked = true;
+    }
+  };
+
+  const addScreenshots = (files: FileList | File[]) => {
+    const newFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (!newFiles.length) return;
+    setScreenshots((prev) => [...prev, ...newFiles]);
+    for (const file of newFiles) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setScreenshotPreviews((prev) => [...prev, e.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeScreenshot = (index: number) => {
+    setScreenshots((prev) => prev.filter((_, i) => i !== index));
+    setScreenshotPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleScreenshotPaste = (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    const imageFiles: File[] = [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith("image/")) {
+        const file = items[i].getAsFile();
+        if (file) imageFiles.push(file);
+      }
+    }
+    if (imageFiles.length) {
+      e.preventDefault();
+      addScreenshots(imageFiles);
+    }
+  };
+
+  const handleScreenshotDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (e.dataTransfer.files.length) {
+      addScreenshots(e.dataTransfer.files);
+    }
+  };
+
+  const processScreenshots = async () => {
+    if (!screenshots.length) return;
+    setIsProcessingScreenshots(true);
+    setOcrStatus("Processing screenshots...");
+
+    try {
+      const formData = new FormData();
+      for (const file of screenshots) {
+        formData.append("screenshots", file);
+      }
+
+      const res = await fetch("/api/parse-screenshots", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        const parsed = await res.json();
+        fillFormFields(parsed);
+        setOcrStatus("Fields auto-filled from screenshots");
+      } else {
+        const err = await res.json();
+        setOcrStatus(`Error: ${err.error || "Failed to process"}`);
+      }
+    } catch (err) {
+      console.error("Failed to process screenshots:", err);
+      setOcrStatus("Error processing screenshots");
+    }
+    setIsProcessingScreenshots(false);
   };
 
   const handleAddOpportunity = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -164,6 +241,9 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       if (res.ok) {
         setShowAddForm(false);
         setJdUrl("");
+        setScreenshots([]);
+        setScreenshotPreviews([]);
+        setOcrStatus("");
         router.refresh();
       }
     } catch (err) {
@@ -209,6 +289,77 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             >
               {isFetchingJd ? "Parsing..." : "Auto-fill"}
             </button>
+          </div>
+
+          {/* Screenshot paste/drop zone */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs text-warm-500">or</span>
+              <span className="text-xs font-medium text-warm-600">Paste / drop screenshots of the job description</span>
+            </div>
+            <div
+              onPaste={handleScreenshotPaste}
+              onDrop={handleScreenshotDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => fileInputRef.current?.click()}
+              tabIndex={0}
+              className="border-2 border-dashed border-warm-300 rounded-lg p-4 text-center cursor-pointer hover:border-terra/40 hover:bg-terra/5 transition-colors focus:outline-none focus:border-terra/40"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => e.target.files && addScreenshots(e.target.files)}
+              />
+              {screenshotPreviews.length === 0 ? (
+                <div className="py-2">
+                  <p className="text-sm text-warm-500">
+                    Click to upload, drag & drop, or paste (Ctrl+V) screenshots
+                  </p>
+                  <p className="text-xs text-warm-400 mt-1">
+                    Supports multiple screenshots for long job descriptions
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {screenshotPreviews.map((src, i) => (
+                    <div key={i} className="relative group">
+                      <img
+                        src={src}
+                        alt={`Screenshot ${i + 1}`}
+                        className="h-20 rounded border border-warm-300 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeScreenshot(i); }}
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {screenshots.length > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <button
+                  type="button"
+                  onClick={processScreenshots}
+                  disabled={isProcessingScreenshots}
+                  className="px-4 py-2 text-xs font-medium bg-terra/20 text-terra border border-terra/30 hover:bg-terra/30 disabled:opacity-40 rounded-lg transition-colors"
+                >
+                  {isProcessingScreenshots ? "Processing..." : `Extract from ${screenshots.length} screenshot${screenshots.length > 1 ? "s" : ""}`}
+                </button>
+                {ocrStatus && (
+                  <span className={`text-xs ${ocrStatus.startsWith("Error") ? "text-red-600" : "text-green-700"}`}>
+                    {ocrStatus}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <form onSubmit={handleAddOpportunity} className="grid grid-cols-3 gap-4">
