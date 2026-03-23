@@ -9,7 +9,7 @@ export async function GET() {
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (session.user as any).id;
 
-    const opportunities = findOpportunities(userId);
+    const opportunities = await findOpportunities(userId);
     return NextResponse.json(opportunities);
   } catch (error) {
     console.error("GET /api/opportunities error:", error);
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Company and role are required" }, { status: 400 });
     }
 
-    const opportunity = createOpportunity(userId, body);
+    const opportunity = await createOpportunity(userId, body);
     return NextResponse.json(opportunity, { status: 201 });
   } catch (error) {
     console.error("POST /api/opportunities error:", error);

@@ -19,7 +19,7 @@ export async function PATCH(
       return NextResponse.json({ error: `Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}` }, { status: 400 });
     }
 
-    const result = updateOpportunityStatus(params.id, userId, status);
+    const result = await updateOpportunityStatus(params.id, userId, status);
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json(result);

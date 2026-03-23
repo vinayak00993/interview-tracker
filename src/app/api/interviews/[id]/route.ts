@@ -13,7 +13,7 @@ export async function PUT(
     const userId = (session.user as any).id;
 
     const body = await req.json();
-    const result = updateInterview(params.id, userId, body);
+    const result = await updateInterview(params.id, userId, body);
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json(result);
@@ -32,7 +32,7 @@ export async function DELETE(
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (session.user as any).id;
 
-    const deleted = deleteInterview(params.id, userId);
+    const deleted = await deleteInterview(params.id, userId);
     if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json({ message: "Deleted" });

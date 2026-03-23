@@ -12,7 +12,7 @@ export async function GET(
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (session.user as any).id;
 
-    const opportunity = findOpportunityById(params.id, userId);
+    const opportunity = await findOpportunityById(params.id, userId);
     if (!opportunity) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json(opportunity);
@@ -32,7 +32,7 @@ export async function PUT(
     const userId = (session.user as any).id;
 
     const body = await req.json();
-    const result = updateOpportunity(params.id, userId, body);
+    const result = await updateOpportunity(params.id, userId, body);
     if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json(result);
@@ -51,7 +51,7 @@ export async function DELETE(
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const userId = (session.user as any).id;
 
-    const deleted = deleteOpportunity(params.id, userId);
+    const deleted = await deleteOpportunity(params.id, userId);
     if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     return NextResponse.json({ message: "Deleted" });

@@ -10,9 +10,9 @@ export default async function DashboardPage() {
 
   const userId = (session.user as any).id;
 
-  const opportunities = findOpportunities(userId);
-  const upcomingInterviews = findUpcomingInterviews(userId);
-  const recentActivity = findRecentActivities(userId);
+  const opportunities = await findOpportunities(userId);
+  const upcomingInterviews = await findUpcomingInterviews(userId);
+  const recentActivity = await findRecentActivities(userId);
 
   const stats = {
     total: opportunities.length,

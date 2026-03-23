@@ -1,34 +1,12 @@
-import Database from "better-sqlite3";
-import path from "path";
+/**
+ * Database access layer — dual mode:
+ * - Local dev: better-sqlite3 (synchronous, file-based)
+ * - Production (Turso): @libsql/client (async, remote)
+ *
+ * All exported functions are async regardless of backend.
+ */
 
-const globalForDb = globalThis as unknown as {
-  db: ReturnType<typeof Database> | undefined;
-};
-
-function createDatabase() {
-  const dbPath = path.resolve(process.cwd(), "prisma/dev.db");
-  const db = new Database(dbPath);
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
-  return db;
-}
-
-export const db = globalForDb.db ?? createDatabase();
-
-if (process.env.NODE_ENV !== "production") globalForDb.db = db;
-
-// ── Helpers ──
-
-function toDate(d: string | null): Date | null {
-  return d ? new Date(d) : null;
-}
-
-function rowToObj<T>(row: any): T {
-  if (!row) return row;
-  // Convert SQLite integer booleans to JS booleans
-  if ("remote" in row) row.remote = Boolean(row.remote);
-  return row as T;
-}
+const IS_TURSO = !!(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN);
 
 // ── Types ──
 
@@ -125,120 +103,195 @@ export interface Document {
   updatedAt: string;
 }
 
+// ── Unified query interface ──
+
+interface QueryResult {
+  rows: Record<string, unknown>[];
+}
+
+interface DbBackend {
+  execute(sql: string, args?: unknown[]): Promise<QueryResult>;
+}
+
+// ── better-sqlite3 backend (local dev) ──
+
+function createLocalBackend(): DbBackend {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const Database = require("better-sqlite3");
+  const path = require("path");
+  const dbPath = path.resolve(process.cwd(), "prisma/dev.db");
+  const sqliteDb = new Database(dbPath);
+  sqliteDb.pragma("journal_mode = WAL");
+  sqliteDb.pragma("foreign_keys = ON");
+
+  return {
+    async execute(sql: string, args?: unknown[]): Promise<QueryResult> {
+      const trimmed = sql.trim().toUpperCase();
+      if (trimmed.startsWith("SELECT") || trimmed.startsWith("WITH")) {
+        const rows = args ? sqliteDb.prepare(sql).all(...args) : sqliteDb.prepare(sql).all();
+        return { rows };
+      } else {
+        args ? sqliteDb.prepare(sql).run(...args) : sqliteDb.prepare(sql).run();
+        return { rows: [] };
+      }
+    },
+  };
+}
+
+// ── @libsql/client backend (Turso production) ──
+
+function createTursoBackend(): DbBackend {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createClient } = require("@libsql/client");
+  const client = createClient({
+    url: process.env.TURSO_DATABASE_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
+  });
+
+  return {
+    async execute(sql: string, args?: unknown[]): Promise<QueryResult> {
+      const result = await client.execute({ sql, args: args || [] });
+      return { rows: result.rows as Record<string, unknown>[] };
+    },
+  };
+}
+
+// ── Singleton ──
+
+const globalForDb = globalThis as unknown as { dbBackend: DbBackend | undefined };
+
+function getBackend(): DbBackend {
+  if (globalForDb.dbBackend) return globalForDb.dbBackend;
+  const backend = IS_TURSO ? createTursoBackend() : createLocalBackend();
+  if (process.env.NODE_ENV !== "production") globalForDb.dbBackend = backend;
+  return backend;
+}
+
+export const db = getBackend();
+
+// ── Helpers ──
+
+function rowToObj<T>(row: Record<string, unknown> | undefined): T | undefined {
+  if (!row) return undefined;
+  if ("remote" in row) (row as any).remote = Boolean(row.remote);
+  return row as unknown as T;
+}
+
 // ── User queries ──
 
-export function findUserByEmail(email: string): User | undefined {
-  return db.prepare("SELECT * FROM User WHERE email = ?").get(email) as User | undefined;
+export async function findUserByEmail(email: string): Promise<User | undefined> {
+  const result = await db.execute("SELECT * FROM User WHERE email = ?", [email]);
+  return rowToObj<User>(result.rows[0]);
 }
 
 // ── Opportunity queries ──
 
-export function findOpportunities(userId: string) {
-  const opps = db.prepare(`
-    SELECT * FROM Opportunity WHERE userId = ? ORDER BY updatedAt DESC
-  `).all(userId) as Opportunity[];
+export async function findOpportunities(userId: string) {
+  const result = await db.execute(
+    "SELECT * FROM Opportunity WHERE userId = ? ORDER BY updatedAt DESC",
+    [userId]
+  );
+  const opps = result.rows;
 
-  return opps.map((opp) => {
-    const interviewCount = (
-      db.prepare("SELECT COUNT(*) as count FROM Interview WHERE opportunityId = ?").get(opp.id) as any
-    ).count;
-    return { ...rowToObj<Opportunity>(opp), _count: { interviews: interviewCount } };
-  });
+  const enriched = [];
+  for (const opp of opps) {
+    const countResult = await db.execute(
+      "SELECT COUNT(*) as count FROM Interview WHERE opportunityId = ?",
+      [opp.id as string]
+    );
+    const interviewCount = Number(countResult.rows[0]?.count ?? 0);
+    enriched.push({ ...rowToObj<Opportunity>(opp)!, _count: { interviews: interviewCount } });
+  }
+  return enriched;
 }
 
-export function findOpportunityById(id: string, userId: string) {
-  const opp = db.prepare("SELECT * FROM Opportunity WHERE id = ? AND userId = ?").get(id, userId) as
-    | Opportunity
-    | undefined;
+export async function findOpportunityById(id: string, userId: string) {
+  const oppResult = await db.execute(
+    "SELECT * FROM Opportunity WHERE id = ? AND userId = ?",
+    [id, userId]
+  );
+  const opp = oppResult.rows[0];
   if (!opp) return null;
 
-  const interviews = db
-    .prepare("SELECT * FROM Interview WHERE opportunityId = ? ORDER BY roundNumber ASC, dateTime ASC")
-    .all(id) as Interview[];
+  const interviewsResult = await db.execute(
+    "SELECT * FROM Interview WHERE opportunityId = ? ORDER BY roundNumber ASC, dateTime ASC",
+    [id]
+  );
 
-  const opportunityContacts = db
-    .prepare(`
-      SELECT oc.id, oc.role, c.* FROM OpportunityContact oc
-      JOIN Contact c ON c.id = oc.contactId
-      WHERE oc.opportunityId = ?
-    `)
-    .all(id)
-    .map((row: any) => ({
+  const contactsResult = await db.execute(
+    `SELECT oc.id as ocId, oc.role as ocRole, c.* FROM OpportunityContact oc
+     JOIN Contact c ON c.id = oc.contactId
+     WHERE oc.opportunityId = ?`,
+    [id]
+  );
+  const opportunityContacts = contactsResult.rows.map((row: any) => ({
+    id: row.ocId,
+    role: row.ocRole,
+    contact: {
       id: row.id,
-      role: row.role,
-      contact: {
-        id: row.id,
-        name: row.name,
-        title: row.title,
-        company: row.company,
-        email: row.email,
-        phone: row.phone,
-        linkedIn: row.linkedIn,
-        type: row.type,
-        warmth: row.warmth,
-        notes: row.notes,
-      },
-    }));
+      name: row.name,
+      title: row.title,
+      company: row.company,
+      email: row.email,
+      phone: row.phone,
+      linkedIn: row.linkedIn,
+      type: row.type,
+      warmth: row.warmth,
+      notes: row.notes,
+    },
+  }));
 
-  const activities = db
-    .prepare("SELECT * FROM Activity WHERE opportunityId = ? ORDER BY date DESC LIMIT 20")
-    .all(id) as Activity[];
+  const activitiesResult = await db.execute(
+    "SELECT * FROM Activity WHERE opportunityId = ? ORDER BY date DESC LIMIT 20",
+    [id]
+  );
 
-  const documentsSent = db
-    .prepare(`
-      SELECT od.id, od.sentAt, d.id as docId, d.type, d.name, d.version
-      FROM OpportunityDocument od
-      JOIN Document d ON d.id = od.documentId
-      WHERE od.opportunityId = ?
-    `)
-    .all(id)
-    .map((row: any) => ({
-      id: row.id,
-      sentAt: row.sentAt,
-      document: { id: row.docId, type: row.type, name: row.name, version: row.version },
-    }));
+  const docsResult = await db.execute(
+    `SELECT od.id, od.sentAt, d.id as docId, d.type, d.name, d.version
+     FROM OpportunityDocument od
+     JOIN Document d ON d.id = od.documentId
+     WHERE od.opportunityId = ?`,
+    [id]
+  );
+  const documentsSent = docsResult.rows.map((row: any) => ({
+    id: row.id,
+    sentAt: row.sentAt,
+    document: { id: row.docId, type: row.type, name: row.name, version: row.version },
+  }));
 
   return {
-    ...rowToObj<Opportunity>(opp),
-    interviews,
+    ...rowToObj<Opportunity>(opp)!,
+    interviews: interviewsResult.rows,
     opportunityContacts,
-    activities,
+    activities: activitiesResult.rows,
     documentsSent,
   };
 }
 
-export function createOpportunity(userId: string, data: Partial<Opportunity>): Opportunity {
+export async function createOpportunity(userId: string, data: Partial<Opportunity>): Promise<Opportunity> {
   const id = crypto.randomUUID();
-  db.prepare(`
-    INSERT INTO Opportunity (id, userId, company, role, jdLink, compMin, compMax, location, remote, fitScore, priority, tier, status, appliedDate, source, notes, prosConsNotes, keyGaps, createdAt, updatedAt)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-  `).run(
-    id,
-    userId,
-    data.company,
-    data.role,
-    data.jdLink ?? null,
-    data.compMin ?? null,
-    data.compMax ?? null,
-    data.location ?? null,
-    data.remote ? 1 : 0,
-    data.fitScore ?? null,
-    data.priority ?? "medium",
-    data.tier ?? null,
-    data.status ?? "saved",
-    data.appliedDate ?? null,
-    data.source ?? null,
-    data.notes ?? null,
-    data.prosConsNotes ?? null,
-    data.keyGaps ?? null
+  await db.execute(
+    `INSERT INTO Opportunity (id, userId, company, role, jdLink, compMin, compMax, location, remote, fitScore, priority, tier, status, appliedDate, source, notes, prosConsNotes, keyGaps, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [
+      id, userId, data.company!, data.role!,
+      data.jdLink ?? null, data.compMin ?? null, data.compMax ?? null,
+      data.location ?? null, data.remote ? 1 : 0, data.fitScore ?? null,
+      data.priority ?? "medium", data.tier ?? null, data.status ?? "saved",
+      data.appliedDate ?? null, data.source ?? null, data.notes ?? null,
+      data.prosConsNotes ?? null, data.keyGaps ?? null,
+    ]
   );
-  return db.prepare("SELECT * FROM Opportunity WHERE id = ?").get(id) as Opportunity;
+  const result = await db.execute("SELECT * FROM Opportunity WHERE id = ?", [id]);
+  return result.rows[0] as unknown as Opportunity;
 }
 
-export function updateOpportunity(id: string, userId: string, data: Partial<Opportunity>) {
-  // Verify ownership
-  const existing = db.prepare("SELECT id FROM Opportunity WHERE id = ? AND userId = ?").get(id, userId);
-  if (!existing) return null;
+export async function updateOpportunity(id: string, userId: string, data: Partial<Opportunity>) {
+  const existing = await db.execute(
+    "SELECT id FROM Opportunity WHERE id = ? AND userId = ?",
+    [id, userId]
+  );
+  if (!existing.rows.length) return null;
 
   const fields: string[] = [];
   const values: any[] = [];
@@ -261,90 +314,94 @@ export function updateOpportunity(id: string, userId: string, data: Partial<Oppo
     }
   }
 
-  if (fields.length === 0) return db.prepare("SELECT * FROM Opportunity WHERE id = ?").get(id);
+  if (fields.length === 0) {
+    const result = await db.execute("SELECT * FROM Opportunity WHERE id = ?", [id]);
+    return rowToObj(result.rows[0]);
+  }
 
   fields.push("updatedAt = datetime('now')");
   values.push(id);
-
-  db.prepare(`UPDATE Opportunity SET ${fields.join(", ")} WHERE id = ?`).run(...values);
-  return rowToObj(db.prepare("SELECT * FROM Opportunity WHERE id = ?").get(id));
+  await db.execute(`UPDATE Opportunity SET ${fields.join(", ")} WHERE id = ?`, values);
+  const result = await db.execute("SELECT * FROM Opportunity WHERE id = ?", [id]);
+  return rowToObj(result.rows[0]);
 }
 
-export function updateOpportunityStatus(id: string, userId: string, status: string) {
-  const existing = db.prepare("SELECT * FROM Opportunity WHERE id = ? AND userId = ?").get(id, userId) as Opportunity | undefined;
+export async function updateOpportunityStatus(id: string, userId: string, status: string) {
+  const existingResult = await db.execute(
+    "SELECT * FROM Opportunity WHERE id = ? AND userId = ?",
+    [id, userId]
+  );
+  const existing = existingResult.rows[0] as unknown as Opportunity | undefined;
   if (!existing) return null;
 
   const updates: string[] = ["status = ?", "updatedAt = datetime('now')"];
   const values: any[] = [status];
 
-  // Auto-set appliedDate
   if (status === "applied" && !existing.appliedDate) {
     updates.push("appliedDate = datetime('now')");
   }
 
   values.push(id);
-  db.prepare(`UPDATE Opportunity SET ${updates.join(", ")} WHERE id = ?`).run(...values);
-  return rowToObj(db.prepare("SELECT * FROM Opportunity WHERE id = ?").get(id));
+  await db.execute(`UPDATE Opportunity SET ${updates.join(", ")} WHERE id = ?`, values);
+  const result = await db.execute("SELECT * FROM Opportunity WHERE id = ?", [id]);
+  return rowToObj(result.rows[0]);
 }
 
-export function deleteOpportunity(id: string, userId: string): boolean {
-  const existing = db.prepare("SELECT id FROM Opportunity WHERE id = ? AND userId = ?").get(id, userId);
-  if (!existing) return false;
-  db.prepare("DELETE FROM Opportunity WHERE id = ?").run(id);
+export async function deleteOpportunity(id: string, userId: string): Promise<boolean> {
+  const existing = await db.execute(
+    "SELECT id FROM Opportunity WHERE id = ? AND userId = ?",
+    [id, userId]
+  );
+  if (!existing.rows.length) return false;
+  await db.execute("DELETE FROM Opportunity WHERE id = ?", [id]);
   return true;
 }
 
 // ── Interview queries ──
 
-export function findUpcomingInterviews(userId: string, limit = 5) {
-  return db.prepare(`
-    SELECT i.*, o.company, o.role
-    FROM Interview i
-    JOIN Opportunity o ON o.id = i.opportunityId
-    WHERE o.userId = ? AND i.status = 'scheduled' AND i.dateTime >= datetime('now')
-    ORDER BY i.dateTime ASC
-    LIMIT ?
-  `).all(userId, limit).map((row: any) => ({
+export async function findUpcomingInterviews(userId: string, limit = 5) {
+  const result = await db.execute(
+    `SELECT i.*, o.company, o.role
+     FROM Interview i
+     JOIN Opportunity o ON o.id = i.opportunityId
+     WHERE o.userId = ? AND i.status = 'scheduled' AND i.dateTime >= datetime('now')
+     ORDER BY i.dateTime ASC
+     LIMIT ?`,
+    [userId, limit]
+  );
+  return result.rows.map((row: any) => ({
     ...row,
     opportunity: { company: row.company, role: row.role },
   }));
 }
 
-export function createInterview(data: any): Interview {
+export async function createInterview(data: any): Promise<Interview> {
   const id = crypto.randomUUID();
-  db.prepare(`
-    INSERT INTO Interview (id, opportunityId, round, roundNumber, dateTime, durationMin, format, interviewerName, interviewerTitle, interviewerLinkedIn, prepNotes, debriefNotes, questionsAsked, questionsToAsk, status, sentiment, nextSteps, createdAt, updatedAt)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
-  `).run(
-    id,
-    data.opportunityId,
-    data.round,
-    data.roundNumber ?? 1,
-    data.dateTime ?? null,
-    data.durationMin ?? null,
-    data.format ?? "video",
-    data.interviewerName ?? null,
-    data.interviewerTitle ?? null,
-    data.interviewerLinkedIn ?? null,
-    data.prepNotes ?? null,
-    data.debriefNotes ?? null,
-    data.questionsAsked ?? null,
-    data.questionsToAsk ?? null,
-    data.status ?? "scheduled",
-    data.sentiment ?? null,
-    data.nextSteps ?? null
+  await db.execute(
+    `INSERT INTO Interview (id, opportunityId, round, roundNumber, dateTime, durationMin, format, interviewerName, interviewerTitle, interviewerLinkedIn, prepNotes, debriefNotes, questionsAsked, questionsToAsk, status, sentiment, nextSteps, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [
+      id, data.opportunityId, data.round, data.roundNumber ?? 1,
+      data.dateTime ?? null, data.durationMin ?? null, data.format ?? "video",
+      data.interviewerName ?? null, data.interviewerTitle ?? null,
+      data.interviewerLinkedIn ?? null, data.prepNotes ?? null,
+      data.debriefNotes ?? null, data.questionsAsked ?? null,
+      data.questionsToAsk ?? null, data.status ?? "scheduled",
+      data.sentiment ?? null, data.nextSteps ?? null,
+    ]
   );
-  return db.prepare("SELECT * FROM Interview WHERE id = ?").get(id) as Interview;
+  const result = await db.execute("SELECT * FROM Interview WHERE id = ?", [id]);
+  return result.rows[0] as unknown as Interview;
 }
 
-export function updateInterview(id: string, userId: string, data: any) {
-  // Verify ownership via opportunity
-  const existing = db.prepare(`
-    SELECT i.id FROM Interview i
-    JOIN Opportunity o ON o.id = i.opportunityId
-    WHERE i.id = ? AND o.userId = ?
-  `).get(id, userId);
-  if (!existing) return null;
+export async function updateInterview(id: string, userId: string, data: any) {
+  const existing = await db.execute(
+    `SELECT i.id FROM Interview i
+     JOIN Opportunity o ON o.id = i.opportunityId
+     WHERE i.id = ? AND o.userId = ?`,
+    [id, userId]
+  );
+  if (!existing.rows.length) return null;
 
   const fields: string[] = [];
   const values: any[] = [];
@@ -365,36 +422,43 @@ export function updateInterview(id: string, userId: string, data: any) {
     }
   }
 
-  if (fields.length === 0) return db.prepare("SELECT * FROM Interview WHERE id = ?").get(id);
+  if (fields.length === 0) {
+    const result = await db.execute("SELECT * FROM Interview WHERE id = ?", [id]);
+    return result.rows[0];
+  }
 
   fields.push("updatedAt = datetime('now')");
   values.push(id);
-  db.prepare(`UPDATE Interview SET ${fields.join(", ")} WHERE id = ?`).run(...values);
-  return db.prepare("SELECT * FROM Interview WHERE id = ?").get(id);
+  await db.execute(`UPDATE Interview SET ${fields.join(", ")} WHERE id = ?`, values);
+  const result = await db.execute("SELECT * FROM Interview WHERE id = ?", [id]);
+  return result.rows[0];
 }
 
-export function deleteInterview(id: string, userId: string): boolean {
-  const existing = db.prepare(`
-    SELECT i.id FROM Interview i
-    JOIN Opportunity o ON o.id = i.opportunityId
-    WHERE i.id = ? AND o.userId = ?
-  `).get(id, userId);
-  if (!existing) return false;
-  db.prepare("DELETE FROM Interview WHERE id = ?").run(id);
+export async function deleteInterview(id: string, userId: string): Promise<boolean> {
+  const existing = await db.execute(
+    `SELECT i.id FROM Interview i
+     JOIN Opportunity o ON o.id = i.opportunityId
+     WHERE i.id = ? AND o.userId = ?`,
+    [id, userId]
+  );
+  if (!existing.rows.length) return false;
+  await db.execute("DELETE FROM Interview WHERE id = ?", [id]);
   return true;
 }
 
 // ── Activity queries ──
 
-export function findRecentActivities(userId: string, limit = 10) {
-  return db.prepare(`
-    SELECT a.*, o.company, o.role
-    FROM Activity a
-    LEFT JOIN Opportunity o ON o.id = a.opportunityId
-    WHERE a.userId = ?
-    ORDER BY a.date DESC
-    LIMIT ?
-  `).all(userId, limit).map((row: any) => ({
+export async function findRecentActivities(userId: string, limit = 10) {
+  const result = await db.execute(
+    `SELECT a.*, o.company, o.role
+     FROM Activity a
+     LEFT JOIN Opportunity o ON o.id = a.opportunityId
+     WHERE a.userId = ?
+     ORDER BY a.date DESC
+     LIMIT ?`,
+    [userId, limit]
+  );
+  return result.rows.map((row: any) => ({
     ...row,
     opportunity: row.company ? { company: row.company, role: row.role } : null,
   }));

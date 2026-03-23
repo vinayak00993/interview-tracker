@@ -15,10 +15,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify opportunity belongs to user
-    const opp = db.prepare("SELECT id FROM Opportunity WHERE id = ? AND userId = ?").get(body.opportunityId, userId);
-    if (!opp) return NextResponse.json({ error: "Opportunity not found" }, { status: 404 });
+    const oppResult = await db.execute(
+      "SELECT id FROM Opportunity WHERE id = ? AND userId = ?",
+      [body.opportunityId, userId]
+    );
+    if (!oppResult.rows.length) return NextResponse.json({ error: "Opportunity not found" }, { status: 404 });
 
-    const interview = createInterview(body);
+    const interview = await createInterview(body);
     return NextResponse.json(interview, { status: 201 });
   } catch (error) {
     console.error("POST /api/interviews error:", error);

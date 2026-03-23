@@ -13,7 +13,7 @@ export default async function OpportunityPage({ params }: Props) {
   if (!session) redirect("/login");
 
   const userId = (session.user as any).id;
-  const opportunity = findOpportunityById(params.id, userId);
+  const opportunity = await findOpportunityById(params.id, userId);
 
   if (!opportunity) notFound();
 
