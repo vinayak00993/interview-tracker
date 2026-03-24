@@ -262,9 +262,9 @@ export async function findOpportunityById(id: string, userId: string) {
 
   return {
     ...rowToObj<Opportunity>(opp)!,
-    interviews: interviewsResult.rows,
+    interviews: interviewsResult.rows as unknown as Interview[],
     opportunityContacts,
-    activities: activitiesResult.rows,
+    activities: activitiesResult.rows as unknown as Activity[],
     documentsSent,
   };
 }
