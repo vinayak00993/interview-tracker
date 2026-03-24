@@ -270,6 +270,31 @@ export async function findUserByEmail(email: string): Promise<User | undefined> 
   return rowToObj<User>(result.rows[0]);
 }
 
+export async function createUser(
+  email: string,
+  password: string,
+  name: string
+): Promise<Omit<User, "passwordHash">> {
+  const bcrypt = require("bcryptjs");
+
+  const existing = await findUserByEmail(email);
+  if (existing) {
+    throw new Error("EMAIL_EXISTS");
+  }
+
+  const id = crypto.randomUUID();
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  await db.execute(
+    `INSERT INTO User (id, email, passwordHash, name, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [id, email, passwordHash, name]
+  );
+
+  const result = await db.execute("SELECT id, email, name, createdAt, updatedAt FROM User WHERE id = ?", [id]);
+  return result.rows[0] as unknown as Omit<User, "passwordHash">;
+}
+
 // ── Opportunity queries ──
 
 export async function findOpportunities(userId: string) {

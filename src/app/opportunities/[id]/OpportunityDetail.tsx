@@ -123,6 +123,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   const [aiPrep, setAiPrep] = useState<string | null>(null);
   const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
   const [aiPrepError, setAiPrepError] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEditSaving, setIsEditSaving] = useState(false);
 
   const statusColor = STATUS_COLORS[opp.status] || STATUS_COLORS.saved;
 
@@ -229,6 +231,47 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
     }
   };
 
+  const handleEditSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsEditSaving(true);
+    const formData = new FormData(e.currentTarget);
+    const data: Record<string, any> = {};
+
+    formData.forEach((value, key) => {
+      if (key === "remote") return; // handled separately
+      if (value === "" && (key === "compMin" || key === "compMax" || key === "fitScore" || key === "tier")) {
+        data[key] = null;
+        return;
+      }
+      if (key === "compMin" || key === "compMax" || key === "fitScore" || key === "tier") {
+        data[key] = parseInt(value as string, 10);
+      } else {
+        data[key] = value || null;
+      }
+    });
+
+    // Checkbox won't appear in FormData if unchecked
+    data.remote = formData.has("remote");
+    // company and role should not be null
+    data.company = formData.get("company") as string;
+    data.role = formData.get("role") as string;
+
+    try {
+      const res = await fetch(`/api/opportunities/${opp.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setIsEditing(false);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Failed to update opportunity:", err);
+    }
+    setIsEditSaving(false);
+  };
+
   return (
     <div className="min-h-screen bg-warm-100">
       {/* Top bar */}
@@ -245,6 +288,67 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         {/* Header section */}
+        {isEditing ? (
+          <div className="mb-8 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
+            <h2 className="text-sm font-medium text-warm-700 mb-4">Edit Opportunity</h2>
+            <form onSubmit={handleEditSave} className="grid grid-cols-3 gap-4">
+              <FormInput name="company" label="Company" required defaultValue={opp.company} />
+              <FormInput name="role" label="Role" required defaultValue={opp.role} />
+              <FormInput name="jdLink" label="JD Link" type="url" defaultValue={opp.jdLink || ""} />
+              <FormInput name="compMin" label="Comp Min (K)" type="number" defaultValue={opp.compMin != null ? String(opp.compMin) : ""} placeholder="e.g. 150" />
+              <FormInput name="compMax" label="Comp Max (K)" type="number" defaultValue={opp.compMax != null ? String(opp.compMax) : ""} placeholder="e.g. 200" />
+              <FormInput name="location" label="Location" defaultValue={opp.location || ""} />
+              <div className="flex items-center gap-2 pt-5">
+                <input
+                  type="checkbox"
+                  name="remote"
+                  id="edit-remote"
+                  defaultChecked={opp.remote}
+                  className="rounded border-warm-300 text-terra focus:ring-terra"
+                />
+                <label htmlFor="edit-remote" className="text-xs font-medium text-warm-600">Remote</label>
+              </div>
+              <FormInput name="fitScore" label="Fit Score (0-100)" type="number" defaultValue={opp.fitScore != null ? String(opp.fitScore) : ""} placeholder="0-100" />
+              <FormSelect name="priority" label="Priority" options={["low", "medium", "high"]} defaultValue={opp.priority} />
+              <FormInput name="tier" label="Tier (1-3)" type="number" defaultValue={opp.tier != null ? String(opp.tier) : ""} placeholder="1-3" />
+              <FormInput name="source" label="Source" defaultValue={opp.source || ""} />
+              <div />
+              <div className="col-span-3">
+                <label className="block text-xs font-medium text-warm-600 mb-1">Notes</label>
+                <textarea
+                  name="notes"
+                  rows={3}
+                  defaultValue={opp.notes || ""}
+                  className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                />
+              </div>
+              <div className="col-span-3">
+                <label className="block text-xs font-medium text-warm-600 mb-1">Key Gaps</label>
+                <textarea
+                  name="keyGaps"
+                  rows={2}
+                  defaultValue={opp.keyGaps || ""}
+                  className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                />
+              </div>
+              <div className="col-span-3">
+                <label className="block text-xs font-medium text-warm-600 mb-1">Pros &amp; Cons</label>
+                <textarea
+                  name="prosConsNotes"
+                  rows={2}
+                  defaultValue={opp.prosConsNotes || ""}
+                  className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
+                />
+              </div>
+              <div className="col-span-3 flex gap-2 justify-end">
+                <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
+                <button type="submit" disabled={isEditSaving} className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors">
+                  {isEditSaving ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
         <div className="flex items-start justify-between mb-8">
           <div>
             <div className="flex items-center gap-3 mb-1">
@@ -303,6 +407,12 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               )}
             </select>
             <button
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 hover:bg-warm-200 border border-transparent hover:border-warm-300 rounded-lg transition-colors"
+            >
+              Edit
+            </button>
+            <button
               onClick={handleDeleteOpportunity}
               className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
             >
@@ -310,6 +420,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </button>
           </div>
         </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-1 border-b border-warm-300 mb-6">
