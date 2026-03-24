@@ -1,7 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  // Output standalone build for Railway/Docker deployment
-  output: "standalone",
-};
+const nextConfig = {};
 
 module.exports = nextConfig;
