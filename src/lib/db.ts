@@ -242,6 +242,27 @@ function rowToObj<T>(row: Record<string, unknown> | undefined): T | undefined {
   return row as unknown as T;
 }
 
+// ── Schema migration (creates tables if missing) ──
+
+async function ensureUserProfileTable() {
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS UserProfile (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL UNIQUE REFERENCES User(id) ON DELETE CASCADE,
+      resumeText TEXT,
+      linkedInAbout TEXT,
+      linkedInUrl TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+    )`);
+  } catch {
+    // Table may already exist
+  }
+}
+
+// Run migration on startup
+ensureUserProfileTable();
+
 // ── User queries ──
 
 export async function findUserByEmail(email: string): Promise<User | undefined> {
@@ -527,4 +548,48 @@ export async function findRecentActivities(userId: string, limit = 10) {
     ...row,
     opportunity: row.company ? { company: row.company, role: row.role } : null,
   }));
+}
+
+// ── UserProfile queries ──
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  resumeText: string | null;
+  linkedInAbout: string | null;
+  linkedInUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function findUserProfile(userId: string): Promise<UserProfile | undefined> {
+  const result = await db.execute("SELECT * FROM UserProfile WHERE userId = ?", [userId]);
+  return result.rows[0] as unknown as UserProfile | undefined;
+}
+
+export async function upsertUserProfile(userId: string, data: Partial<UserProfile>): Promise<UserProfile> {
+  const existing = await findUserProfile(userId);
+  if (existing) {
+    const fields: string[] = [];
+    const values: any[] = [];
+    if (data.resumeText !== undefined) { fields.push("resumeText = ?"); values.push(data.resumeText); }
+    if (data.linkedInAbout !== undefined) { fields.push("linkedInAbout = ?"); values.push(data.linkedInAbout); }
+    if (data.linkedInUrl !== undefined) { fields.push("linkedInUrl = ?"); values.push(data.linkedInUrl); }
+    if (fields.length > 0) {
+      fields.push("updatedAt = datetime('now')");
+      values.push(existing.id);
+      await db.execute(`UPDATE UserProfile SET ${fields.join(", ")} WHERE id = ?`, values);
+    }
+    const result = await db.execute("SELECT * FROM UserProfile WHERE id = ?", [existing.id]);
+    return result.rows[0] as unknown as UserProfile;
+  } else {
+    const id = crypto.randomUUID();
+    await db.execute(
+      `INSERT INTO UserProfile (id, userId, resumeText, linkedInAbout, linkedInUrl, createdAt, updatedAt)
+       VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+      [id, userId, data.resumeText ?? null, data.linkedInAbout ?? null, data.linkedInUrl ?? null]
+    );
+    const result = await db.execute("SELECT * FROM UserProfile WHERE id = ?", [id]);
+    return result.rows[0] as unknown as UserProfile;
+  }
 }

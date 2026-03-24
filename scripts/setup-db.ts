@@ -129,6 +129,15 @@ async function createSchema() {
       sentAt TEXT NOT NULL DEFAULT (datetime('now')),
       UNIQUE(opportunityId, documentId)
     )`,
+    `CREATE TABLE IF NOT EXISTS UserProfile (
+      id TEXT PRIMARY KEY,
+      userId TEXT NOT NULL UNIQUE REFERENCES User(id) ON DELETE CASCADE,
+      resumeText TEXT,
+      linkedInAbout TEXT,
+      linkedInUrl TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+    )`,
   ];
 
   for (const sql of statements) {

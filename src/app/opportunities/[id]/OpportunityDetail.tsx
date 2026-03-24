@@ -114,10 +114,15 @@ interface Props {
 
 export default function OpportunityDetail({ opportunity: opp }: Props) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"interviews" | "notes" | "contacts" | "activity">("interviews");
+  const [activeTab, setActiveTab] = useState<"interviews" | "prep" | "notes" | "contacts" | "activity">("interviews");
   const [showAddInterview, setShowAddInterview] = useState(false);
   const [expandedInterview, setExpandedInterview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [debriefingInterview, setDebriefingInterview] = useState<string | null>(null);
+  const [isDebriefSubmitting, setIsDebriefSubmitting] = useState(false);
+  const [aiPrep, setAiPrep] = useState<string | null>(null);
+  const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
+  const [aiPrepError, setAiPrepError] = useState<string | null>(null);
 
   const statusColor = STATUS_COLORS[opp.status] || STATUS_COLORS.saved;
 
@@ -163,6 +168,55 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
       console.error("Failed to add interview:", err);
     }
     setIsSubmitting(false);
+  };
+
+  const handleDebrief = async (e: React.FormEvent<HTMLFormElement>, interviewId: string) => {
+    e.preventDefault();
+    setIsDebriefSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+    const data: Record<string, any> = {};
+    formData.forEach((value, key) => {
+      if (value === "") return;
+      data[key] = value;
+    });
+    // Mark as completed when debriefing
+    data.status = "completed";
+
+    try {
+      const res = await fetch(`/api/interviews/${interviewId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setDebriefingInterview(null);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Failed to save debrief:", err);
+    }
+    setIsDebriefSubmitting(false);
+  };
+
+  const handleGenerateAiPrep = async () => {
+    setIsGeneratingPrep(true);
+    setAiPrepError(null);
+    try {
+      const res = await fetch("/api/ai-prep", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ opportunityId: opp.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAiPrep(data.prep);
+      } else {
+        setAiPrepError(data.error || "Failed to generate prep");
+      }
+    } catch {
+      setAiPrepError("Failed to connect to AI service");
+    }
+    setIsGeneratingPrep(false);
   };
 
   const handleDeleteOpportunity = async () => {
@@ -262,6 +316,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
           {(
             [
               { key: "interviews", label: "Interviews", count: opp.interviews.length },
+              { key: "prep", label: "Prep" },
               { key: "notes", label: "Notes" },
               { key: "contacts", label: "Contacts", count: opp.opportunityContacts.length },
               { key: "activity", label: "Activity", count: opp.activities.length },
@@ -435,29 +490,90 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                               {interview.prepNotes && (
                                 <div>
                                   <h4 className="text-xs font-medium text-warm-600 mb-1">Prep Notes</h4>
-                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.prepNotes}</div>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-100 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.prepNotes}</div>
                                 </div>
                               )}
                               {interview.debriefNotes && (
                                 <div>
                                   <h4 className="text-xs font-medium text-warm-600 mb-1">Debrief</h4>
-                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.debriefNotes}</div>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-100 rounded-lg p-3 max-h-48 overflow-y-auto">{interview.debriefNotes}</div>
                                 </div>
                               )}
                               {interview.questionsAsked && (
                                 <div>
                                   <h4 className="text-xs font-medium text-warm-600 mb-1">Questions They Asked</h4>
-                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsAsked}</div>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-100 rounded-lg p-3">{interview.questionsAsked}</div>
                                 </div>
                               )}
                               {interview.questionsToAsk && (
                                 <div>
                                   <h4 className="text-xs font-medium text-warm-600 mb-1">Questions to Ask</h4>
-                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-900 rounded-lg p-3">{interview.questionsToAsk}</div>
+                                  <div className="text-xs text-warm-800 whitespace-pre-wrap bg-warm-100 rounded-lg p-3">{interview.questionsToAsk}</div>
                                 </div>
                               )}
                             </div>
                           </div>
+
+                          {/* Quick Debrief button */}
+                          {interview.status !== "cancelled" && !interview.debriefNotes && debriefingInterview !== interview.id && (
+                            <div className="mt-4 pt-3 border-t border-warm-200">
+                              <button
+                                onClick={() => setDebriefingInterview(interview.id)}
+                                className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg transition-colors"
+                              >
+                                + Quick Debrief
+                              </button>
+                            </div>
+                          )}
+
+                          {/* Debrief form */}
+                          {debriefingInterview === interview.id && (
+                            <div className="mt-4 pt-4 border-t border-warm-200">
+                              <h4 className="text-xs font-medium text-warm-700 mb-3">Post-Interview Debrief</h4>
+                              <form onSubmit={(e) => handleDebrief(e, interview.id)} className="space-y-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-warm-600 mb-1">How did it go?</label>
+                                  <div className="flex gap-2">
+                                    {["positive", "neutral", "negative"].map((s) => (
+                                      <label key={s} className="flex items-center gap-1.5 text-xs cursor-pointer">
+                                        <input type="radio" name="sentiment" value={s} defaultChecked={s === (interview.sentiment || "neutral")}
+                                          className="text-terra focus:ring-terra" />
+                                        <span className={s === "positive" ? "text-green-700" : s === "negative" ? "text-red-600" : "text-yellow-700"}>
+                                          {s === "positive" ? "Good" : s === "negative" ? "Tough" : "Neutral"}
+                                        </span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-warm-600 mb-1">Debrief Notes</label>
+                                  <textarea name="debriefNotes" rows={3} defaultValue={interview.debriefNotes || ""}
+                                    placeholder="What went well? What could have gone better? Key takeaways..."
+                                    className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-warm-600 mb-1">Questions They Asked</label>
+                                  <textarea name="questionsAsked" rows={2} defaultValue={interview.questionsAsked || ""}
+                                    placeholder="Key questions from the interviewer..."
+                                    className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none" />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-warm-600 mb-1">Next Steps</label>
+                                  <input type="text" name="nextSteps" defaultValue={interview.nextSteps || ""}
+                                    placeholder="e.g., Waiting for follow-up, next round scheduled..."
+                                    className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors" />
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                  <button type="button" onClick={() => setDebriefingInterview(null)}
+                                    className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
+                                  <button type="submit" disabled={isDebriefSubmitting}
+                                    className="px-4 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg transition-colors">
+                                    {isDebriefSubmitting ? "Saving..." : "Save Debrief"}
+                                  </button>
+                                </div>
+                              </form>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -465,6 +581,225 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 })}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "prep" && (
+          <div className="space-y-6">
+            {/* AI Prep Generation */}
+            <div className="bg-white border border-warm-300 rounded-lg p-5">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider">AI-Powered Prep</h3>
+                <button
+                  onClick={handleGenerateAiPrep}
+                  disabled={isGeneratingPrep}
+                  className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-2"
+                >
+                  {isGeneratingPrep ? (
+                    <>
+                      <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Generating...
+                    </>
+                  ) : aiPrep ? "Regenerate" : "Generate Tailored Prep"}
+                </button>
+              </div>
+              <p className="text-xs text-warm-500 mb-3">
+                Uses your <Link href="/profile" className="text-terra hover:text-terra-light">profile</Link> (resume + LinkedIn) to generate prep tailored to this specific role.
+              </p>
+
+              {aiPrepError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                  {aiPrepError}
+                  {aiPrepError.includes("profile") && (
+                    <Link href="/profile" className="ml-2 text-terra hover:text-terra-light font-medium">Set up profile →</Link>
+                  )}
+                </div>
+              )}
+
+              {aiPrep && (
+                <div className="mt-3 prose prose-sm max-w-none text-warm-800 text-sm whitespace-pre-wrap bg-warm-50 rounded-lg p-4 max-h-[600px] overflow-y-auto border border-warm-200">
+                  {aiPrep}
+                </div>
+              )}
+            </div>
+
+            {/* Next interview context */}
+            {(() => {
+              const scheduled = opp.interviews
+                .filter((i) => i.status === "scheduled")
+                .sort((a, b) => (a.dateTime || "").localeCompare(b.dateTime || ""));
+              const nextInterview = scheduled[0];
+
+              return (
+                <>
+                  {nextInterview ? (
+                    <div className="bg-terra/5 border border-terra/20 rounded-lg p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-sm font-medium text-warm-900">Next Up: {nextInterview.round}</h3>
+                        {nextInterview.dateTime && (
+                          <span className="text-xs px-2.5 py-1 rounded-full bg-terra/10 text-terra border border-terra/20">
+                            {new Date(nextInterview.dateTime).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 text-xs">
+                        <div>
+                          <span className="text-warm-500">Format</span>
+                          <p className="text-warm-800 mt-0.5">{nextInterview.format}</p>
+                        </div>
+                        {nextInterview.durationMin && (
+                          <div>
+                            <span className="text-warm-500">Duration</span>
+                            <p className="text-warm-800 mt-0.5">{nextInterview.durationMin} min</p>
+                          </div>
+                        )}
+                        {nextInterview.interviewerName && (
+                          <div>
+                            <span className="text-warm-500">Interviewer</span>
+                            <p className="text-warm-800 mt-0.5">
+                              {nextInterview.interviewerName}
+                              {nextInterview.interviewerTitle && <span className="text-warm-500"> · {nextInterview.interviewerTitle}</span>}
+                            </p>
+                            {nextInterview.interviewerLinkedIn && (
+                              <a href={nextInterview.interviewerLinkedIn} target="_blank" rel="noopener noreferrer" className="text-terra hover:text-terra-light text-[10px]">LinkedIn →</a>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-warm-200 border border-warm-300 rounded-lg p-4 text-center">
+                      <p className="text-sm text-warm-600">No upcoming interviews scheduled.</p>
+                      <p className="text-xs text-warm-500 mt-1">Add an interview from the Interviews tab to see prep notes here.</p>
+                    </div>
+                  )}
+
+                  {/* Company & Role context */}
+                  <div className="bg-white border border-warm-300 rounded-lg p-5">
+                    <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">Role Context</h3>
+                    <div className="grid grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <span className="text-warm-500">Company</span>
+                        <p className="text-warm-900 font-medium mt-0.5">{opp.company}</p>
+                      </div>
+                      <div>
+                        <span className="text-warm-500">Role</span>
+                        <p className="text-warm-900 font-medium mt-0.5">{opp.role}</p>
+                      </div>
+                      {opp.location && (
+                        <div>
+                          <span className="text-warm-500">Location</span>
+                          <p className="text-warm-800 mt-0.5">{opp.location}{opp.remote ? " · Remote" : ""}</p>
+                        </div>
+                      )}
+                      {opp.compMin != null && opp.compMax != null && (
+                        <div>
+                          <span className="text-warm-500">Comp Range</span>
+                          <p className="text-warm-800 mt-0.5">${opp.compMin}K – ${opp.compMax}K</p>
+                        </div>
+                      )}
+                      {opp.fitScore != null && (
+                        <div>
+                          <span className="text-warm-500">Fit Score</span>
+                          <p className={`mt-0.5 font-medium ${opp.fitScore >= 80 ? "text-green-700" : opp.fitScore >= 60 ? "text-yellow-700" : "text-red-600"}`}>
+                            {opp.fitScore}%
+                          </p>
+                        </div>
+                      )}
+                      {opp.jdLink && (
+                        <div>
+                          <span className="text-warm-500">Job Description</span>
+                          <p className="mt-0.5">
+                            <a href={opp.jdLink} target="_blank" rel="noopener noreferrer" className="text-terra hover:text-terra-light">
+                              View JD →
+                            </a>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Key Gaps to address */}
+                  {opp.keyGaps && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-red-700 uppercase tracking-wider mb-2">Key Gaps to Address</h3>
+                      <div className="text-sm text-red-800 whitespace-pre-wrap">{opp.keyGaps}</div>
+                    </div>
+                  )}
+
+                  {/* Prep Notes for the next interview */}
+                  {nextInterview?.prepNotes && (
+                    <div className="bg-white border border-warm-300 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Prep Notes — {nextInterview.round}</h3>
+                      <div className="text-sm text-warm-800 whitespace-pre-wrap">{nextInterview.prepNotes}</div>
+                    </div>
+                  )}
+
+                  {/* Questions to Ask */}
+                  {nextInterview?.questionsToAsk && (
+                    <div className="bg-white border border-warm-300 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Questions to Ask</h3>
+                      <div className="text-sm text-warm-800 whitespace-pre-wrap">{nextInterview.questionsToAsk}</div>
+                    </div>
+                  )}
+
+                  {/* Contacts involved */}
+                  {opp.opportunityContacts.length > 0 && (
+                    <div className="bg-white border border-warm-300 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">Key Contacts</h3>
+                      <div className="space-y-2">
+                        {opp.opportunityContacts.map(({ id, role, contact }) => (
+                          <div key={id} className="flex items-center justify-between text-xs py-1.5 border-b border-warm-200 last:border-0">
+                            <div>
+                              <span className="text-warm-900 font-medium">{contact.name}</span>
+                              {contact.title && <span className="text-warm-500"> · {contact.title}</span>}
+                              {role && <span className="text-terra ml-1.5 px-1.5 py-0.5 rounded bg-terra/10 text-[10px]">{role}</span>}
+                            </div>
+                            <div className="flex gap-2">
+                              {contact.email && <a href={`mailto:${contact.email}`} className="text-terra hover:text-terra-light">Email</a>}
+                              {contact.linkedIn && <a href={contact.linkedIn} target="_blank" rel="noopener noreferrer" className="text-terra hover:text-terra-light">LinkedIn</a>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* General notes */}
+                  {opp.notes && (
+                    <div className="bg-white border border-warm-300 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">General Notes</h3>
+                      <div className="text-sm text-warm-800 whitespace-pre-wrap">{opp.notes}</div>
+                    </div>
+                  )}
+
+                  {/* Previous interview debriefs */}
+                  {opp.interviews.filter((i) => i.status === "completed" && i.debriefNotes).length > 0 && (
+                    <div className="bg-white border border-warm-300 rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">Previous Interview Debriefs</h3>
+                      <div className="space-y-3">
+                        {opp.interviews
+                          .filter((i) => i.status === "completed" && i.debriefNotes)
+                          .map((i) => (
+                            <div key={i.id} className="border-b border-warm-200 last:border-0 pb-3 last:pb-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-warm-800">{i.round}</span>
+                                {i.sentiment && (
+                                  <span className={`text-[10px] ${SENTIMENT_COLORS[i.sentiment]}`}>{i.sentiment}</span>
+                                )}
+                                {i.dateTime && (
+                                  <span className="text-[10px] text-warm-500">{new Date(i.dateTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-warm-700 whitespace-pre-wrap">{i.debriefNotes}</p>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
 

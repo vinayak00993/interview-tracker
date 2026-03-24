@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { findOpportunities, findUpcomingInterviews, findRecentActivities } from "@/lib/db";
+import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
 
 export default async function DashboardPage() {
@@ -33,6 +34,18 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center gap-4">
+          <Link
+            href="/dashboard/comp"
+            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300 hover:border-warm-400 rounded-lg transition-colors"
+          >
+            Comp Compare
+          </Link>
+          <Link
+            href="/profile"
+            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300 hover:border-warm-400 rounded-lg transition-colors"
+          >
+            Profile
+          </Link>
           <span className="text-sm text-warm-700">{session.user?.name}</span>
         </div>
       </header>
