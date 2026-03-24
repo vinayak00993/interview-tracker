@@ -47,9 +47,9 @@ export function middleware(req: NextRequest) {
 
     // Cleanup old entries periodically
     if (loginAttempts.size > 1000) {
-      for (const [k, v] of loginAttempts) {
+      loginAttempts.forEach((v, k) => {
         if (v.resetAt < now) loginAttempts.delete(k);
-      }
+      });
     }
   }
 
