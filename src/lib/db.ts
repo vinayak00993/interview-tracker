@@ -138,22 +138,85 @@ function createLocalBackend(): DbBackend {
   };
 }
 
-// ── @libsql/client backend (Turso production) ──
+// ── Turso HTTP backend (production) ──
+// Uses Turso's HTTP API directly via Node.js native https module.
+// This avoids cross-fetch/node-fetch header validation issues with JWT tokens.
 
 function createTursoBackend(): DbBackend {
-  // Use standard client on Node.js (Railway runs Linux x86_64)
-  // The /web variant uses cross-fetch which rejects JWT tokens in headers
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createClient } = require("@libsql/client");
-  const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!,
-  });
+  const https = require("https");
+  const tursoUrl = process.env.TURSO_DATABASE_URL!.replace("libsql://", "https://");
+  const authToken = (process.env.TURSO_AUTH_TOKEN || "").trim();
+
+  function tursoRequest(stmts: Array<{ sql: string; args?: unknown[] }>): Promise<any> {
+    const requests = stmts.map((s) => ({
+      type: "execute" as const,
+      stmt: {
+        sql: s.sql,
+        args: (s.args || []).map((a) => {
+          if (a === null || a === undefined) return { type: "null" };
+          if (typeof a === "number") return { type: "integer", value: String(a) };
+          return { type: "text", value: String(a) };
+        }),
+      },
+    }));
+    requests.push({ type: "close" } as any);
+
+    const body = JSON.stringify({ requests });
+    return new Promise((resolve, reject) => {
+      const url = new URL(tursoUrl + "/v3/pipeline");
+      const req = https.request(
+        {
+          hostname: url.hostname,
+          port: 443,
+          path: url.pathname,
+          method: "POST",
+          headers: {
+            "Authorization": "Bearer " + authToken,
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(body),
+          },
+        },
+        (res: any) => {
+          let data = "";
+          res.on("data", (c: string) => (data += c));
+          res.on("end", () => {
+            try {
+              const parsed = JSON.parse(data);
+              resolve(parsed);
+            } catch (e) {
+              reject(new Error("Failed to parse Turso response: " + data.slice(0, 200)));
+            }
+          });
+        }
+      );
+      req.on("error", reject);
+      req.write(body);
+      req.end();
+    });
+  }
 
   return {
     async execute(sql: string, args?: unknown[]): Promise<QueryResult> {
-      const result = await client.execute({ sql, args: args || [] });
-      return { rows: result.rows as Record<string, unknown>[] };
+      const response = await tursoRequest([{ sql, args }]);
+      const result = response.results?.[0];
+      if (result?.type === "error") {
+        throw new Error("Turso query error: " + result.error?.message);
+      }
+      // Convert Turso column-based response to row objects
+      const execResult = result?.response?.result;
+      if (!execResult) return { rows: [] };
+
+      const cols = execResult.cols?.map((c: any) => c.name) || [];
+      const rows = (execResult.rows || []).map((row: any[]) => {
+        const obj: Record<string, unknown> = {};
+        row.forEach((cell: any, i: number) => {
+          if (cell.type === "null") obj[cols[i]] = null;
+          else if (cell.type === "integer") obj[cols[i]] = Number(cell.value);
+          else obj[cols[i]] = cell.value;
+        });
+        return obj;
+      });
+      return { rows };
     },
   };
 }
