@@ -141,9 +141,10 @@ function createLocalBackend(): DbBackend {
 // ── @libsql/client backend (Turso production) ──
 
 function createTursoBackend(): DbBackend {
-  // Use web client (HTTP) — avoids native binary issues on ARM64
+  // Use standard client on Node.js (Railway runs Linux x86_64)
+  // The /web variant uses cross-fetch which rejects JWT tokens in headers
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createClient } = require("@libsql/client/web");
+  const { createClient } = require("@libsql/client");
   const client = createClient({
     url: process.env.TURSO_DATABASE_URL!,
     authToken: process.env.TURSO_AUTH_TOKEN!,
