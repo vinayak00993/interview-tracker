@@ -2,7 +2,7 @@
 const nextConfig = {
   experimental: {
     // Prevent webpack from bundling native/binary packages
-    serverComponentsExternalPackages: ["better-sqlite3", "@libsql/client", "libsql"],
+    serverComponentsExternalPackages: ["better-sqlite3", "@libsql/client", "libsql", "pdf-parse"],
   },
 };
 

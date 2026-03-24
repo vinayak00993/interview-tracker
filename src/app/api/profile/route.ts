@@ -41,9 +41,21 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(arrayBuffer);
 
         if (file.type === "application/pdf") {
-          const pdfParse = require("pdf-parse");
-          const parsed = await pdfParse(buffer);
-          resumeText = parsed.text;
+          try {
+            const pdfParse = require("pdf-parse");
+            const parsed = await pdfParse(buffer);
+            resumeText = parsed.text;
+          } catch (pdfErr) {
+            console.error("PDF parse failed, trying raw text extraction:", pdfErr);
+            // Fallback: extract readable text from PDF buffer
+            const raw = buffer.toString("utf-8");
+            const textChunks = raw.match(/\(([^)]+)\)/g);
+            if (textChunks) {
+              resumeText = textChunks.map((c) => c.slice(1, -1)).join(" ");
+            } else {
+              resumeText = raw.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
+            }
+          }
         } else {
           // Plain text file
           resumeText = buffer.toString("utf-8");
