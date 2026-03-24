@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import Tesseract from "tesseract.js";
+import { createWorker } from "tesseract.js";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,16 +18,22 @@ export async function POST(req: NextRequest) {
     // OCR each image and combine text
     const textParts: string[] = [];
 
+    // Use CDN-hosted worker to avoid bundling issues in production
+    const worker = await createWorker("eng", 1, {
+      workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/worker.min.js",
+      corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5/tesseract-core-simd-lstm.wasm.js",
+    });
+
     for (const file of files) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-      const { data } = await Tesseract.recognize(base64, "eng", {
-        logger: () => {}, // suppress progress logs
-      });
+      const { data } = await worker.recognize(base64);
       textParts.push(data.text);
     }
+
+    await worker.terminate();
 
     const fullText = textParts.join("\n\n");
 

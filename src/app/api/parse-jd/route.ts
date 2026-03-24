@@ -111,17 +111,33 @@ export async function POST(req: NextRequest) {
     if (structured?.compMin) result.compMin = structured.compMin;
     if (structured?.compMax) result.compMax = structured.compMax;
     if (!result.compMin && !result.compMax) {
-      // Try to find salary patterns like $150,000 - $200,000 or $150K - $200K
-      const salaryMatch = text.match(/\$\s*([\d,]+)\s*[kK]?\s*[-–—to]+\s*\$?\s*([\d,]+)\s*[kK]?/);
-      if (salaryMatch) {
-        let min = parseInt(salaryMatch[1].replace(/,/g, ""), 10);
-        let max = parseInt(salaryMatch[2].replace(/,/g, ""), 10);
-        // Normalize to $K
-        if (min > 1000) min = Math.round(min / 1000);
-        if (max > 1000) max = Math.round(max / 1000);
-        if (min > 0 && max > 0) {
-          result.compMin = min;
-          result.compMax = max;
+      // Try multiple salary patterns from most specific to least
+      const salaryPatterns = [
+        // $150,000/yr - $200,000/yr or $150,000/year - $200,000/year
+        /\$\s*([\d,]+)\s*(?:\/\s*(?:yr|year|annually))?\s*[-–—~to]+\s*\$\s*([\d,]+)\s*(?:\/\s*(?:yr|year|annually))?/i,
+        // $150K - $200K or $150k-$200k
+        /\$\s*([\d]+)\s*[kK]\s*[-–—~to]+\s*\$?\s*([\d]+)\s*[kK]/,
+        // 150K - 200K (no dollar sign)
+        /(?:salary|compensation|pay|base|range|total|OTE)[:\s]*\$?\s*([\d,]+)\s*[kK]?\s*[-–—~to]+\s*\$?\s*([\d,]+)\s*[kK]?/i,
+        // $150,000 - $200,000 (basic range with dollar sign)
+        /\$\s*([\d,]+)\s*[-–—~to]+\s*\$?\s*([\d,]+)/,
+        // USD 150,000 - 200,000
+        /USD\s*([\d,]+)\s*[-–—~to]+\s*(?:USD\s*)?([\d,]+)/i,
+      ];
+      for (const pattern of salaryPatterns) {
+        const salaryMatch = text.match(pattern);
+        if (salaryMatch) {
+          let min = parseInt(salaryMatch[1].replace(/,/g, ""), 10);
+          let max = parseInt(salaryMatch[2].replace(/,/g, ""), 10);
+          // Normalize to $K
+          if (min > 1000) min = Math.round(min / 1000);
+          if (max > 1000) max = Math.round(max / 1000);
+          // Sanity check: reasonable salary range (10K - 2000K)
+          if (min >= 10 && max >= 10 && max <= 2000 && min <= max) {
+            result.compMin = min;
+            result.compMax = max;
+            break;
+          }
         }
       }
     }
