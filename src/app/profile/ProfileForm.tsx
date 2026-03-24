@@ -16,6 +16,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
   const [saveStatus, setSaveStatus] = useState("");
   const [resumeFileName, setResumeFileName] = useState("");
   const [resumeText, setResumeText] = useState(profile?.resumeText || "");
+  const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -28,7 +29,14 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
 
     // If there's a file, use multipart; otherwise JSON
     const file = formData.get("resume") as File;
+    setUploadError("");
     if (file && file.size > 0) {
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith(".pdf")) {
+        setUploadError("PDF is not supported. Please save your resume as .docx or .txt and re-upload.");
+        setIsSaving(false);
+        return;
+      }
       // Multipart upload
       const uploadData = new FormData();
       uploadData.append("resume", file);
@@ -38,6 +46,8 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
       try {
         const res = await fetch("/api/profile", { method: "POST", body: uploadData });
         if (res.ok) {
+          const data = await res.json();
+          setResumeText(data.resumeText || "");
           setSaveStatus("Profile saved");
           router.refresh();
         } else {
@@ -76,6 +86,12 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setUploadError("");
+      if (file.name.toLowerCase().endsWith(".pdf")) {
+        setUploadError("PDF is not supported. Please save your resume as .docx or .txt and re-upload.");
+        e.target.value = "";
+        return;
+      }
       setResumeFileName(file.name);
     }
   };
@@ -112,7 +128,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
                   ref={fileInputRef}
                   type="file"
                   name="resume"
-                  accept=".pdf,.txt,.doc,.docx"
+                  accept=".docx,.txt"
                   className="hidden"
                   onChange={handleFileChange}
                 />
@@ -123,9 +139,12 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
                   </div>
                 ) : (
                   <div>
-                    <p className="text-sm text-warm-600">Click to upload your resume (PDF or TXT)</p>
+                    <p className="text-sm text-warm-600">Click to upload your resume (.docx or .txt)</p>
                     <p className="text-xs text-warm-400 mt-1">We'll extract the text content for AI prep generation</p>
                   </div>
+                )}
+                {uploadError && (
+                  <p className="text-xs text-red-600 mt-2">{uploadError}</p>
                 )}
               </div>
 

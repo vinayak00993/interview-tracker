@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { findUserProfile, upsertUserProfile } from "@/lib/db";
+import mammoth from "mammoth";
 
 export async function GET() {
   try {
@@ -30,7 +31,6 @@ export async function POST(req: NextRequest) {
     let linkedInUrl: string | undefined;
 
     if (contentType.includes("multipart/form-data")) {
-      // Handle file upload
       const formData = await req.formData();
       const file = formData.get("resume") as File | null;
       linkedInAbout = (formData.get("linkedInAbout") as string) || undefined;
@@ -39,26 +39,24 @@ export async function POST(req: NextRequest) {
       if (file && file.size > 0) {
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
+        const fileName = file.name.toLowerCase();
 
-        if (file.type === "application/pdf") {
-          try {
-            const pdfParse = require("pdf-parse");
-            const parsed = await pdfParse(buffer);
-            resumeText = parsed.text;
-          } catch (pdfErr) {
-            console.error("PDF parse failed, trying raw text extraction:", pdfErr);
-            // Fallback: extract readable text from PDF buffer
-            const raw = buffer.toString("utf-8");
-            const textChunks = raw.match(/\(([^)]+)\)/g);
-            if (textChunks) {
-              resumeText = textChunks.map((c) => c.slice(1, -1)).join(" ");
-            } else {
-              resumeText = raw.replace(/[^\x20-\x7E\n\r\t]/g, " ").replace(/\s+/g, " ").trim();
-            }
-          }
-        } else {
-          // Plain text file
+        if (fileName.endsWith(".docx")) {
+          // Word document — mammoth is pure JS, works in production
+          const result = await mammoth.extractRawText({ buffer });
+          resumeText = result.value;
+        } else if (fileName.endsWith(".txt") || file.type === "text/plain") {
           resumeText = buffer.toString("utf-8");
+        } else if (fileName.endsWith(".pdf")) {
+          return NextResponse.json(
+            { error: "PDF upload is not supported. Please upload a .docx or .txt file, or paste your resume text directly." },
+            { status: 400 }
+          );
+        } else {
+          return NextResponse.json(
+            { error: "Unsupported file type. Please upload a .docx or .txt file." },
+            { status: 400 }
+          );
         }
       }
     } else {
