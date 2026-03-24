@@ -12,22 +12,39 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) {
+            console.error("[auth] Missing credentials");
+            return null;
+          }
 
-        const user = await findUserByEmail(credentials.email);
-        if (!user) return null;
+          console.log("[auth] Looking up user:", credentials.email);
+          const user = await findUserByEmail(credentials.email);
+          if (!user) {
+            console.error("[auth] User not found:", credentials.email);
+            return null;
+          }
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-        if (!isValid) return null;
+          console.log("[auth] User found, checking password");
+          const isValid = await bcrypt.compare(
+            credentials.password,
+            user.passwordHash
+          );
+          if (!isValid) {
+            console.error("[auth] Invalid password");
+            return null;
+          }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-        };
+          console.log("[auth] Login successful for:", user.email);
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+          };
+        } catch (error) {
+          console.error("[auth] Authorize error:", error);
+          return null;
+        }
       },
     }),
   ],
