@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   saved: { bg: "bg-warm-200", text: "text-warm-700", border: "border-warm-300" },
@@ -963,8 +964,23 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               )}
 
               {aiPrep && (
-                <div className="mt-3 prose prose-sm max-w-none text-warm-800 text-sm whitespace-pre-wrap bg-warm-50 rounded-lg p-4 max-h-[600px] overflow-y-auto border border-warm-200">
-                  {aiPrep}
+                <div className="mt-3 bg-warm-50 rounded-lg p-5 max-h-[600px] overflow-y-auto border border-warm-200 prep-content">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({ children }) => <h1 className="text-lg font-semibold text-warm-900 mb-3 pb-2 border-b border-warm-200">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-sm font-semibold text-warm-800 mt-5 mb-2 uppercase tracking-wide">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-sm font-medium text-warm-800 mt-4 mb-1.5">{children}</h3>,
+                      p: ({ children }) => <p className="text-sm text-warm-700 leading-relaxed mb-3">{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-warm-900">{children}</strong>,
+                      ul: ({ children }) => <ul className="space-y-1.5 mb-3 ml-1">{children}</ul>,
+                      ol: ({ children }) => <ol className="space-y-1.5 mb-3 ml-1 list-decimal list-inside">{children}</ol>,
+                      li: ({ children }) => <li className="text-sm text-warm-700 leading-relaxed flex gap-2"><span className="text-terra mt-1 shrink-0">•</span><span>{children}</span></li>,
+                      hr: () => <hr className="my-4 border-warm-200" />,
+                      blockquote: ({ children }) => <blockquote className="border-l-2 border-terra/30 pl-3 my-3 text-sm text-warm-600 italic">{children}</blockquote>,
+                    }}
+                  >
+                    {aiPrep}
+                  </ReactMarkdown>
                 </div>
               )}
             </div>
