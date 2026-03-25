@@ -454,6 +454,17 @@ export async function updateOpportunityStatus(id: string, userId: string, status
 
   values.push(id);
   await db.execute(`UPDATE Opportunity SET ${updates.join(", ")} WHERE id = ?`, values);
+
+  // Auto-create activity record for status change audit trail
+  if (existing.status !== status) {
+    const activityId = crypto.randomUUID();
+    await db.execute(
+      `INSERT INTO Activity (id, userId, opportunityId, type, description, date)
+       VALUES (?, ?, ?, 'status_change', ?, datetime('now'))`,
+      [activityId, userId, id, `Status changed from ${existing.status} to ${status}`]
+    );
+  }
+
   const result = await db.execute("SELECT * FROM Opportunity WHERE id = ?", [id]);
   return rowToObj(result.rows[0]);
 }
@@ -617,4 +628,35 @@ export async function upsertUserProfile(userId: string, data: Partial<UserProfil
     const result = await db.execute("SELECT * FROM UserProfile WHERE id = ?", [id]);
     return result.rows[0] as unknown as UserProfile;
   }
+}
+
+// ── Follow-up reminders ──
+
+export async function findOverdueFollowups(userId: string) {
+  const result = await db.execute(
+    `SELECT o.id, o.company, o.role, o.status, o.updatedAt,
+       (SELECT MAX(a.date) FROM Activity a WHERE a.opportunityId = o.id) as lastActivity,
+       julianday('now') - julianday(COALESCE(
+         (SELECT MAX(a.date) FROM Activity a WHERE a.opportunityId = o.id),
+         o.updatedAt
+       )) as daysSinceActivity
+     FROM Opportunity o
+     WHERE o.userId = ?
+       AND o.status IN ('applied', 'interviewing')
+       AND julianday('now') - julianday(COALESCE(
+         (SELECT MAX(a.date) FROM Activity a WHERE a.opportunityId = o.id),
+         o.updatedAt
+       )) >= 5
+     ORDER BY daysSinceActivity DESC
+     LIMIT 10`,
+    [userId]
+  );
+  return result.rows.map((row: any) => ({
+    id: row.id,
+    company: row.company,
+    role: row.role,
+    status: row.status,
+    daysSinceActivity: Math.round(row.daysSinceActivity),
+    lastActivity: row.lastActivity || row.updatedAt,
+  }));
 }

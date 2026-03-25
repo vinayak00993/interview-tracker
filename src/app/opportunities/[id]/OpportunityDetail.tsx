@@ -125,6 +125,11 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   const [aiPrepError, setAiPrepError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditSaving, setIsEditSaving] = useState(false);
+  const [followUpEmail, setFollowUpEmail] = useState<string | null>(null);
+  const [followUpSubject, setFollowUpSubject] = useState<string | null>(null);
+  const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
+  const [followUpInterviewId, setFollowUpInterviewId] = useState<string | null>(null);
+  const [followUpError, setFollowUpError] = useState<string | null>(null);
 
   const statusColor = STATUS_COLORS[opp.status] || STATUS_COLORS.saved;
 
@@ -231,6 +236,32 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
     }
   };
 
+  const generateFollowUp = async (interviewId: string) => {
+    setIsGeneratingFollowUp(true);
+    setFollowUpInterviewId(interviewId);
+    setFollowUpError(null);
+    setFollowUpEmail(null);
+    setFollowUpSubject(null);
+    try {
+      const res = await fetch("/api/ai-followup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interviewId }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to generate follow-up");
+      }
+      const { subject, email } = await res.json();
+      setFollowUpSubject(subject);
+      setFollowUpEmail(email);
+    } catch (err: any) {
+      setFollowUpError(err.message);
+    } finally {
+      setIsGeneratingFollowUp(false);
+    }
+  };
+
   const handleEditSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsEditSaving(true);
@@ -286,12 +317,12 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <span className="text-xs text-warm-600">{opp.company}</span>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-8 animate-fade-in-up">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in-up">
         {/* Header section */}
         {isEditing ? (
           <div className="mb-8 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
             <h2 className="text-sm font-medium text-warm-700 mb-4">Edit Opportunity</h2>
-            <form onSubmit={handleEditSave} className="grid grid-cols-3 gap-4">
+            <form onSubmit={handleEditSave} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormInput name="company" label="Company" required defaultValue={opp.company} />
               <FormInput name="role" label="Role" required defaultValue={opp.role} />
               <FormInput name="jdLink" label="JD Link" type="url" defaultValue={opp.jdLink || ""} />
@@ -313,7 +344,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               <FormInput name="tier" label="Tier (1-3)" type="number" defaultValue={opp.tier != null ? String(opp.tier) : ""} placeholder="1-3" />
               <FormInput name="source" label="Source" defaultValue={opp.source || ""} />
               <div />
-              <div className="col-span-3">
+              <div className="col-span-1 sm:col-span-3">
                 <label className="block text-xs font-medium text-warm-600 mb-1">Notes</label>
                 <textarea
                   name="notes"
@@ -322,7 +353,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-1 sm:col-span-3">
                 <label className="block text-xs font-medium text-warm-600 mb-1">Key Gaps</label>
                 <textarea
                   name="keyGaps"
@@ -331,7 +362,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                 />
               </div>
-              <div className="col-span-3">
+              <div className="col-span-1 sm:col-span-3">
                 <label className="block text-xs font-medium text-warm-600 mb-1">Pros &amp; Cons</label>
                 <textarea
                   name="prosConsNotes"
@@ -340,7 +371,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                 />
               </div>
-              <div className="col-span-3 flex gap-2 justify-end">
+              <div className="col-span-1 sm:col-span-3 flex gap-2 justify-end">
                 <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
                 <button type="submit" disabled={isEditSaving} className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors">
                   {isEditSaving ? "Saving..." : "Save Changes"}
@@ -349,10 +380,10 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </form>
           </div>
         ) : (
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl font-semibold text-warm-900">{opp.company}</h1>
+            <div className="flex items-center gap-3 mb-1 flex-wrap">
+              <h1 className="text-xl sm:text-2xl font-semibold text-warm-900">{opp.company}</h1>
               <span
                 className={`text-xs px-2 py-0.5 rounded-full ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}
               >
@@ -455,7 +486,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {activeTab === "overview" && (
           <div className="animate-fade-in-up space-y-6">
             {/* Role snapshot cards */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
                 <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-1">Role</p>
                 <p className="text-sm font-semibold text-warm-900">{opp.role}</p>
@@ -500,7 +531,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </div>
 
             {/* Two-column layout: JD link + key details, and quick stats */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {/* Left: Notes & JD */}
               <div className="space-y-4">
                 {opp.jdLink && (
@@ -618,7 +649,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
             {showAddInterview && (
               <div className="mb-6 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
-                <form onSubmit={handleAddInterview} className="grid grid-cols-3 gap-4">
+                <form onSubmit={handleAddInterview} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <FormInput name="round" label="Round Name" required placeholder='e.g. "Recruiter Screen"' />
                   <FormInput name="roundNumber" label="Round #" type="number" defaultValue="1" />
                   <FormInput name="dateTime" label="Date & Time" type="datetime-local" />
@@ -638,7 +669,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   <FormInput name="interviewerName" label="Interviewer Name" />
                   <FormInput name="interviewerTitle" label="Interviewer Title" />
                   <FormInput name="interviewerLinkedIn" label="Interviewer LinkedIn" />
-                  <div className="col-span-3">
+                  <div className="col-span-1 sm:col-span-3">
                     <label className="block text-xs font-medium text-warm-600 mb-1">Prep Notes</label>
                     <textarea
                       name="prepNotes"
@@ -647,7 +678,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                       placeholder="Key talking points, things to prepare..."
                     />
                   </div>
-                  <div className="col-span-3">
+                  <div className="col-span-1 sm:col-span-3">
                     <label className="block text-xs font-medium text-warm-600 mb-1">Questions to Ask</label>
                     <textarea
                       name="questionsToAsk"
@@ -655,7 +686,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                       className="w-full px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors resize-none"
                     />
                   </div>
-                  <div className="col-span-3 flex gap-2 justify-end">
+                  <div className="col-span-1 sm:col-span-3 flex gap-2 justify-end">
                     <button type="button" onClick={() => setShowAddInterview(false)} className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
                     <button type="submit" disabled={isSubmitting} className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors">
                       {isSubmitting ? "Adding..." : "Add Interview"}
@@ -836,6 +867,57 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                                   </button>
                                 </div>
                               </form>
+                            </div>
+                          )}
+
+                          {/* Draft Follow-up Email button */}
+                          {interview.debriefNotes && (
+                            <div className="mt-4 pt-3 border-t border-warm-200">
+                              {followUpInterviewId === interview.id && followUpEmail ? (
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-medium text-warm-700">Follow-up Email Draft</h4>
+                                    <button
+                                      onClick={() => { setFollowUpEmail(null); setFollowUpSubject(null); setFollowUpInterviewId(null); }}
+                                      className="text-xs text-warm-500 hover:text-warm-700 transition-colors"
+                                    >
+                                      Dismiss
+                                    </button>
+                                  </div>
+                                  <div className="bg-warm-50 border border-warm-200 rounded-lg p-3 space-y-2">
+                                    <p className="text-xs font-medium text-warm-800">Subject: {followUpSubject}</p>
+                                    <div className="border-t border-warm-200 pt-2">
+                                      <div className="text-xs text-warm-700 whitespace-pre-wrap">{followUpEmail}</div>
+                                    </div>
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(`Subject: ${followUpSubject}\n\n${followUpEmail}`);
+                                    }}
+                                    className="px-3 py-1.5 text-xs font-medium bg-terra/10 text-terra-dark border border-terra/20 hover:bg-terra/20 rounded-lg transition-colors"
+                                  >
+                                    Copy to Clipboard
+                                  </button>
+                                </div>
+                              ) : followUpInterviewId === interview.id && followUpError ? (
+                                <div className="space-y-2">
+                                  <p className="text-xs text-red-600">{followUpError}</p>
+                                  <button
+                                    onClick={() => generateFollowUp(interview.id)}
+                                    className="px-3 py-1.5 text-xs font-medium text-terra-dark border border-terra/20 hover:bg-terra/10 rounded-lg transition-colors"
+                                  >
+                                    Retry
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => generateFollowUp(interview.id)}
+                                  disabled={isGeneratingFollowUp}
+                                  className="px-3 py-1.5 text-xs font-medium bg-terra/10 text-terra-dark border border-terra/20 hover:bg-terra/20 disabled:opacity-50 rounded-lg transition-colors"
+                                >
+                                  {isGeneratingFollowUp && followUpInterviewId === interview.id ? "Generating..." : "Draft Follow-up Email"}
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>

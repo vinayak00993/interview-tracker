@@ -290,7 +290,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       </div>
 
       {/* Search & Filter bar */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-5">
         <div className="relative flex-1 max-w-sm">
           <input
             type="text"
@@ -433,7 +433,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             )}
           </div>
 
-          <form onSubmit={handleAddOpportunity} className="grid grid-cols-3 gap-4">
+          <form onSubmit={handleAddOpportunity} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input name="company" label="Company" required />
             <Input name="role" label="Role" required />
             <Input name="jdLink" label="JD Link" />
@@ -497,11 +497,11 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       )}
 
       {/* Kanban columns */}
-      <div className="flex gap-4 min-h-[calc(100vh-220px)]">
+      <div className="flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-220px)] overflow-x-auto pb-4 -mx-2 px-2">
         {grouped.map((col) => (
           <div
             key={col.status}
-            className={`flex-1 min-w-[220px] flex flex-col rounded-xl transition-all duration-300 ${
+            className={`flex-1 min-w-[160px] sm:min-w-[220px] flex flex-col rounded-xl transition-all duration-300 ${
               dragOverColumn === col.status
                 ? "bg-warm-200/80 ring-2 ring-terra/20 scale-[1.01]"
                 : "bg-warm-100/40"
