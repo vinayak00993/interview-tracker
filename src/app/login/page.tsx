@@ -98,17 +98,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm animate-fade-in-up">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold tracking-tight text-warm-900">
             Interview Tracker
           </h1>
-          <p className="text-sm text-warm-600 mt-2">
+          <p className="text-sm text-warm-600 mt-2 animate-fade-in-up-delay-1">
             {isRegister ? "Create your account" : "Sign in to manage your pipeline"}
           </p>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 bg-white/50 backdrop-blur-sm border border-warm-300/40 rounded-2xl p-6 shadow-elevated">
           {isRegister && (
             <div>
               <label className="block text-xs font-medium text-warm-700 mb-1.5">
@@ -190,6 +190,12 @@ export default function LoginPage() {
             </button>
           </p>
         </div>
+      </div>
+
+      {/* Decorative background circles */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-terra/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-warm-400/10 blur-3xl" />
       </div>
     </div>
   );

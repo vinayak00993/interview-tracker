@@ -275,7 +275,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   return (
     <div className="min-h-screen bg-warm-100">
       {/* Top bar */}
-      <header className="border-b border-warm-300 px-6 py-3 flex items-center gap-4 bg-warm-50">
+      <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <Link
           href="/dashboard"
           className="text-xs text-warm-600 hover:text-warm-900 transition-colors"
@@ -286,7 +286,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <span className="text-xs text-warm-600">{opp.company}</span>
       </header>
 
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-5xl mx-auto px-6 py-8 animate-fade-in-up">
         {/* Header section */}
         {isEditing ? (
           <div className="mb-8 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">

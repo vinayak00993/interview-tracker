@@ -283,7 +283,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         </h2>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg transition-colors"
+          className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
         >
           + Add Opportunity
         </button>
@@ -297,7 +297,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by company, role, or location..."
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-warm-300 rounded-lg text-warm-900 text-xs focus:outline-none focus:border-terra transition-colors placeholder:text-warm-400"
+            className="w-full pl-8 pr-3 py-1.5 bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-lg text-warm-900 text-xs focus:outline-none focus:border-terra focus:shadow-glow/30 transition-all duration-200 placeholder:text-warm-400"
           />
           <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -340,7 +340,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
 
       {/* Add form */}
       {showAddForm && (
-        <div className="mb-6 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
+        <div className="mb-6 bg-white/90 backdrop-blur-sm border border-warm-300/60 rounded-xl p-5 shadow-elevated animate-scale-in">
           <h3 className="text-sm font-medium text-warm-900 mb-4">New Opportunity</h3>
 
           {/* JD URL paste bar */}
@@ -501,10 +501,10 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         {grouped.map((col) => (
           <div
             key={col.status}
-            className={`flex-1 min-w-[220px] flex flex-col rounded-lg transition-colors ${
+            className={`flex-1 min-w-[220px] flex flex-col rounded-xl transition-all duration-300 ${
               dragOverColumn === col.status
-                ? "bg-warm-200"
-                : "bg-warm-100/60"
+                ? "bg-warm-200/80 ring-2 ring-terra/20 scale-[1.01]"
+                : "bg-warm-100/40"
             }`}
             onDragOver={(e) => handleDragOver(e, col.status)}
             onDragLeave={handleDragLeave}
@@ -525,14 +525,14 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             </div>
 
             {/* Cards */}
-            <div className="flex-1 px-2 pb-2 space-y-2 overflow-y-auto">
+            <div className="flex-1 px-2 pb-2 space-y-2 overflow-y-auto stagger-children">
               {col.items.map((opp) => (
                 <div
                   key={opp.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, opp.id)}
-                  className={`group bg-white border border-warm-300 rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-warm-400 hover:shadow-sm transition-all ${
-                    draggedId === opp.id ? "opacity-40" : ""
+                  className={`group bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-3 cursor-grab active:cursor-grabbing shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200 ${
+                    draggedId === opp.id ? "opacity-40 scale-95 rotate-1" : ""
                   }`}
                 >
                   <Link href={`/opportunities/${opp.id}`} className="block">

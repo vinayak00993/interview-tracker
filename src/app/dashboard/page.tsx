@@ -24,7 +24,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-warm-100">
       {/* Header */}
-      <header className="border-b border-warm-300 px-6 py-4 flex items-center justify-between bg-warm-50">
+      <header className="border-b border-warm-300/60 px-6 py-4 flex items-center justify-between bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <div>
           <h1 className="text-lg font-semibold text-warm-900 tracking-tight">
             Interview Tracker
@@ -36,13 +36,13 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard/comp"
-            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300 hover:border-warm-400 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card hover:-translate-y-px transition-all duration-200"
           >
             Comp Compare
           </Link>
           <Link
             href="/profile"
-            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300 hover:border-warm-400 rounded-lg transition-colors"
+            className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card hover:-translate-y-px transition-all duration-200"
           >
             Profile
           </Link>
@@ -52,12 +52,12 @@ export default async function DashboardPage() {
 
       <div className="flex">
         {/* Main content — Kanban */}
-        <main className="flex-1 p-6 overflow-x-auto">
+        <main className="flex-1 p-6 overflow-x-auto animate-fade-in-up">
           <KanbanBoard opportunities={opportunities} />
         </main>
 
         {/* Right sidebar */}
-        <aside className="w-80 border-l border-warm-300 p-5 space-y-6 shrink-0 bg-warm-50">
+        <aside className="w-80 border-l border-warm-300/60 p-5 space-y-6 shrink-0 bg-warm-50/80 backdrop-blur-sm animate-slide-in-right">
           {/* Upcoming Interviews */}
           <div>
             <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
                 {upcomingInterviews.map((interview: any) => (
                   <div
                     key={interview.id}
-                    className="bg-white border border-warm-300 rounded-lg p-3"
+                    className="bg-white/80 border border-warm-300/60 rounded-lg p-3 shadow-card hover:shadow-card-hover"
                   >
                     <p className="text-sm text-warm-900 font-medium">
                       {interview.opportunity.company}
