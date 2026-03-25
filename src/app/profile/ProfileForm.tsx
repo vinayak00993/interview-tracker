@@ -99,7 +99,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
   return (
     <div className="min-h-screen bg-warm-100">
       <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-        <Link href="/dashboard" className="text-xs text-warm-600 hover:text-warm-900 transition-colors">
+        <Link href="/dashboard" className="text-xs font-medium text-warm-600 hover:text-warm-900 bg-warm-100/80 hover:bg-warm-200 px-3 py-1.5 rounded-lg border border-warm-300/60 hover:border-warm-400 shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200">
           ← Dashboard
         </Link>
         <div className="h-4 w-px bg-warm-300" />

@@ -114,7 +114,7 @@ interface Props {
 
 export default function OpportunityDetail({ opportunity: opp }: Props) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"interviews" | "prep" | "notes" | "contacts" | "activity">("interviews");
+  const [activeTab, setActiveTab] = useState<"overview" | "interviews" | "prep" | "notes" | "contacts" | "activity">("overview");
   const [showAddInterview, setShowAddInterview] = useState(false);
   const [expandedInterview, setExpandedInterview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -278,7 +278,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
       <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <Link
           href="/dashboard"
-          className="text-xs text-warm-600 hover:text-warm-900 transition-colors"
+          className="text-xs font-medium text-warm-600 hover:text-warm-900 bg-warm-100/80 hover:bg-warm-200 px-3 py-1.5 rounded-lg border border-warm-300/60 hover:border-warm-400 shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200"
         >
           ← Dashboard
         </Link>
@@ -426,6 +426,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <div className="flex gap-1 border-b border-warm-300 mb-6">
           {(
             [
+              { key: "overview", label: "Overview" },
               { key: "interviews", label: "Interviews", count: opp.interviews.length },
               { key: "prep", label: "Prep" },
               { key: "notes", label: "Notes" },
@@ -451,6 +452,158 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         </div>
 
         {/* Tab content */}
+        {activeTab === "overview" && (
+          <div className="animate-fade-in-up space-y-6">
+            {/* Role snapshot cards */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-1">Role</p>
+                <p className="text-sm font-semibold text-warm-900">{opp.role}</p>
+                <p className="text-xs text-warm-600 mt-1">{opp.company}</p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-1">Compensation</p>
+                {opp.compMin != null && opp.compMax != null ? (
+                  <>
+                    <p className="text-sm font-semibold text-warm-900">${opp.compMin}K – ${opp.compMax}K</p>
+                    <p className="text-xs text-warm-600 mt-1">Base range</p>
+                  </>
+                ) : (
+                  <p className="text-xs text-warm-500 italic">Not specified</p>
+                )}
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-1">Fit & Priority</p>
+                <div className="flex items-center gap-3">
+                  {opp.fitScore != null ? (
+                    <span className="text-sm font-semibold text-terra">{opp.fitScore}%</span>
+                  ) : (
+                    <span className="text-xs text-warm-500 italic">No score</span>
+                  )}
+                  {opp.tier && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-warm-200 text-warm-700 border border-warm-300">
+                      Tier {opp.tier}
+                    </span>
+                  )}
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    opp.priority === "high" ? "bg-terra/10 text-terra border border-terra/20" :
+                    opp.priority === "low" ? "bg-warm-200 text-warm-500 border border-warm-300" :
+                    "bg-warm-200 text-warm-700 border border-warm-300"
+                  }`}>
+                    {opp.priority}
+                  </span>
+                </div>
+                <p className="text-xs text-warm-600 mt-1">
+                  {opp.location || "Location not set"}{opp.remote ? " · Remote" : ""}
+                </p>
+              </div>
+            </div>
+
+            {/* Two-column layout: JD link + key details, and quick stats */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left: Notes & JD */}
+              <div className="space-y-4">
+                {opp.jdLink && (
+                  <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                    <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-2">Job Description</p>
+                    <a
+                      href={opp.jdLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-sm text-terra hover:text-terra-light font-medium transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      View Full Job Description
+                    </a>
+                    <p className="text-[10px] text-warm-400 mt-1.5 break-all">{opp.jdLink}</p>
+                  </div>
+                )}
+
+                {opp.notes && (
+                  <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                    <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-2">Notes</p>
+                    <p className="text-sm text-warm-800 whitespace-pre-wrap leading-relaxed">{opp.notes}</p>
+                  </div>
+                )}
+
+                {opp.prosConsNotes && (
+                  <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                    <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-2">Pros & Cons</p>
+                    <p className="text-sm text-warm-800 whitespace-pre-wrap leading-relaxed">{opp.prosConsNotes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Quick stats & timeline */}
+              <div className="space-y-4">
+                <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-4 shadow-card">
+                  <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-3">Quick Stats</p>
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-warm-600">Status</span>
+                      <span className={`px-2 py-0.5 rounded-full ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}>
+                        {opp.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-warm-600">Interviews</span>
+                      <span className="text-warm-900 font-medium">{opp.interviews.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-warm-600">Contacts</span>
+                      <span className="text-warm-900 font-medium">{opp.opportunityContacts.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-warm-600">Source</span>
+                      <span className="text-warm-900">{opp.source || "—"}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-warm-600">Added</span>
+                      <span className="text-warm-900">{new Date(opp.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                    </div>
+                    {opp.appliedDate && (
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-warm-600">Applied</span>
+                        <span className="text-warm-900">{new Date(opp.appliedDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {opp.keyGaps && (
+                  <div className="bg-terra-bg border border-terra/20 rounded-xl p-4 shadow-card">
+                    <p className="text-[10px] font-medium text-terra uppercase tracking-wider mb-2">Key Gaps to Address</p>
+                    <p className="text-sm text-warm-800 whitespace-pre-wrap leading-relaxed">{opp.keyGaps}</p>
+                  </div>
+                )}
+
+                {/* Next steps prompt */}
+                {opp.interviews.length === 0 && opp.status === "saved" && (
+                  <div className="bg-warm-200/50 border border-warm-300/60 rounded-xl p-4">
+                    <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-2">Next Steps</p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setActiveTab("prep")}
+                        className="w-full text-left text-xs text-warm-700 hover:text-terra px-3 py-2 rounded-lg hover:bg-white/60 transition-all duration-200 flex items-center gap-2"
+                      >
+                        <span className="text-terra">→</span> Generate AI prep for this role
+                      </button>
+                      <button
+                        onClick={() => { setActiveTab("interviews"); setShowAddInterview(true); }}
+                        className="w-full text-left text-xs text-warm-700 hover:text-terra px-3 py-2 rounded-lg hover:bg-white/60 transition-all duration-200 flex items-center gap-2"
+                      >
+                        <span className="text-terra">→</span> Schedule your first interview
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTab === "interviews" && (
           <div>
             <div className="flex items-center justify-between mb-4">

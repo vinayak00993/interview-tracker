@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { findOpportunities, findUpcomingInterviews, findRecentActivities } from "@/lib/db";
 import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
+import LogoutButton from "./LogoutButton";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -47,6 +48,7 @@ export default async function DashboardPage() {
             Profile
           </Link>
           <span className="text-sm text-warm-700">{session.user?.name}</span>
+          <LogoutButton />
         </div>
       </header>
 
