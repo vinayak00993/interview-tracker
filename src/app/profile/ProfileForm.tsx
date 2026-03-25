@@ -98,7 +98,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
 
   return (
     <div className="min-h-screen bg-warm-100">
-      <header className="border-b border-warm-300 px-6 py-3 flex items-center gap-4 bg-warm-50">
+      <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <Link href="/dashboard" className="text-xs text-warm-600 hover:text-warm-900 transition-colors">
           ← Dashboard
         </Link>
@@ -106,7 +106,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
         <h1 className="text-sm font-semibold text-warm-900">Your Profile</h1>
       </header>
 
-      <div className="max-w-2xl mx-auto px-6 py-8">
+      <div className="max-w-2xl mx-auto px-6 py-8 animate-fade-in-up">
         <div className="mb-6">
           <h2 className="text-lg font-semibold text-warm-900">AI Prep Profile</h2>
           <p className="text-sm text-warm-600 mt-1">
@@ -116,7 +116,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Resume upload */}
-          <div className="bg-white border border-warm-300 rounded-lg p-5">
+          <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-5 shadow-card">
             <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">Resume</h3>
 
             <div className="space-y-3">
@@ -152,7 +152,16 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
                 <div>
                   <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-medium text-warm-600">Extracted Resume Text</label>
-                    <span className="text-[10px] text-warm-400">{(resumeText || "").length} chars</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] text-warm-400">{(resumeText || "").length} chars</span>
+                      <button
+                        type="button"
+                        onClick={() => setResumeText("")}
+                        className="text-[10px] text-terra hover:text-terra-light transition-colors"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
                   <textarea
                     value={resumeText}
@@ -172,7 +181,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
                     onChange={(e) => setResumeText(e.target.value)}
                     rows={6}
                     className="w-full mt-1 px-3 py-2 bg-warm-50 border border-warm-300 rounded-lg text-warm-900 text-xs font-mono focus:outline-none focus:border-terra transition-colors resize-y"
-                    placeholder="Paste your resume content here if you don't have a PDF..."
+                    placeholder="Paste your resume content here..."
                   />
                 </div>
               )}
@@ -180,7 +189,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
           </div>
 
           {/* LinkedIn */}
-          <div className="bg-white border border-warm-300 rounded-lg p-5">
+          <div className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-5 shadow-card">
             <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">LinkedIn</h3>
 
             <div className="space-y-3">
@@ -216,7 +225,7 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
             <button
               type="submit"
               disabled={isSaving}
-              className="px-5 py-2 text-sm font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors"
+              className="px-5 py-2 text-sm font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
             >
               {isSaving ? "Saving..." : "Save Profile"}
             </button>
