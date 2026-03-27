@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -40,8 +40,14 @@ const PRIORITY_ICONS: Record<string, string> = {
 
 export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const router = useRouter();
+  const [localOpps, setLocalOpps] = useState(opportunities);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
+
+  // Sync local state when server data changes (e.g. after adding a new opp)
+  useEffect(() => {
+    setLocalOpps(opportunities);
+  }, [opportunities]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [jdUrl, setJdUrl] = useState("");
@@ -58,7 +64,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const [filterTier, setFilterTier] = useState("");
 
   // Apply search and filters
-  const filtered = opportunities.filter((o) => {
+  const filtered = localOpps.filter((o) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       const matches =
@@ -99,33 +105,47 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   }, []);
 
   const handleDrop = useCallback(
-    async (e: React.DragEvent, newStatus: string) => {
+    (e: React.DragEvent, newStatus: string) => {
       e.preventDefault();
       setDragOverColumn(null);
       const id = e.dataTransfer.getData("text/plain");
       if (!id) return;
 
-      const opp = opportunities.find((o) => o.id === id);
+      const opp = localOpps.find((o) => o.id === id);
       if (!opp || opp.status === newStatus) {
         setDraggedId(null);
         return;
       }
 
-      try {
-        const res = await fetch(`/api/opportunities/${id}/status`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: newStatus }),
-        });
-        if (res.ok) {
-          router.refresh();
-        }
-      } catch (err) {
-        console.error("Failed to update status:", err);
-      }
+      // Optimistic update — move card instantly
+      const previousStatus = opp.status;
+      setLocalOpps((prev) =>
+        prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
+      );
       setDraggedId(null);
+
+      // Fire API in background, rollback on failure
+      fetch(`/api/opportunities/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            // Rollback
+            setLocalOpps((prev) =>
+              prev.map((o) => (o.id === id ? { ...o, status: previousStatus } : o))
+            );
+          }
+        })
+        .catch(() => {
+          // Rollback
+          setLocalOpps((prev) =>
+            prev.map((o) => (o.id === id ? { ...o, status: previousStatus } : o))
+          );
+        });
     },
-    [opportunities, router]
+    [localOpps]
   );
 
   const handleFetchJd = async () => {
@@ -333,7 +353,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         )}
         {hasActiveFilters && (
           <span className="text-xs text-warm-500">
-            {filtered.length} of {opportunities.length} shown
+            {filtered.length} of {localOpps.length} shown
           </span>
         )}
       </div>
@@ -501,7 +521,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         {grouped.map((col) => (
           <div
             key={col.status}
-            className={`flex-1 min-w-[160px] sm:min-w-[220px] flex flex-col rounded-xl transition-all duration-300 ${
+            className={`flex-1 min-w-[160px] sm:min-w-[220px] flex flex-col rounded-xl transition-all duration-150 ${
               dragOverColumn === col.status
                 ? "bg-warm-200/80 ring-2 ring-terra/20 scale-[1.01]"
                 : "bg-warm-100/40"
