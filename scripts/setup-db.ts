@@ -40,6 +40,7 @@ async function createSchema() {
       location TEXT,
       remote INTEGER NOT NULL DEFAULT 0,
       fitScore INTEGER,
+      totalScore REAL,
       priority TEXT NOT NULL DEFAULT 'medium',
       tier INTEGER,
       status TEXT NOT NULL DEFAULT 'saved',
