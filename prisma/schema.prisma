@@ -37,6 +37,7 @@ model Opportunity {
 
   // Assessment
   fitScore    Int?          // 0-100
+  totalScore  Float?        // computed weighted score 0-100
   priority    String        @default("medium") // high, medium, low
   tier        Int?          // 1, 2, 3
 
