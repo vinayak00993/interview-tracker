@@ -2,15 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { findOpportunityById, findUserProfile } from "@/lib/db";
-import Anthropic from "@anthropic-ai/sdk";
+import { callAI } from "@/lib/ai";
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({ error: "AI prep not configured — ANTHROPIC_API_KEY missing" }, { status: 500 });
     }
 
@@ -80,16 +79,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const client = new Anthropic({ apiKey });
+    const PREP_SYSTEM = `You are an expert career coach helping a job candidate prepare for an opportunity. Based on their profile and the job details, generate a tailored prep sheet. Be direct and specific — no generic advice. Every point should reference the candidate's actual experience or the specific role.`;
 
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 2000,
+    const result = await callAI({
+      tier: "sonnet",
+      system: PREP_SYSTEM,
       messages: [{
         role: "user",
-        content: `You are an expert career coach helping a job candidate prepare for an opportunity. Based on their profile and the job details, generate a tailored prep sheet.
-
-# Candidate Profile
+        content: `# Candidate Profile
 ${profileContext}
 
 # Target Opportunity
@@ -111,20 +108,16 @@ Honestly assess 2-3 gaps between the candidate's background and the role require
 5-7 thoughtful questions the candidate should ask that demonstrate strategic thinking and genuine interest in the role.
 
 ## Key Research Points
-3-4 things the candidate should research about the company before interviewing.
-
-Be direct and specific — no generic advice. Every point should reference the candidate's actual experience or the specific role.`,
+3-4 things the candidate should research about the company before interviewing.`,
       }],
+      maxTokens: 2000,
     });
 
-    const content = message.content[0];
-    const prepText = content.type === "text" ? content.text : "";
-
     return NextResponse.json({
-      prep: prepText,
+      prep: result.text,
       tokensUsed: {
-        input: message.usage.input_tokens,
-        output: message.usage.output_tokens,
+        input: result.usage.input,
+        output: result.usage.output,
       },
     });
   } catch (error: any) {

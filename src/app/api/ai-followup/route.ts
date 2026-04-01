@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { findUserProfile } from "@/lib/db";
-import Anthropic from "@anthropic-ai/sdk";
+import { callHaiku } from "@/lib/ai";
 
 // Inline query to load interview + opportunity since no dedicated function exists
 async function loadInterviewWithContext(interviewId: string, userId: string) {
@@ -26,8 +26,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession(authOptions);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) {
+    if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json({ error: "AI features not configured — ANTHROPIC_API_KEY missing" }, { status: 500 });
     }
 
@@ -44,14 +43,8 @@ export async function POST(req: NextRequest) {
 
     const candidateName = (session.user as any).name || "the candidate";
 
-    const client = new Anthropic({ apiKey });
-
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      messages: [{
-        role: "user",
-        content: `Generate a professional follow-up/thank-you email after a job interview.
+    const result = await callHaiku(
+      `Generate a professional follow-up/thank-you email after a job interview.
 
 ## Context
 - Candidate name: ${candidateName}
@@ -77,11 +70,11 @@ Return your response in this exact format:
 SUBJECT: [email subject line]
 ---
 [email body - ready to send, starting with the greeting]`,
-      }],
-    });
+      undefined,
+      1000,
+    );
 
-    const content = message.content[0];
-    const text = content.type === "text" ? content.text : "";
+    const text = result.text;
 
     // Parse subject and body
     const parts = text.split("---");
