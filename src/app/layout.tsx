@@ -16,7 +16,7 @@ export default function RootLayout({
       <body className="antialiased min-h-screen animate-fade-in flex flex-col">
         {children}
         <footer className="mt-auto py-4 border-t border-warm-300/40 text-center">
-          
+          <a
             href="/faq"
             className="text-xs text-warm-400 hover:text-warm-600 transition-colors"
           >
