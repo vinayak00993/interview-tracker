@@ -173,3 +173,32 @@ npm run build              # Production build
 - Rate limiting on auth endpoints
 - All API routes require authenticated session
 - Environment variables for all secrets (never committed)
+
+## Multi-Agent Workflow
+
+This repo is worked on by multiple agents and devices:
+
+### Agents
+- **You (Claude Code)** — runs interactively on Vinayak's laptop or via SSH to the Mac Mini. Uses Opus via Max subscription. Vinayak supervises directly.
+- **Constable (OpenClaw)** — an always-on autonomous agent running on a dedicated Mac Mini. Uses Sonnet by default, Opus on demand. Receives tasks via Telegram. Pushes code via the GitHub API.
+
+### Branch Rules
+- **Claude Code (supervised)**: Can push directly to master — Vinayak is reviewing in real time
+- **Constable (autonomous)**: NEVER pushes to master. Always uses `agent/<feature-name>` branches. Vinayak reviews and merges via Pull Request.
+- Cursor Bugbot runs automated reviews on every PR
+
+### Before Starting Work
+- Always `git pull origin master` first
+- Check for open PRs and recent `agent/*` branches to avoid conflicts with Constable
+- If Constable has a branch touching the same files, coordinate with Vinayak
+
+### Deployment
+- Railway auto-deploys from `master`
+- Pushing or merging to master = going live
+- Prisma migrations need to run on deploy (`prisma migrate deploy`)
+- Raw SQL setup script (`scripts/setup-db.ts`) must stay in sync with Prisma schema
+
+### AI Features
+- `src/lib/ai.ts` — tiered AI router (local/sonnet/opus) with Ollama fallback
+- Tier selection is always server-side, never from client input
+- Existing AI routes: /api/ai-prep, /api/ai-followup, /api/parse-jd, /api/parse-screenshots
