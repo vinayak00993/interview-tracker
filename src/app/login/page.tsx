@@ -3,6 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
@@ -189,6 +190,15 @@ export default function LoginPage() {
               {isRegister ? "Sign in" : "Create account"}
             </button>
           </p>
+
+          <div className="pt-2 border-t border-warm-300/40">
+            <Link
+              href="/demo"
+              className="block w-full text-center py-2 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card transition-all duration-200"
+            >
+              See a live demo
+            </Link>
+          </div>
         </div>
       </div>
 

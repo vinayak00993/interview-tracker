@@ -16,19 +16,19 @@ function cuid(): string {
 
 async function main() {
   // Create the admin user
-  const passwordHash = await bcrypt.hash("changeme123", 12);
+  const passwordHash = await bcrypt.hash("demo12345678", 12);
   const userId = cuid();
 
   db.prepare(`
     INSERT OR IGNORE INTO User (id, email, passwordHash, name, createdAt, updatedAt)
     VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
-  `).run(userId, "vinayak009@gmail.com", passwordHash, "Vinayak Rao");
+  `).run(userId, "demo@example.com", passwordHash, "Demo User");
 
   // Get user id (in case upsert found existing)
-  const user = db.prepare(`SELECT id FROM User WHERE email = ?`).get("vinayak009@gmail.com") as any;
+  const user = db.prepare(`SELECT id FROM User WHERE email = ?`).get("demo@example.com") as any;
   const uid = user.id;
 
-  console.log("✓ Created user: vinayak009@gmail.com");
+  console.log("✓ Created user: demo@example.com");
 
   // --- CONTACTS ---
   const sukhId = cuid();
@@ -40,7 +40,7 @@ async function main() {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
   `);
 
-  insertContact.run(sukhId, uid, "Sukh Jhangri", "Sr. Recruitment Consultant", "Metrics Recruitment", "sukh@metricsrecruitment.com", "1.206.539.1342", "https://www.linkedin.com/in/sukh-jhangri", "recruiter", "hot", "External recruiter managing the Ripple Director of Ecosystem search. Very responsive, provides detailed prep notes.");
+  insertContact.run(sukhId, uid, "Sukh Jhangri", "Sr. Recruitment Consultant", "Metrics Recruitment", "recruiter@example.com", "1.555.555.1234", "https://www.linkedin.com/in/sukh-jhangri", "recruiter", "hot", "External recruiter managing the Ripple Director of Ecosystem search. Very responsive, provides detailed prep notes.");
   insertContact.run(elonaId, uid, "Elona Kokoneshi", "Talent Team", "Ripple", null, null, "https://www.linkedin.com/in/elona-kokoneshi-80a58a22/", "recruiter", "warm", "Internal Ripple recruiter managing the Director of Ecosystem search. First interview contact.");
   insertContact.run(christinaId, uid, "Christina Chan", "Senior Director of Ecosystem Growth", "Ripple", null, null, "https://www.linkedin.com/in/christinabchan/", "hiring_manager", "cold", "Would be the direct manager for the Director of Ecosystem role. Has spoken publicly about her vision for XRPL ecosystem growth.");
 
@@ -150,7 +150,7 @@ async function main() {
 
   console.log("✓ Created activity feed");
   console.log("\n🎉 Seed complete! Your pipeline is ready.");
-  console.log("   Login: vinayak009@gmail.com / changeme123");
+  console.log("   Login: demo@example.com / demo12345678");
   console.log("   ⚠️  Change your password after first login!\n");
 }
 

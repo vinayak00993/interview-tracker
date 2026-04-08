@@ -95,7 +95,7 @@ export default function FAQPage() {
         <p className="mt-12 text-xs text-warm-400 text-center">
           Still have questions?{" "}
           <a
-            href="mailto:vinayak009@gmail.com"
+            href="mailto:support@example.com"
             className="text-terra hover:text-terra-light transition-colors"
           >
             Get in touch

@@ -4,9 +4,9 @@
 
 An **AI-powered interview intelligence platform** for tracking opportunities, preparing for interviews, and capturing debriefs across an active job search. Positioning: "Prep smarter, debrief faster, land the role." The tracker is the container — the AI coaching layer is the product.
 
-### Owner Context
+### What It Does
 
-Built by **Vinayak Rao**, a BD & Investments Lead at Aptos Labs, targeting a career transition into strategic partnerships/BD roles at AI-first companies (Anthropic, OpenAI, Ripple, etc.). The tool handles:
+A personal interview intelligence platform that handles:
 
 - Multiple simultaneous opportunities at different pipeline stages
 - AI-generated interview prep tailored to resume + JD
@@ -179,18 +179,18 @@ npm run build              # Production build
 This repo is worked on by multiple agents and devices:
 
 ### Agents
-- **You (Claude Code)** — runs interactively on Vinayak's laptop or via SSH to the Mac Mini. Uses Opus via Max subscription. Vinayak supervises directly.
+- **You (Claude Code)** — runs interactively on the owner's laptop or via SSH to the Mac Mini. Uses Opus via Max subscription. The owner supervises directly.
 - **Constable (OpenClaw)** — an always-on autonomous agent running on a dedicated Mac Mini. Uses Sonnet by default, Opus on demand. Receives tasks via Telegram. Pushes code via the GitHub API.
 
 ### Branch Rules
-- **Claude Code (supervised)**: Can push directly to master — Vinayak is reviewing in real time
-- **Constable (autonomous)**: NEVER pushes to master. Always uses `agent/<feature-name>` branches. Vinayak reviews and merges via Pull Request.
+- **Claude Code (supervised)**: Can push directly to master — the owner is reviewing in real time
+- **Constable (autonomous)**: NEVER pushes to master. Always uses `agent/<feature-name>` branches. The owner reviews and merges via Pull Request.
 - Cursor Bugbot runs automated reviews on every PR
 
 ### Before Starting Work
 - Always `git pull origin master` first
 - Check for open PRs and recent `agent/*` branches to avoid conflicts with Constable
-- If Constable has a branch touching the same files, coordinate with Vinayak
+- If Constable has a branch touching the same files, coordinate with the owner
 
 ### Deployment
 - Railway auto-deploys from `master`

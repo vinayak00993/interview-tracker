@@ -150,18 +150,18 @@ async function createSchema() {
 async function seed() {
   console.log("Seeding data...");
 
-  const passwordHash = await bcrypt.hash("changeme123", 12);
+  const passwordHash = await bcrypt.hash("demo12345678", 12);
   const userId = cuid();
 
   await db.execute({
     sql: `INSERT OR IGNORE INTO User (id, email, passwordHash, name, createdAt, updatedAt)
           VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))`,
-    args: [userId, "vinayak009@gmail.com", passwordHash, "Vinayak Rao"],
+    args: [userId, "demo@example.com", passwordHash, "Demo User"],
   });
 
   const userResult = await db.execute({
     sql: "SELECT id FROM User WHERE email = ?",
-    args: ["vinayak009@gmail.com"],
+    args: ["demo@example.com"],
   });
   const uid = userResult.rows[0]!.id as string;
   console.log("✓ Created user");
@@ -169,7 +169,7 @@ async function seed() {
   // Contacts
   const sukhId = cuid(), elonaId = cuid(), christinaId = cuid();
   const contacts = [
-    [sukhId, uid, "Sukh Jhangri", "Sr. Recruitment Consultant", "Metrics Recruitment", "sukh@metricsrecruitment.com", "1.206.539.1342", "https://www.linkedin.com/in/sukh-jhangri", "recruiter", "hot", "External recruiter managing the Ripple Director of Ecosystem search."],
+    [sukhId, uid, "Sukh Jhangri", "Sr. Recruitment Consultant", "Metrics Recruitment", "recruiter@example.com", "1.555.555.1234", "https://www.linkedin.com/in/sukh-jhangri", "recruiter", "hot", "External recruiter managing the Ripple Director of Ecosystem search."],
     [elonaId, uid, "Elona Kokoneshi", "Talent Team", "Ripple", null, null, "https://www.linkedin.com/in/elona-kokoneshi-80a58a22/", "recruiter", "warm", "Internal Ripple recruiter."],
     [christinaId, uid, "Christina Chan", "Senior Director of Ecosystem Growth", "Ripple", null, null, "https://www.linkedin.com/in/christinabchan/", "hiring_manager", "cold", "Direct manager for Director of Ecosystem role."],
   ];
@@ -252,7 +252,7 @@ async function seed() {
   console.log("✓ Created activities");
 
   console.log("\n🎉 Setup complete!");
-  console.log("   Login: vinayak009@gmail.com / changeme123");
+  console.log("   Login: demo@example.com / demo12345678");
   console.log("   ⚠️  Change your password after first login!\n");
 }
 
