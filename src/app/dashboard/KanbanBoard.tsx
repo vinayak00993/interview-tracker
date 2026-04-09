@@ -16,6 +16,7 @@ interface Opportunity {
   priority: string;
   tier: number | null;
   status: string;
+  source: string | null;
   _count: { interviews: number };
 }
 
@@ -62,6 +63,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterPriority, setFilterPriority] = useState("");
   const [filterTier, setFilterTier] = useState("");
+  const [showComp, setShowComp] = useState(true);
 
   // Apply search and filters
   const filtered = localOpps.filter((o) => {
@@ -343,6 +345,17 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
           <option value="2">Tier 2</option>
           <option value="3">Tier 3</option>
         </select>
+        <button
+          onClick={() => setShowComp(!showComp)}
+          className={`px-2.5 py-1.5 text-xs font-medium border rounded-lg transition-all duration-200 ${
+            showComp
+              ? "text-warm-700 border-warm-400 bg-warm-200/60"
+              : "text-warm-500 border-warm-300/60 hover:border-warm-400"
+          }`}
+          title={showComp ? "Hide compensation" : "Show compensation"}
+        >
+          {showComp ? "$ visible" : "$ hidden"}
+        </button>
         {hasActiveFilters && (
           <button
             onClick={() => { setSearchQuery(""); setFilterPriority(""); setFilterTier(""); }}
@@ -592,6 +605,11 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                           T{opp.tier}
                         </span>
                       )}
+                      {opp.source === "referral" && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 border border-green-200" title="Referral">
+                          ref
+                        </span>
+                      )}
                       {opp._count.interviews > 0 && (
                         <span className="text-[10px] text-warm-500">
                           {opp._count.interviews} int.
@@ -599,7 +617,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                       )}
                     </div>
 
-                    {opp.compMin != null && opp.compMax != null && (
+                    {showComp && opp.compMin != null && opp.compMax != null && (
                       <p className="text-[10px] text-warm-500 mt-1.5">
                         ${opp.compMin}K – ${opp.compMax}K
                       </p>
