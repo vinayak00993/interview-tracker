@@ -487,7 +487,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             <Select
               name="source"
               label="Source"
-              options={["direct", "recruiter", "referral", "job_board"]}
+              options={["direct", "recruiter", "referral", "job board"]}
             />
             <Input name="fitScore" label="Fit Score (0-100)" type="number" />
             <div className="flex items-end gap-2 pb-1">

@@ -343,7 +343,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               <FormInput name="fitScore" label="Fit Score (0-100)" type="number" defaultValue={opp.fitScore != null ? String(opp.fitScore) : ""} placeholder="0-100" />
               <FormSelect name="priority" label="Priority" options={["low", "medium", "high"]} defaultValue={opp.priority} />
               <FormInput name="tier" label="Tier (1-3)" type="number" defaultValue={opp.tier != null ? String(opp.tier) : ""} placeholder="1-3" />
-              <FormInput name="source" label="Source" defaultValue={opp.source || ""} />
+              <FormSelect name="source" label="Source" options={["direct", "recruiter", "referral", "job board"]} defaultValue={opp.source || ""} />
               <div />
               <div className="col-span-1 sm:col-span-3">
                 <label className="block text-xs font-medium text-warm-600 mb-1">Notes</label>
