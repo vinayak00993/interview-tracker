@@ -41,7 +41,7 @@ function DemoCompanyAvatar({ company }: { company: string }) {
     .replace(/\s*\(.*?\)\s*/g, "")
     .replace(/[^a-zA-Z0-9]/g, "")
     .toLowerCase();
-  const logoUrl = `https://logo.clearbit.com/${domain}.com`;
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}.com&sz=128`;
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
