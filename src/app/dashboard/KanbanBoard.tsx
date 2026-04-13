@@ -55,27 +55,30 @@ function CompanyAvatar({ company, website }: { company: string; website?: string
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  // Use the stored website domain for accurate logo, skip guessing if none
-  let logoDomain: string | null = null;
+  // Use stored website domain if available, otherwise guess from company name
+  let logoDomain: string;
   if (website) {
     try {
       logoDomain = new URL(website).hostname;
     } catch {
       logoDomain = website.replace(/^https?:\/\//, "").split("/")[0];
     }
+  } else {
+    logoDomain = company
+      .replace(/\s*\(.*?\)\s*/g, "")
+      .replace(/[^a-zA-Z0-9]/g, "")
+      .toLowerCase() + ".com";
   }
-  const logoUrl = logoDomain
-    ? `https://www.google.com/s2/favicons?domain=${logoDomain}&sz=128`
-    : null;
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${logoDomain}&sz=128`;
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
   // Timeout fallback — if image hasn't loaded in 2s, show initial
   useEffect(() => {
-    if (!logoUrl || imgLoaded || imgError) return;
+    if (imgLoaded || imgError) return;
     const timer = setTimeout(() => setImgError(true), 2000);
     return () => clearTimeout(timer);
-  }, [logoUrl, imgLoaded, imgError]);
+  }, [imgLoaded, imgError]);
 
   const fallback = (
     <div
@@ -86,8 +89,7 @@ function CompanyAvatar({ company, website }: { company: string; website?: string
     </div>
   );
 
-  // No website stored — just show colored initial
-  if (!logoUrl || imgError) return fallback;
+  if (imgError) return fallback;
 
   return (
     <>
