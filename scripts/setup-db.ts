@@ -35,6 +35,7 @@ async function createSchema() {
       company TEXT NOT NULL,
       role TEXT NOT NULL,
       jdLink TEXT,
+      website TEXT,
       compMin INTEGER,
       compMax INTEGER,
       location TEXT,

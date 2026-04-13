@@ -88,6 +88,7 @@ interface Opportunity {
   company: string;
   role: string;
   jdLink: string | null;
+  website: string | null;
   compMin: number | null;
   compMax: number | null;
   location: string | null;
@@ -327,6 +328,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               <FormInput name="company" label="Company" required defaultValue={opp.company} />
               <FormInput name="role" label="Role" required defaultValue={opp.role} />
               <FormInput name="jdLink" label="JD Link" type="url" defaultValue={opp.jdLink || ""} />
+              <FormInput name="website" label="Company Website" type="url" defaultValue={opp.website || ""} placeholder="https://company.com" />
               <FormInput name="compMin" label="Comp Min (K)" type="number" defaultValue={opp.compMin != null ? String(opp.compMin) : ""} placeholder="e.g. 150" />
               <FormInput name="compMax" label="Comp Max (K)" type="number" defaultValue={opp.compMax != null ? String(opp.compMax) : ""} placeholder="e.g. 200" />
               <FormInput name="location" label="Location" defaultValue={opp.location || ""} />

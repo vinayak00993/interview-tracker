@@ -34,22 +34,29 @@ function stringToColor(str: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
-function DemoCompanyAvatar({ company }: { company: string }) {
+function DemoCompanyAvatar({ company, website }: { company: string; website?: string | null }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const domain = company
-    .replace(/\s*\(.*?\)\s*/g, "")
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .toLowerCase();
-  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}.com&sz=128`;
+
+  let logoDomain: string | null = null;
+  if (website) {
+    try {
+      logoDomain = new URL(website).hostname;
+    } catch {
+      logoDomain = website.replace(/^https?:\/\//, "").split("/")[0];
+    }
+  }
+  const logoUrl = logoDomain
+    ? `https://www.google.com/s2/favicons?domain=${logoDomain}&sz=128`
+    : null;
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
   useEffect(() => {
-    if (imgLoaded || imgError) return;
+    if (!logoUrl || imgLoaded || imgError) return;
     const timer = setTimeout(() => setImgError(true), 2000);
     return () => clearTimeout(timer);
-  }, [imgLoaded, imgError]);
+  }, [logoUrl, imgLoaded, imgError]);
 
   const fallback = (
     <div
@@ -60,7 +67,7 @@ function DemoCompanyAvatar({ company }: { company: string }) {
     </div>
   );
 
-  if (imgError) return fallback;
+  if (!logoUrl || imgError) return fallback;
 
   return (
     <>
@@ -77,16 +84,16 @@ function DemoCompanyAvatar({ company }: { company: string }) {
 }
 
 const DEMO_OPPS = [
-  { id: "1", company: "Stripe", role: "Head of Strategic Partnerships", location: "San Francisco, CA", fitScore: 92, compMin: 280, compMax: 400, priority: "high", tier: 1, status: "interviewing", interviews: 2 },
-  { id: "2", company: "Figma", role: "Director of Business Development", location: "San Francisco, CA", fitScore: 88, compMin: 250, compMax: 350, priority: "high", tier: 1, status: "interviewing", interviews: 1 },
-  { id: "3", company: "Notion", role: "Strategic Partnerships Lead", location: "New York, NY", fitScore: 85, compMin: 220, compMax: 320, priority: "medium", tier: 1, status: "applied", interviews: 0 },
-  { id: "4", company: "Databricks", role: "Sr. Director, Alliances", location: "San Francisco, CA", fitScore: 80, compMin: 300, compMax: 420, priority: "high", tier: 1, status: "saved", interviews: 0 },
-  { id: "5", company: "Vercel", role: "Head of Partnerships", location: "Remote", fitScore: 78, compMin: 200, compMax: 300, priority: "medium", tier: 2, status: "saved", interviews: 0 },
-  { id: "6", company: "Linear", role: "Business Development Lead", location: "San Francisco, CA", fitScore: 75, compMin: 180, compMax: 260, priority: "medium", tier: 2, status: "saved", interviews: 0 },
-  { id: "7", company: "Plaid", role: "Partner Development Manager", location: "San Francisco, CA", fitScore: 72, compMin: 200, compMax: 280, priority: "low", tier: 2, status: "rejected", interviews: 2 },
-  { id: "8", company: "Ramp", role: "Director of Strategic Partnerships", location: "New York, NY", fitScore: 90, compMin: 260, compMax: 380, priority: "high", tier: 1, status: "offer", interviews: 4 },
-  { id: "9", company: "Scale AI", role: "Enterprise Partnerships Lead", location: "San Francisco, CA", fitScore: 82, compMin: 240, compMax: 340, priority: "medium", tier: 1, status: "applied", interviews: 0 },
-  { id: "10", company: "Watershed", role: "Head of BD", location: "San Francisco, CA", fitScore: null, compMin: 200, compMax: 280, priority: "low", tier: 3, status: "withdrawn", interviews: 1 },
+  { id: "1", company: "Stripe", role: "Head of Strategic Partnerships", location: "San Francisco, CA", fitScore: 92, compMin: 280, compMax: 400, priority: "high", tier: 1, status: "interviewing", interviews: 2, website: "https://stripe.com" },
+  { id: "2", company: "Figma", role: "Director of Business Development", location: "San Francisco, CA", fitScore: 88, compMin: 250, compMax: 350, priority: "high", tier: 1, status: "interviewing", interviews: 1, website: "https://figma.com" },
+  { id: "3", company: "Notion", role: "Strategic Partnerships Lead", location: "New York, NY", fitScore: 85, compMin: 220, compMax: 320, priority: "medium", tier: 1, status: "applied", interviews: 0, website: "https://notion.so" },
+  { id: "4", company: "Databricks", role: "Sr. Director, Alliances", location: "San Francisco, CA", fitScore: 80, compMin: 300, compMax: 420, priority: "high", tier: 1, status: "saved", interviews: 0, website: "https://databricks.com" },
+  { id: "5", company: "Vercel", role: "Head of Partnerships", location: "Remote", fitScore: 78, compMin: 200, compMax: 300, priority: "medium", tier: 2, status: "saved", interviews: 0, website: "https://vercel.com" },
+  { id: "6", company: "Linear", role: "Business Development Lead", location: "San Francisco, CA", fitScore: 75, compMin: 180, compMax: 260, priority: "medium", tier: 2, status: "saved", interviews: 0, website: "https://linear.app" },
+  { id: "7", company: "Plaid", role: "Partner Development Manager", location: "San Francisco, CA", fitScore: 72, compMin: 200, compMax: 280, priority: "low", tier: 2, status: "rejected", interviews: 2, website: "https://plaid.com" },
+  { id: "8", company: "Ramp", role: "Director of Strategic Partnerships", location: "New York, NY", fitScore: 90, compMin: 260, compMax: 380, priority: "high", tier: 1, status: "offer", interviews: 4, website: "https://ramp.com" },
+  { id: "9", company: "Scale AI", role: "Enterprise Partnerships Lead", location: "San Francisco, CA", fitScore: 82, compMin: 240, compMax: 340, priority: "medium", tier: 1, status: "applied", interviews: 0, website: "https://scale.com" },
+  { id: "10", company: "Watershed", role: "Head of BD", location: "San Francisco, CA", fitScore: null, compMin: 200, compMax: 280, priority: "low", tier: 3, status: "withdrawn", interviews: 1, website: "https://watershed.com" },
 ];
 
 const DEMO_UPCOMING = [
@@ -195,7 +202,7 @@ export default function DemoPage() {
                         className={`group bg-white/80 backdrop-blur-sm border border-warm-300/60 border-l-[3px] ${PRIORITY_BORDER[opp.priority] || "border-l-warm-300"} rounded-xl p-3 cursor-pointer shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200`}
                       >
                         <div className="flex items-start gap-2.5">
-                          <DemoCompanyAvatar company={opp.company} />
+                          <DemoCompanyAvatar company={opp.company} website={opp.website} />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-1">
                               <h3 className="text-sm font-medium text-warm-900 truncate">

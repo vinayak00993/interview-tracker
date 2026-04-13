@@ -25,6 +25,7 @@ export interface Opportunity {
   company: string;
   role: string;
   jdLink: string | null;
+  website: string | null;
   compMin: number | null;
   compMax: number | null;
   location: string | null;
@@ -260,8 +261,17 @@ async function ensureUserProfileTable() {
   }
 }
 
-// Run migration on startup
+async function ensureWebsiteColumn() {
+  try {
+    await db.execute("ALTER TABLE Opportunity ADD COLUMN website TEXT");
+  } catch {
+    // Column already exists
+  }
+}
+
+// Run migrations on startup
 ensureUserProfileTable();
+ensureWebsiteColumn();
 
 // ── User queries ──
 
@@ -382,11 +392,11 @@ export async function findOpportunityById(id: string, userId: string) {
 export async function createOpportunity(userId: string, data: Partial<Opportunity>): Promise<Opportunity> {
   const id = crypto.randomUUID();
   await db.execute(
-    `INSERT INTO Opportunity (id, userId, company, role, jdLink, compMin, compMax, location, remote, fitScore, priority, tier, status, appliedDate, source, notes, prosConsNotes, keyGaps, createdAt, updatedAt)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    `INSERT INTO Opportunity (id, userId, company, role, jdLink, website, compMin, compMax, location, remote, fitScore, priority, tier, status, appliedDate, source, notes, prosConsNotes, keyGaps, createdAt, updatedAt)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
     [
       id, userId, data.company!, data.role!,
-      data.jdLink ?? null, data.compMin ?? null, data.compMax ?? null,
+      data.jdLink ?? null, data.website ?? null, data.compMin ?? null, data.compMax ?? null,
       data.location ?? null, data.remote ? 1 : 0, data.fitScore ?? null,
       data.priority ?? "medium", data.tier ?? null, data.status ?? "saved",
       data.appliedDate ?? null, data.source ?? null, data.notes ?? null,
@@ -408,7 +418,7 @@ export async function updateOpportunity(id: string, userId: string, data: Partia
   const values: any[] = [];
 
   const allowedFields = [
-    "company", "role", "jdLink", "compMin", "compMax", "location", "remote",
+    "company", "role", "jdLink", "website", "compMin", "compMax", "location", "remote",
     "fitScore", "priority", "tier", "status", "appliedDate", "source",
     "notes", "prosConsNotes", "keyGaps",
   ];

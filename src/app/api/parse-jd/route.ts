@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
           structured = {
             role: job.title,
             company: job.hiringOrganization?.name,
+            website: job.hiringOrganization?.sameAs || job.hiringOrganization?.url || undefined,
             location: job.jobLocation?.address?.addressLocality
               ? `${job.jobLocation.address.addressLocality}${job.jobLocation.address.addressRegion ? ", " + job.jobLocation.address.addressRegion : ""}`
               : undefined,
@@ -72,6 +73,27 @@ export async function POST(req: NextRequest) {
       // Try og:site_name or og:title
       const ogSite = html.match(/property="og:site_name"\s+content="([^"]+)"/i);
       if (ogSite) result.company = ogSite[1];
+    }
+
+    // Company website — try multiple sources
+    if (structured?.website) {
+      result.website = structured.website;
+    } else {
+      // Try og:url — if it's a company careers page, extract the domain
+      const ogUrl = html.match(/property="og:url"\s+content="([^"]+)"/i);
+      const canonicalUrl = html.match(/<link[^>]+rel="canonical"[^>]+href="([^"]+)"/i);
+      const sourceUrl = ogUrl?.[1] || canonicalUrl?.[1] || url;
+
+      // Known job boards — the JD URL is NOT the company website
+      const jobBoards = /linkedin\.com|greenhouse\.io|lever\.co|workday\.com|indeed\.com|glassdoor\.com|jobs\.ashbyhq\.com|boards\.greenhouse\.io|job-boards\.greenhouse\.io|apply\.workable\.com|careers\.jobscore\.com|angel\.co|wellfound\.com/i;
+
+      if (!jobBoards.test(sourceUrl)) {
+        // This URL is likely the company's own careers page — extract base domain
+        try {
+          const parsed = new URL(sourceUrl);
+          result.website = `${parsed.protocol}//${parsed.hostname}`;
+        } catch {}
+      }
     }
 
     // Role/title

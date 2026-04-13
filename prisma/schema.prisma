@@ -30,6 +30,7 @@ model Opportunity {
   company     String
   role        String
   jdLink      String?
+  website     String?       // company website URL for logo matching
   compMin     Int?          // in thousands (e.g., 176 = $176K)
   compMax     Int?          // in thousands
   location    String?

@@ -17,6 +17,7 @@ interface Opportunity {
   tier: number | null;
   status: string;
   source: string | null;
+  website: string | null;
   _count: { interviews: number };
 }
 
@@ -50,23 +51,31 @@ function stringToColor(str: string): string {
   return colors[Math.abs(hash) % colors.length];
 }
 
-function CompanyAvatar({ company }: { company: string }) {
+function CompanyAvatar({ company, website }: { company: string; website?: string | null }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const domain = company
-    .replace(/\s*\(.*?\)\s*/g, "")
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .toLowerCase();
-  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}.com&sz=128`;
+
+  // Use the stored website domain for accurate logo, skip guessing if none
+  let logoDomain: string | null = null;
+  if (website) {
+    try {
+      logoDomain = new URL(website).hostname;
+    } catch {
+      logoDomain = website.replace(/^https?:\/\//, "").split("/")[0];
+    }
+  }
+  const logoUrl = logoDomain
+    ? `https://www.google.com/s2/favicons?domain=${logoDomain}&sz=128`
+    : null;
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
   // Timeout fallback — if image hasn't loaded in 2s, show initial
   useEffect(() => {
-    if (imgLoaded || imgError) return;
+    if (!logoUrl || imgLoaded || imgError) return;
     const timer = setTimeout(() => setImgError(true), 2000);
     return () => clearTimeout(timer);
-  }, [imgLoaded, imgError]);
+  }, [logoUrl, imgLoaded, imgError]);
 
   const fallback = (
     <div
@@ -77,7 +86,8 @@ function CompanyAvatar({ company }: { company: string }) {
     </div>
   );
 
-  if (imgError) return fallback;
+  // No website stored — just show colored initial
+  if (!logoUrl || imgError) return fallback;
 
   return (
     <>
@@ -232,7 +242,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const fillFormFields = (parsed: Record<string, any>) => {
     const form = document.querySelector("form") as HTMLFormElement;
     if (!form) return;
-    const fields = ["company", "role", "location", "compMin", "compMax", "jdLink"];
+    const fields = ["company", "role", "location", "compMin", "compMax", "jdLink", "website"];
     for (const field of fields) {
       const input = form.querySelector(`[name="${field}"]`) as HTMLInputElement;
       if (input && parsed[field]) {
@@ -530,6 +540,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             <Input name="company" label="Company" required />
             <Input name="role" label="Role" required />
             <Input name="jdLink" label="JD Link" />
+            <Input name="website" label="Company Website" />
             <Input name="compMin" label="Comp Min ($K)" type="number" />
             <Input name="compMax" label="Comp Max ($K)" type="number" />
             <Input name="location" label="Location" />
@@ -630,7 +641,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                 >
                   <Link href={`/opportunities/${opp.id}`} className="block">
                     <div className="flex items-start gap-2.5">
-                      <CompanyAvatar company={opp.company} />
+                      <CompanyAvatar company={opp.company} website={opp.website} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-1">
                           <h3 className="text-sm font-medium text-warm-900 truncate">
