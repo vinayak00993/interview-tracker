@@ -25,13 +25,61 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS = [
-  { status: "saved", label: "Saved", color: "#8a7d6d" },
-  { status: "applied", label: "Applied", color: "#d4a03c" },
-  { status: "interviewing", label: "Interviewing", color: "#b33a3a" },
-  { status: "offer", label: "Offer", color: "#6b9e5c" },
-  { status: "rejected", label: "Rejected", color: "#c44848" },
-  { status: "withdrawn", label: "Withdrawn", color: "#9b7bb8" },
+  { status: "saved", label: "Saved", color: "#8a7d6d", bg: "bg-warm-100/40" },
+  { status: "applied", label: "Applied", color: "#d4a03c", bg: "bg-amber-50/40" },
+  { status: "interviewing", label: "Interviewing", color: "#b33a3a", bg: "bg-terra/[0.03]" },
+  { status: "offer", label: "Offer", color: "#6b9e5c", bg: "bg-green-50/40" },
+  { status: "rejected", label: "Rejected", color: "#c44848", bg: "bg-red-50/30" },
+  { status: "withdrawn", label: "Withdrawn", color: "#9b7bb8", bg: "bg-purple-50/30" },
 ];
+
+const PRIORITY_BORDER: Record<string, string> = {
+  high: "border-l-terra",
+  medium: "border-l-amber-400",
+  low: "border-l-warm-300",
+};
+
+// Generate a consistent color from a string
+function stringToColor(str: string): string {
+  const colors = [
+    "#b33a3a", "#d4a03c", "#6b9e5c", "#5b8abf", "#9b7bb8",
+    "#c47a5a", "#7a9e8e", "#b07ab0", "#8a7d6d", "#5a8a9e",
+  ];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function CompanyAvatar({ company }: { company: string }) {
+  const [imgError, setImgError] = useState(false);
+  const domain = company
+    .replace(/\s*\(.*?\)\s*/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
+  const logoUrl = `https://logo.clearbit.com/${domain}.com`;
+  const initial = company.charAt(0).toUpperCase();
+  const color = stringToColor(company);
+
+  if (imgError) {
+    return (
+      <div
+        className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
+        style={{ backgroundColor: color }}
+      >
+        {initial}
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={logoUrl}
+      alt={company}
+      className="w-7 h-7 rounded-lg object-contain bg-white border border-warm-200/60 shrink-0"
+      onError={() => setImgError(true)}
+    />
+  );
+}
 
 const PRIORITY_ICONS: Record<string, string> = {
   high: "↑",
@@ -537,7 +585,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
             className={`flex-1 min-w-[160px] sm:min-w-[220px] flex flex-col rounded-xl transition-all duration-150 ${
               dragOverColumn === col.status
                 ? "bg-warm-200/80 ring-2 ring-terra/20 scale-[1.01]"
-                : "bg-warm-100/40"
+                : col.bg
             }`}
             onDragOver={(e) => handleDragOver(e, col.status)}
             onDragLeave={handleDragLeave}
@@ -564,34 +612,37 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                   key={opp.id}
                   draggable
                   onDragStart={(e) => handleDragStart(e, opp.id)}
-                  className={`group bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl p-3 cursor-grab active:cursor-grabbing shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200 ${
+                  className={`group bg-white/80 backdrop-blur-sm border border-warm-300/60 border-l-[3px] ${PRIORITY_BORDER[opp.priority] || "border-l-warm-300"} rounded-xl p-3 cursor-grab active:cursor-grabbing shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200 ${
                     draggedId === opp.id ? "opacity-40 scale-95 rotate-1" : ""
                   }`}
                 >
                   <Link href={`/opportunities/${opp.id}`} className="block">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h3 className="text-sm font-medium text-warm-900 truncate">
-                          {opp.company}
-                        </h3>
+                    <div className="flex items-start gap-2.5">
+                      <CompanyAvatar company={opp.company} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-1">
+                          <h3 className="text-sm font-medium text-warm-900 truncate">
+                            {opp.company}
+                          </h3>
+                          {opp.priority && (
+                            <span
+                              className={`text-xs shrink-0 ${
+                                opp.priority === "high"
+                                  ? "text-terra"
+                                  : opp.priority === "low"
+                                  ? "text-warm-400"
+                                  : "text-warm-500"
+                              }`}
+                              title={`${opp.priority} priority`}
+                            >
+                              {PRIORITY_ICONS[opp.priority] || ""}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-warm-600 truncate mt-0.5">
                           {opp.role}
                         </p>
                       </div>
-                      {opp.priority && (
-                        <span
-                          className={`text-xs shrink-0 ${
-                            opp.priority === "high"
-                              ? "text-terra"
-                              : opp.priority === "low"
-                              ? "text-warm-400"
-                              : "text-warm-500"
-                          }`}
-                          title={`${opp.priority} priority`}
-                        >
-                          {PRIORITY_ICONS[opp.priority] || ""}
-                        </span>
-                      )}
                     </div>
 
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
