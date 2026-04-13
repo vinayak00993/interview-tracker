@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 const COLUMNS = [
@@ -36,29 +36,43 @@ function stringToColor(str: string): string {
 
 function DemoCompanyAvatar({ company }: { company: string }) {
   const [imgError, setImgError] = useState(false);
-  const domain = company.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const domain = company
+    .replace(/\s*\(.*?\)\s*/g, "")
+    .replace(/[^a-zA-Z0-9]/g, "")
+    .toLowerCase();
   const logoUrl = `https://logo.clearbit.com/${domain}.com`;
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
-  if (imgError) {
-    return (
-      <div
-        className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
-        style={{ backgroundColor: color }}
-      >
-        {initial}
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (imgLoaded || imgError) return;
+    const timer = setTimeout(() => setImgError(true), 2000);
+    return () => clearTimeout(timer);
+  }, [imgLoaded, imgError]);
+
+  const fallback = (
+    <div
+      className="w-7 h-7 rounded-lg flex items-center justify-center text-[11px] font-semibold text-white shrink-0"
+      style={{ backgroundColor: color }}
+    >
+      {initial}
+    </div>
+  );
+
+  if (imgError) return fallback;
 
   return (
-    <img
-      src={logoUrl}
-      alt={company}
-      className="w-7 h-7 rounded-lg object-contain bg-white border border-warm-200/60 shrink-0"
-      onError={() => setImgError(true)}
-    />
+    <>
+      {!imgLoaded && fallback}
+      <img
+        src={logoUrl}
+        alt={company}
+        className={`w-7 h-7 rounded-lg object-contain bg-white border border-warm-200/60 shrink-0 ${imgLoaded ? "" : "hidden"}`}
+        onLoad={() => setImgLoaded(true)}
+        onError={() => setImgError(true)}
+      />
+    </>
   );
 }
 
