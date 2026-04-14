@@ -53,7 +53,6 @@ function stringToColor(str: string): string {
 
 function CompanyAvatar({ company, website }: { company: string; website?: string | null }) {
   const [imgError, setImgError] = useState(false);
-  const [imgLoaded, setImgLoaded] = useState(false);
 
   let logoDomain: string;
   if (website) {
@@ -72,34 +71,34 @@ function CompanyAvatar({ company, website }: { company: string; website?: string
   const initial = company.charAt(0).toUpperCase();
   const color = stringToColor(company);
 
-  useEffect(() => {
-    if (imgLoaded || imgError) return;
-    const timer = setTimeout(() => setImgError(true), 2000);
-    return () => clearTimeout(timer);
-  }, [imgLoaded, imgError]);
+  if (imgError) {
+    return (
+      <div
+        className="w-8 h-8 rounded flex items-center justify-center text-[12px] font-serif font-medium text-vellum shrink-0"
+        style={{ backgroundColor: color }}
+      >
+        {initial}
+      </div>
+    );
+  }
 
-  const fallback = (
+  // Render the <img> directly, with the tinted initial as an instant
+  // backdrop. Favicon paints over it when it arrives. No JS timeout.
+  return (
     <div
-      className="w-8 h-8 rounded flex items-center justify-center text-[12px] font-serif font-medium text-vellum shrink-0"
+      className="relative w-8 h-8 rounded flex items-center justify-center text-[12px] font-serif font-medium text-vellum shrink-0 overflow-hidden"
       style={{ backgroundColor: color }}
     >
-      {initial}
-    </div>
-  );
-
-  if (imgError) return fallback;
-
-  return (
-    <>
-      {!imgLoaded && fallback}
+      <span className="absolute inset-0 flex items-center justify-center">{initial}</span>
       <img
         src={logoUrl}
         alt={company}
-        className={`w-8 h-8 rounded object-contain bg-vellum-lowest shrink-0 ${imgLoaded ? "" : "hidden"}`}
-        onLoad={() => setImgLoaded(true)}
+        loading="lazy"
+        decoding="async"
+        className="w-8 h-8 rounded object-contain bg-vellum-lowest relative z-10"
         onError={() => setImgError(true)}
       />
-    </>
+    </div>
   );
 }
 
@@ -419,7 +418,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
               : "text-ink-600 hover:text-terracotta"
           }`}
         >
-          {showComp ? "$ shown" : "$ hidden"}
+          {showComp ? "Hide Salary" : "Show Salary"}
         </button>
         {hasActiveFilters && (
           <button
@@ -610,7 +609,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       )}
 
       {/* Kanban columns — tonal shift only */}
-      <div className="flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-260px)] overflow-x-auto pb-4 -mx-2 px-2 stagger-children">
+      <div className="flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-260px)] overflow-x-auto pb-4 -mx-2 px-2">
         {grouped.map((col) => {
           const isActive = col.status === "interviewing";
           const isDropTarget = dragOverColumn === col.status;
