@@ -634,7 +634,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
               </div>
 
               {/* Cards */}
-              <div className="flex-1 px-3 pb-3 space-y-3 overflow-y-auto">
+              <div className="flex-1 px-3 pb-3 space-y-2.5 overflow-y-auto">
                 {col.items.map((opp) => (
                   <div
                     key={opp.id}
@@ -679,28 +679,48 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                         </p>
                       )}
 
-                      <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
-                        {opp.fitScore != null && (
-                          <span className="text-[10px] font-semibold uppercase tracking-label text-terracotta">
-                            {opp.fitScore}% fit
-                          </span>
-                        )}
-                        {opp.tier != null && (
-                          <span className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
-                            · T{opp.tier}
-                          </span>
-                        )}
-                        {opp.source === "referral" && (
-                          <span className="text-[10px] font-semibold uppercase tracking-label text-sage">
-                            · Referral
-                          </span>
-                        )}
-                        {opp._count.interviews > 0 && (
-                          <span className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
-                            · {opp._count.interviews} int.
-                          </span>
-                        )}
-                      </div>
+                      {(() => {
+                        const chips: React.ReactNode[] = [];
+                        if (opp.fitScore != null) {
+                          chips.push(
+                            <span key="fit" className="text-[10px] font-semibold uppercase tracking-label text-terracotta">
+                              {opp.fitScore}% fit
+                            </span>
+                          );
+                        }
+                        if (opp.tier != null) {
+                          chips.push(
+                            <span key="tier" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
+                              T{opp.tier}
+                            </span>
+                          );
+                        }
+                        if (opp.source === "referral") {
+                          chips.push(
+                            <span key="ref" className="text-[10px] font-semibold uppercase tracking-label text-sage">
+                              Referral
+                            </span>
+                          );
+                        }
+                        if (opp._count.interviews > 0) {
+                          chips.push(
+                            <span key="int" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
+                              {opp._count.interviews} int.
+                            </span>
+                          );
+                        }
+                        if (chips.length === 0) return null;
+                        return (
+                          <div className="flex items-center gap-x-2 gap-y-1 mt-2 flex-wrap">
+                            {chips.map((chip, i) => (
+                              <span key={i} className="flex items-center gap-x-2">
+                                {i > 0 && <span className="text-ink-400 text-[10px]">·</span>}
+                                {chip}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </Link>
                   </div>
                 ))}
