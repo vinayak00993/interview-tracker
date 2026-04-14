@@ -103,11 +103,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in-up">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded bg-terracotta mb-4 shadow-card">
-            <span className="text-vellum font-serif text-xl leading-none">IT</span>
-          </div>
           <p className="manuscript-label">The Curated Manuscript</p>
-          <h1 className="manuscript-display text-3xl font-semibold tracking-tight text-ink-900 mt-1">
+          <h1 className="manuscript-display text-4xl font-semibold tracking-tight text-ink-900 mt-2">
             Interview Tracker
           </h1>
           <p className="text-sm font-serif italic text-ink-700 mt-3 animate-fade-in-up-delay-1">

@@ -25,15 +25,16 @@ interface KanbanBoardProps {
   opportunities: Opportunity[];
 }
 
-// Earthen Manuscript column palette — each column a different tonal surface,
-// no borders, accent pill for count, terracotta for "active" stage.
+// Earthen Manuscript column palette — tonal shifts only (no colored blocks).
+// All columns live on the same vellum surface; the active stage gets a
+// terracotta header underline + accent. Status is conveyed typographically.
 const COLUMNS = [
-  { status: "saved",        label: "Saved",        surface: "bg-vellum-low",  accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
-  { status: "applied",      label: "Applied",      surface: "bg-vellum-mid",  accent: "text-umber",      chip: "bg-umber-soft text-umber" },
-  { status: "interviewing", label: "Interviewing", surface: "bg-[#f6e8e4]",   accent: "text-terracotta", chip: "bg-terracotta text-vellum" },
-  { status: "offer",        label: "Offer",        surface: "bg-sage-soft",   accent: "text-sage",       chip: "bg-sage text-vellum" },
-  { status: "rejected",     label: "Archived",     surface: "bg-vellum-low",  accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
-  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-vellum-low",  accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
+  { status: "saved",        label: "Saved",        surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
+  { status: "applied",      label: "Applied",      surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
+  { status: "interviewing", label: "Interviewing", surface: "bg-vellum-lowest",    accent: "text-terracotta", chip: "bg-terracotta text-vellum" },
+  { status: "offer",        label: "Offer",        surface: "bg-vellum-lowest/60", accent: "text-sage",       chip: "bg-sage/15 text-sage" },
+  { status: "rejected",     label: "Archived",     surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
+  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
 ];
 
 const PRIORITY_DOT: Record<string, string> = {

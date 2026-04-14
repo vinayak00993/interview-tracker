@@ -32,9 +32,6 @@ export default async function DashboardPage() {
       <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
           <div className="min-w-0 flex items-center gap-3 sm:gap-5">
-            <div className="h-8 w-8 rounded-sm bg-terracotta flex items-center justify-center shadow-card shrink-0">
-              <span className="text-vellum font-serif text-base leading-none">IT</span>
-            </div>
             <div className="min-w-0">
               <h1 className="manuscript-display text-xl sm:text-2xl lg:text-[1.75rem] font-semibold text-ink-900 leading-tight truncate">
                 The Pipeline

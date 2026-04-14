@@ -28,7 +28,7 @@ export default function RootLayout({
             href="/faq"
             className="text-[10px] font-medium uppercase tracking-label text-ink-600 hover:text-terracotta transition-colors"
           >
-            FAQ · The Colophon
+            FAQ
           </a>
         </footer>
       </body>

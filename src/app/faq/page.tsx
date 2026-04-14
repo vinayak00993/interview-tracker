@@ -49,13 +49,13 @@ export default function FAQPage() {
             ← The Pipeline
           </Link>
           <span className="text-ink-400">/</span>
-          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">The Colophon</span>
+          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">FAQ</span>
         </div>
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-10 lg:px-16 py-12 sm:py-16 animate-fade-in-up">
-        <p className="manuscript-label">The Colophon</p>
+        <p className="manuscript-label">FAQ</p>
         <h1 className="manuscript-display text-3xl sm:text-4xl font-semibold text-ink-900 mt-1 leading-tight">
           Frequently asked questions
         </h1>
