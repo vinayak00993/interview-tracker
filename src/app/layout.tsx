@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Interview Tracker",
-  description: "Personal job search management platform",
+  description: "The curated manuscript of your job search.",
 };
 
 export default function RootLayout({
@@ -13,14 +13,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen animate-fade-in flex flex-col">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500&display=swap"
+        />
+      </head>
+      <body className="font-body antialiased min-h-screen animate-fade-in flex flex-col bg-vellum text-ink-900 selection:bg-terracotta/15 selection:text-terracotta-deep">
         {children}
-        <footer className="mt-auto py-4 border-t border-warm-300/40 text-center">
+        <footer className="mt-auto py-5 text-center">
           <a
             href="/faq"
-            className="text-xs text-warm-400 hover:text-warm-600 transition-colors"
+            className="text-[10px] font-medium uppercase tracking-label text-ink-600 hover:text-terracotta transition-colors"
           >
-            FAQ
+            FAQ · The Colophon
           </a>
         </footer>
       </body>

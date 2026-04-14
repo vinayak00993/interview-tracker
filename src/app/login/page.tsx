@@ -97,104 +97,102 @@ export default function LoginPage() {
     setError("");
   };
 
+  const inputCls = "w-full px-0 py-2 bg-transparent text-ink-900 text-sm focus:outline-none border-b border-outlineSoft focus:border-terracotta transition-colors placeholder:text-ink-600";
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in-up">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-warm-900">
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded bg-terracotta mb-4 shadow-card">
+            <span className="text-vellum font-serif text-xl leading-none">IT</span>
+          </div>
+          <p className="manuscript-label">The Curated Manuscript</p>
+          <h1 className="manuscript-display text-3xl font-semibold tracking-tight text-ink-900 mt-1">
             Interview Tracker
           </h1>
-          <p className="text-sm text-warm-600 mt-2 animate-fade-in-up-delay-1">
-            {isRegister ? "Create your account" : "Sign in to manage your pipeline"}
+          <p className="text-sm font-serif italic text-ink-700 mt-3 animate-fade-in-up-delay-1">
+            {isRegister ? "Begin your archive." : "Return to your manuscript."}
           </p>
         </div>
 
-        <div className="space-y-4 bg-white/50 backdrop-blur-sm border border-warm-300/40 rounded-2xl p-6 shadow-elevated">
+        <div className="space-y-5 bg-vellum-lowest rounded-lg p-7 shadow-elevated">
           {isRegister && (
             <div>
-              <label className="block text-xs font-medium text-warm-700 mb-1.5">
-                Name
-              </label>
+              <label className="manuscript-label block mb-1.5">Name</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
+                className={inputCls}
                 placeholder="Your name"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-warm-700 mb-1.5">
-              Email
-            </label>
+            <label className="manuscript-label block mb-1.5">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
+              className={inputCls}
               placeholder="you@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-warm-700 mb-1.5">
-              Password
-            </label>
+            <label className="manuscript-label block mb-1.5">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
+              className={inputCls}
               placeholder="••••••••"
             />
           </div>
 
           {isRegister && (
             <div>
-              <label className="block text-xs font-medium text-warm-700 mb-1.5">
-                Confirm Password
-              </label>
+              <label className="manuscript-label block mb-1.5">Confirm Password</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-warm-300 rounded-lg text-warm-900 text-sm focus:outline-none focus:border-terra transition-colors"
+                className={inputCls}
                 placeholder="••••••••"
               />
             </div>
           )}
 
           {error && (
-            <p className="text-red-400 text-xs">{error}</p>
+            <p className="text-terracotta text-xs font-serif italic">{error}</p>
           )}
 
           <button
             onClick={isRegister ? handleRegister : handleSignIn}
             disabled={loading}
-            className="w-full py-2.5 bg-terra hover:bg-terra-light disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+            className="w-full py-3 bg-terracotta hover:bg-terracotta-deep disabled:opacity-50 text-vellum text-[11px] font-semibold uppercase tracking-label rounded shadow-card hover:shadow-lift hover:-translate-y-0.5 transition-all"
           >
             {loading
-              ? (isRegister ? "Creating account..." : "Signing in...")
-              : (isRegister ? "Create account" : "Sign in")}
+              ? (isRegister ? "Creating..." : "Signing in...")
+              : (isRegister ? "Begin Archive" : "Sign In")}
           </button>
 
-          <p className="text-center text-xs text-warm-600">
+          <p className="text-center text-xs text-ink-600">
             {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               type="button"
               onClick={toggleMode}
-              className="text-terra hover:text-terra-light font-medium transition-colors"
+              className="text-terracotta hover:text-terracotta-deep font-semibold underline underline-offset-2 transition-colors"
             >
               {isRegister ? "Sign in" : "Create account"}
             </button>
           </p>
 
-          <div className="pt-2 border-t border-warm-300/40">
+          <div className="pt-4 border-t border-vellum-high">
             <Link
               href="/demo"
-              className="block w-full text-center py-2 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card transition-all duration-200"
+              className="block w-full text-center py-2.5 text-[11px] font-semibold uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-low rounded transition-all"
             >
               See a live demo
             </Link>
@@ -202,10 +200,10 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Decorative background circles */}
+      {/* Decorative background warmth */}
       <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-terra/5 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-warm-400/10 blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-terracotta/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-sage/10 blur-3xl" />
       </div>
     </div>
   );

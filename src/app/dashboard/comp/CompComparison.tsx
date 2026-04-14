@@ -17,10 +17,10 @@ interface Opportunity {
 }
 
 const STATUS_COLORS: Record<string, { bar: string; text: string }> = {
-  saved: { bar: "bg-warm-400", text: "text-warm-700" },
+  saved: { bar: "bg-warm-400", text: "text-ink-700" },
   applied: { bar: "bg-yellow-500", text: "text-yellow-700" },
-  interviewing: { bar: "bg-terra", text: "text-terra" },
-  offer: { bar: "bg-green-500", text: "text-green-700" },
+  interviewing: { bar: "bg-terracotta", text: "text-terracotta" },
+  offer: { bar: "bg-sage-soft0", text: "text-sage" },
   rejected: { bar: "bg-red-400", text: "text-red-600" },
   withdrawn: { bar: "bg-purple-400", text: "text-purple-600" },
 };
@@ -43,13 +43,13 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
   const lowestMin = withComp.length > 0 ? Math.min(...withComp.map((o) => o.compMin!)) : 0;
 
   return (
-    <div className="min-h-screen bg-warm-100">
-      <header className="border-b border-warm-300 px-6 py-3 flex items-center gap-4 bg-warm-50">
-        <Link href="/dashboard" className="text-xs text-warm-600 hover:text-warm-900 transition-colors">
+    <div className="min-h-screen bg-vellum">
+      <header className="border-b border-transparent px-6 py-3 flex items-center gap-4 bg-warm-50">
+        <Link href="/dashboard" className="text-xs text-ink-700 hover:text-ink-900 transition-colors">
           ← Dashboard
         </Link>
-        <div className="h-4 w-px bg-warm-300" />
-        <h1 className="text-sm font-semibold text-warm-900">Comp Comparison</h1>
+        <div className="h-4 w-px bg-vellum-high" />
+        <h1 className="text-sm font-semibold text-ink-900">Comp Comparison</h1>
       </header>
 
       <div className="max-w-4xl mx-auto px-6 py-8">
@@ -63,14 +63,14 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
 
         {/* Bar chart */}
         {withComp.length === 0 ? (
-          <div className="text-center py-12 text-warm-500">
+          <div className="text-center py-12 text-ink-600">
             <p className="text-sm">No opportunities with comp data yet.</p>
             <p className="text-xs mt-1">Add comp ranges to your opportunities to see them compared here.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {/* Scale labels */}
-            <div className="flex items-center justify-between text-[10px] text-warm-400 pl-48 pr-2 mb-1">
+            <div className="flex items-center justify-between text-[10px] text-ink-600 pl-48 pr-2 mb-1">
               <span>$0K</span>
               <span>${Math.round(globalMax / 4)}K</span>
               <span>${Math.round(globalMax / 2)}K</span>
@@ -87,20 +87,20 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                 <Link
                   key={opp.id}
                   href={`/opportunities/${opp.id}`}
-                  className="flex items-center gap-3 group hover:bg-warm-200/50 rounded-lg py-2 px-2 -mx-2 transition-colors"
+                  className="flex items-center gap-3 group hover:bg-vellum-high/50 rounded-lg py-2 px-2 -mx-2 transition-colors"
                 >
                   {/* Label */}
                   <div className="w-44 shrink-0 text-right pr-2">
-                    <p className="text-xs font-medium text-warm-900 truncate group-hover:text-terra transition-colors">
+                    <p className="text-xs font-medium text-ink-900 truncate group-hover:text-terracotta transition-colors">
                       {opp.company}
                     </p>
-                    <p className="text-[10px] text-warm-500 truncate">{opp.role}</p>
+                    <p className="text-[10px] text-ink-600 truncate">{opp.role}</p>
                   </div>
 
                   {/* Bar */}
                   <div className="flex-1 relative h-8">
                     {/* Background track */}
-                    <div className="absolute inset-0 bg-warm-200 rounded" />
+                    <div className="absolute inset-0 bg-vellum-high rounded" />
                     {/* Range bar */}
                     <div
                       className={`absolute top-0 bottom-0 ${colors.bar} rounded opacity-80 group-hover:opacity-100 transition-opacity`}
@@ -117,7 +117,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                     {/* Tooltip for narrow bars */}
                     {rangePct <= 8 && (
                       <div
-                        className="absolute top-0 bottom-0 flex items-center text-[10px] font-medium text-warm-700 pl-1"
+                        className="absolute top-0 bottom-0 flex items-center text-[10px] font-medium text-ink-700 pl-1"
                         style={{ left: `${minPct + rangePct + 1}%` }}
                       >
                         ${opp.compMin}K – ${opp.compMax}K
@@ -129,10 +129,10 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                   <div className="w-24 shrink-0 text-right">
                     <span className={`text-[10px] ${colors.text}`}>{opp.status}</span>
                     {opp.tier && (
-                      <span className="text-[10px] text-warm-500 ml-1.5">T{opp.tier}</span>
+                      <span className="text-[10px] text-ink-600 ml-1.5">T{opp.tier}</span>
                     )}
                     {opp.fitScore != null && (
-                      <p className={`text-[10px] ${opp.fitScore >= 80 ? "text-green-600" : opp.fitScore >= 60 ? "text-yellow-600" : "text-warm-500"}`}>
+                      <p className={`text-[10px] ${opp.fitScore >= 80 ? "text-green-600" : opp.fitScore >= 60 ? "text-yellow-600" : "text-ink-600"}`}>
                         {opp.fitScore}% fit
                       </p>
                     )}
@@ -145,8 +145,8 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
 
         {/* Opportunities without comp data */}
         {withoutComp.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-warm-300">
-            <h3 className="text-xs font-medium text-warm-500 uppercase tracking-wider mb-3">
+          <div className="mt-8 pt-6 border-t border-transparent">
+            <h3 className="text-xs font-medium text-ink-600 uppercase tracking-wider mb-3">
               Missing Comp Data ({withoutComp.length})
             </h3>
             <div className="grid grid-cols-2 gap-2">
@@ -154,7 +154,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                 <Link
                   key={opp.id}
                   href={`/opportunities/${opp.id}`}
-                  className="text-xs text-warm-600 hover:text-terra py-1 transition-colors"
+                  className="text-xs text-ink-700 hover:text-terracotta py-1 transition-colors"
                 >
                   {opp.company} — {opp.role}
                 </Link>
@@ -169,10 +169,10 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
 
 function StatCard({ label, value, sub, accent }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
-    <div className="bg-white border border-warm-300 rounded-lg p-4">
-      <p className="text-[10px] text-warm-500 uppercase tracking-wider">{label}</p>
-      <p className={`text-lg font-semibold mt-1 ${accent ? "text-terra" : "text-warm-900"}`}>{value}</p>
-      {sub && <p className="text-[10px] text-warm-500 mt-0.5">{sub}</p>}
+    <div className="bg-vellum-lowest border border-transparent rounded-lg p-4">
+      <p className="text-[10px] text-ink-600 uppercase tracking-wider">{label}</p>
+      <p className={`text-lg font-semibold mt-1 ${accent ? "text-terracotta" : "text-ink-900"}`}>{value}</p>
+      {sub && <p className="text-[10px] text-ink-600 mt-0.5">{sub}</p>}
     </div>
   );
 }

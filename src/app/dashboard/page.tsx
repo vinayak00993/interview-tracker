@@ -23,87 +23,114 @@ export default async function DashboardPage() {
     total: opportunities.length,
     interviewing: opportunities.filter((o) => o.status === "interviewing").length,
     upcoming: upcomingInterviews.length,
+    offers: opportunities.filter((o) => o.status === "offer").length,
   };
 
   return (
-    <div className="min-h-screen bg-warm-100">
-      {/* Header */}
-      <header className="border-b border-warm-300/60 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-        <div className="min-w-0">
-          <h1 className="text-base sm:text-lg font-semibold text-warm-900 tracking-tight">
-            Interview Tracker
-          </h1>
-          <p className="text-[10px] sm:text-xs text-warm-600 mt-0.5">
-            {stats.total} opps · {stats.interviewing} active · {stats.upcoming} upcoming
-          </p>
-        </div>
-        <div className="flex items-center gap-2 sm:gap-4 flex-wrap justify-end">
-          <div className="hidden sm:flex items-center gap-2">
-            <Link
-              href="/dashboard/comp"
-              className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card hover:-translate-y-px transition-all duration-200"
-            >
-              Comp Compare
-            </Link>
-            <a
-              href="/api/export?format=csv"
-              className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card hover:-translate-y-px transition-all duration-200"
-            >
-              Export
-            </a>
-            <Link
-              href="/profile"
-              className="px-3 py-1.5 text-xs font-medium text-warm-600 hover:text-warm-900 border border-warm-300/60 hover:border-warm-400 rounded-lg hover:shadow-card hover:-translate-y-px transition-all duration-200"
-            >
-              Profile
-            </Link>
+    <div className="min-h-screen bg-vellum">
+      {/* Header — editorial masthead */}
+      <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
+        <div className="px-4 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
+          <div className="min-w-0 flex items-center gap-3 sm:gap-5">
+            <div className="h-8 w-8 rounded-sm bg-terracotta flex items-center justify-center shadow-card shrink-0">
+              <span className="text-vellum font-serif text-base leading-none">IT</span>
+            </div>
+            <div className="min-w-0">
+              <h1 className="manuscript-display text-xl sm:text-2xl lg:text-[1.75rem] font-semibold text-ink-900 leading-tight truncate">
+                The Pipeline
+              </h1>
+              <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-label text-ink-600 mt-0.5">
+                <span className="text-terracotta">{stats.total}</span> opps
+                <span className="mx-2 text-ink-400">·</span>
+                <span className="text-terracotta">{stats.interviewing}</span> active
+                <span className="mx-2 text-ink-400">·</span>
+                <span className="text-terracotta">{stats.upcoming}</span> upcoming
+              </p>
+            </div>
           </div>
-          <span className="text-xs sm:text-sm text-warm-700 truncate max-w-[80px] sm:max-w-none">{session.user?.name}</span>
-          <LogoutButton />
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="hidden md:flex items-center gap-1">
+              <Link
+                href="/dashboard/comp"
+                className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
+              >
+                Compensation
+              </Link>
+              <a
+                href="/api/export?format=csv"
+                className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
+              >
+                Export
+              </a>
+              <Link
+                href="/profile"
+                className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
+              >
+                Profile
+              </Link>
+            </div>
+            <div className="flex items-center gap-2 pl-2 sm:pl-3 sm:border-l sm:border-vellum-high">
+              <span className="hidden sm:inline text-xs text-ink-700 font-medium truncate max-w-[140px]">
+                {session.user?.name}
+              </span>
+              <LogoutButton />
+            </div>
+          </div>
         </div>
+        {/* Tonal shift seam — no hard border */}
+        <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      {/* Mobile nav links */}
-      <div className="sm:hidden flex items-center gap-2 px-4 py-2 border-b border-warm-300/40 bg-warm-50/60 overflow-x-auto">
-        <Link href="/dashboard/comp" className="px-2.5 py-1 text-[10px] font-medium text-warm-600 border border-warm-300/60 rounded-lg whitespace-nowrap">
-          Comp Compare
+      {/* Mobile secondary nav */}
+      <div className="md:hidden flex items-center gap-1 px-4 py-2 bg-vellum-low overflow-x-auto">
+        <Link href="/dashboard/comp" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
+          Compensation
         </Link>
-        <a href="/api/export?format=csv" className="px-2.5 py-1 text-[10px] font-medium text-warm-600 border border-warm-300/60 rounded-lg whitespace-nowrap">
+        <a href="/api/export?format=csv" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
           Export
         </a>
-        <Link href="/profile" className="px-2.5 py-1 text-[10px] font-medium text-warm-600 border border-warm-300/60 rounded-lg whitespace-nowrap">
+        <Link href="/profile" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
           Profile
         </Link>
       </div>
 
-      <div className="flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row pb-20 lg:pb-0">
         {/* Main content — Kanban */}
-        <main className="flex-1 p-4 sm:p-6 overflow-x-auto animate-fade-in-up">
+        <main className="flex-1 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 overflow-x-auto animate-fade-in-up">
           <KanbanBoard opportunities={opportunities} />
         </main>
 
-        {/* Right sidebar — collapses below on mobile */}
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-warm-300/60 p-4 sm:p-5 space-y-6 shrink-0 bg-warm-50/80 backdrop-blur-sm animate-slide-in-right">
+        {/* Right sidebar — marginalia */}
+        <aside className="w-full lg:w-80 xl:w-96 bg-vellum-low lg:sticky lg:top-[85px] lg:self-start lg:max-h-[calc(100vh-85px)] lg:overflow-y-auto px-4 sm:px-10 lg:px-8 py-6 sm:py-8 space-y-8 shrink-0 animate-slide-in-right">
           {/* Upcoming Interviews */}
           <div>
-            <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
-              Upcoming Interviews
+            <h2 className="manuscript-label mb-3 flex items-center justify-between">
+              <span>Upcoming</span>
+              {upcomingInterviews.length > 0 && (
+                <span className="text-[10px] text-terracotta font-semibold normal-case tracking-normal">
+                  {upcomingInterviews.length}
+                </span>
+              )}
             </h2>
             {upcomingInterviews.length === 0 ? (
-              <p className="text-sm text-warm-500">No interviews scheduled.</p>
+              <p className="text-sm text-ink-600 italic font-serif">
+                No interviews on the calendar.
+              </p>
             ) : (
               <div className="space-y-2">
                 {upcomingInterviews.map((interview: any) => (
-                  <div
+                  <Link
+                    href={`/opportunities/${interview.opportunity.id}`}
                     key={interview.id}
-                    className="bg-white/80 border border-warm-300/60 rounded-lg p-3 shadow-card hover:shadow-card-hover"
+                    className="block bg-vellum-lowest rounded px-3 py-2.5 hover-lift"
                   >
-                    <p className="text-sm text-warm-900 font-medium">
+                    <p className="text-sm text-ink-900 font-serif font-medium leading-tight">
                       {interview.opportunity.company}
                     </p>
-                    <p className="text-xs text-warm-600">{interview.round}</p>
+                    <p className="text-[11px] text-ink-600 mt-0.5">{interview.round}</p>
                     {interview.dateTime && (
-                      <p className="text-xs text-terra-light mt-1">
+                      <p className="text-[10px] uppercase tracking-label text-terracotta mt-1.5 font-medium">
                         {new Date(interview.dateTime).toLocaleDateString(
                           "en-US",
                           {
@@ -116,7 +143,7 @@ export default async function DashboardPage() {
                         )}
                       </p>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -125,20 +152,18 @@ export default async function DashboardPage() {
           {/* Overdue Follow-ups */}
           {overdueFollowups.length > 0 && (
             <div>
-              <h2 className="text-xs font-medium text-terra uppercase tracking-wider mb-3">
-                Needs Follow-up
-              </h2>
+              <h2 className="manuscript-label mb-3 text-terracotta">Needs Follow-up</h2>
               <div className="space-y-2">
                 {overdueFollowups.map((item: any) => (
                   <Link
                     key={item.id}
                     href={`/opportunities/${item.id}`}
-                    className="block bg-terra/5 border border-terra/15 rounded-lg p-3 hover:bg-terra/10 transition-colors"
+                    className="block bg-terracotta/5 rounded px-3 py-2.5 hover:bg-terracotta/10 transition-colors"
                   >
-                    <p className="text-sm text-warm-900 font-medium">{item.company}</p>
-                    <p className="text-xs text-warm-600">{item.role}</p>
-                    <p className="text-xs text-terra mt-1">
-                      {item.daysSinceActivity} days since last activity
+                    <p className="text-sm text-ink-900 font-serif font-medium leading-tight">{item.company}</p>
+                    <p className="text-[11px] text-ink-600 mt-0.5">{item.role}</p>
+                    <p className="text-[10px] uppercase tracking-label text-terracotta mt-1.5 font-medium">
+                      {item.daysSinceActivity} days silent
                     </p>
                   </Link>
                 ))}
@@ -148,28 +173,26 @@ export default async function DashboardPage() {
 
           {/* Recent Activity */}
           <div>
-            <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
-              Recent Activity
-            </h2>
-            <div className="space-y-2">
+            <h2 className="manuscript-label mb-3">Marginalia</h2>
+            <div className="space-y-2.5">
               {recentActivity.map((activity: any) => (
                 <div
                   key={activity.id}
-                  className="flex items-start gap-2 text-xs"
+                  className="flex items-start gap-3 text-xs"
                 >
-                  <span className="text-warm-500 shrink-0 w-14">
+                  <span className="text-[10px] uppercase tracking-label text-ink-600 shrink-0 w-12 pt-0.5 font-medium">
                     {new Date(activity.date).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
                     })}
                   </span>
-                  <div>
-                    <span className="text-warm-800">
+                  <div className="min-w-0">
+                    <span className="text-ink-900 font-serif leading-snug block">
                       {activity.description}
                     </span>
                     {activity.opportunity && (
-                      <span className="text-warm-500 block">
-                        {activity.opportunity.company} — {activity.opportunity.role}
+                      <span className="text-ink-600 text-[11px] block mt-0.5">
+                        {activity.opportunity.company} · {activity.opportunity.role}
                       </span>
                     )}
                   </div>
@@ -179,6 +202,24 @@ export default async function DashboardPage() {
           </div>
         </aside>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 manuscript-glass safe-bottom border-t border-vellum-high/60">
+        <div className="flex items-center justify-around py-2">
+          <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-terracotta">
+            <span className="text-base">◪</span>
+            <span className="text-[9px] uppercase tracking-label font-semibold">Pipeline</span>
+          </Link>
+          <Link href="/dashboard/comp" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-ink-700">
+            <span className="text-base">$</span>
+            <span className="text-[9px] uppercase tracking-label font-semibold">Comp</span>
+          </Link>
+          <Link href="/profile" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-ink-700">
+            <span className="text-base">✎</span>
+            <span className="text-[9px] uppercase tracking-label font-semibold">Profile</span>
+          </Link>
+        </div>
+      </nav>
     </div>
   );
 }

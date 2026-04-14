@@ -39,51 +39,55 @@ export default function FAQPage() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen bg-warm-100">
-      <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10">
-        <Link
-          href="/dashboard"
-          className="text-xs font-medium text-warm-600 hover:text-warm-900 bg-warm-100/80 hover:bg-warm-200 px-3 py-1.5 rounded-lg border border-warm-300/60 hover:border-warm-400 shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200"
-        >
-          ← Dashboard
-        </Link>
-        <div className="h-4 w-px bg-warm-300" />
-        <span className="text-xs text-warm-600">FAQ</span>
+    <div className="min-h-screen bg-vellum">
+      <header className="manuscript-glass sticky top-0 z-20">
+        <div className="px-4 sm:px-10 lg:px-16 py-4 flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="text-[11px] font-semibold uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high px-3 py-1.5 rounded transition-all"
+          >
+            ← The Pipeline
+          </Link>
+          <span className="text-ink-400">/</span>
+          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">The Colophon</span>
+        </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 animate-fade-in-up">
-        <h1 className="text-2xl font-semibold text-warm-900 mb-2">
-          Frequently Asked Questions
+      <div className="max-w-2xl mx-auto px-4 sm:px-10 lg:px-16 py-12 sm:py-16 animate-fade-in-up">
+        <p className="manuscript-label">The Colophon</p>
+        <h1 className="manuscript-display text-3xl sm:text-4xl font-semibold text-ink-900 mt-1 leading-tight">
+          Frequently asked questions
         </h1>
-        <p className="text-sm text-warm-500 mb-10">
+        <p className="text-base font-serif italic text-ink-700 mt-3 mb-12">
           Everything you need to know about Interview Tracker.
         </p>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {faqs.map((faq, i) => (
             <div
               key={i}
-              className="bg-white/80 backdrop-blur-sm border border-warm-300/60 rounded-xl overflow-hidden shadow-card"
+              className="bg-vellum-lowest rounded overflow-hidden shadow-card hover-lift"
             >
               <button
                 onClick={() => setOpen(open === i ? null : i)}
-                className="w-full flex items-center justify-between px-5 py-4 text-left gap-4 hover:bg-warm-50/60 transition-colors"
+                className="w-full flex items-center justify-between px-5 py-4 text-left gap-4 hover:bg-vellum-low transition-colors"
               >
-                <span className="text-sm font-medium text-warm-900">
+                <span className="text-[15px] font-serif font-medium text-ink-900">
                   {faq.q}
                 </span>
                 <span
-                  className="text-warm-400 text-xs shrink-0 transition-transform duration-200"
+                  className="text-terracotta text-sm shrink-0 transition-transform duration-200"
                   style={{
-                    transform: open === i ? "rotate(180deg)" : "rotate(0deg)",
+                    transform: open === i ? "rotate(45deg)" : "rotate(0deg)",
                   }}
                 >
-                  ▼
+                  +
                 </span>
               </button>
               {open === i && (
-                <div className="px-5 pb-5">
-                  <p className="text-sm text-warm-700 leading-relaxed">
+                <div className="px-5 pb-5 pt-1">
+                  <p className="text-sm text-ink-700 leading-relaxed font-serif">
                     {faq.a}
                   </p>
                 </div>
@@ -92,11 +96,11 @@ export default function FAQPage() {
           ))}
         </div>
 
-        <p className="mt-12 text-xs text-warm-400 text-center">
+        <p className="mt-16 text-[11px] uppercase tracking-label text-ink-600 text-center">
           Still have questions?{" "}
           <a
             href="mailto:support@example.com"
-            className="text-terra hover:text-terra-light transition-colors"
+            className="text-terracotta hover:text-terracotta-deep font-semibold underline underline-offset-2 transition-colors"
           >
             Get in touch
           </a>

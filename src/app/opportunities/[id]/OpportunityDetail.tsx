@@ -6,25 +6,25 @@ import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  saved: { bg: "bg-warm-200", text: "text-warm-700", border: "border-warm-300" },
-  applied: { bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200" },
-  interviewing: { bg: "bg-terra/10", text: "text-terra-dark", border: "border-terra/20" },
-  offer: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  rejected: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
-  withdrawn: { bg: "bg-purple-50", text: "text-purple-700", border: "border-purple-200" },
+  saved:        { bg: "bg-vellum-high",     text: "text-ink-700",         border: "border-transparent" },
+  applied:      { bg: "bg-umber-soft",      text: "text-umber",           border: "border-transparent" },
+  interviewing: { bg: "bg-terracotta",      text: "text-vellum",          border: "border-transparent" },
+  offer:        { bg: "bg-sage",            text: "text-vellum",          border: "border-transparent" },
+  rejected:     { bg: "bg-vellum-mid",      text: "text-ink-600",         border: "border-transparent" },
+  withdrawn:    { bg: "bg-vellum-mid",      text: "text-ink-600",         border: "border-transparent" },
 };
 
 const SENTIMENT_COLORS: Record<string, string> = {
-  positive: "text-green-700",
-  neutral: "text-yellow-700",
-  negative: "text-red-700",
+  positive: "text-sage",
+  neutral:  "text-umber",
+  negative: "text-terracotta",
 };
 
 const INTERVIEW_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  scheduled: { bg: "bg-terra/10", text: "text-terra-dark" },
-  completed: { bg: "bg-green-50", text: "text-green-700" },
-  cancelled: { bg: "bg-red-50", text: "text-red-700" },
-  rescheduled: { bg: "bg-yellow-50", text: "text-yellow-700" },
+  scheduled:   { bg: "bg-terracotta",  text: "text-vellum" },
+  completed:   { bg: "bg-sage",        text: "text-vellum" },
+  cancelled:   { bg: "bg-vellum-high", text: "text-ink-700" },
+  rescheduled: { bg: "bg-umber-soft",  text: "text-umber" },
 };
 
 interface Interview {
@@ -306,24 +306,28 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-warm-100">
-      {/* Top bar */}
-      <header className="border-b border-warm-300/60 px-6 py-3 flex items-center gap-4 bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
-        <Link
-          href="/dashboard"
-          className="text-xs font-medium text-warm-600 hover:text-warm-900 bg-warm-100/80 hover:bg-warm-200 px-3 py-1.5 rounded-lg border border-warm-300/60 hover:border-warm-400 shadow-card hover:shadow-card-hover hover:-translate-y-px transition-all duration-200"
-        >
-          ← Dashboard
-        </Link>
-        <div className="h-4 w-px bg-warm-300" />
-        <span className="text-xs text-warm-600">{opp.company}</span>
+    <div className="min-h-screen bg-vellum pb-20 lg:pb-0">
+      {/* Top bar — editorial masthead */}
+      <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
+        <div className="px-4 sm:px-10 lg:px-16 py-4 flex items-center gap-4">
+          <Link
+            href="/dashboard"
+            className="text-[11px] font-semibold uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high px-3 py-1.5 rounded transition-all"
+          >
+            ← The Pipeline
+          </Link>
+          <span className="text-ink-400">/</span>
+          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600 truncate">{opp.company}</span>
+        </div>
+        <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 animate-fade-in-up">
+      <div className="max-w-5xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10 animate-fade-in-up">
         {/* Header section */}
         {isEditing ? (
-          <div className="mb-8 bg-white border border-warm-300 rounded-lg p-5 shadow-sm">
-            <h2 className="text-sm font-medium text-warm-700 mb-4">Edit Opportunity</h2>
+          <div className="mb-8 bg-vellum-lowest rounded-lg p-6 shadow-card">
+            <p className="manuscript-label mb-1">Archive Entry</p>
+            <h2 className="manuscript-display text-xl font-semibold text-ink-900 mb-5">Edit Opportunity</h2>
             <form onSubmit={handleEditSave} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormInput name="company" label="Company" required defaultValue={opp.company} />
               <FormInput name="role" label="Role" required defaultValue={opp.role} />
@@ -383,54 +387,56 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </form>
           </div>
         ) : (
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-3 mb-1 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-semibold text-warm-900">{opp.company}</h1>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full ${statusColor.bg} ${statusColor.text} border ${statusColor.border}`}
-              >
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5 mb-10">
+          <div className="flex-1 min-w-0">
+            <p className="manuscript-label mb-2">{opp.source ? `via ${opp.source}` : "Opportunity"}</p>
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h1 className="manuscript-display text-3xl sm:text-4xl lg:text-[3rem] font-semibold text-ink-900 leading-[1.05] tracking-tight">
+                {opp.role}
+              </h1>
+            </div>
+            <p className="text-lg font-serif italic text-ink-700 mt-2">
+              at <span className="text-ink-900 not-italic font-medium">{opp.company}</span>
+              {opp.location && <span className="text-ink-600"> · {opp.location}{opp.remote ? " · Remote" : ""}</span>}
+            </p>
+
+            <div className="flex items-center gap-3 mt-4 flex-wrap">
+              <span className={`text-[10px] font-semibold uppercase tracking-label px-2.5 py-1 rounded ${statusColor.bg} ${statusColor.text}`}>
                 {opp.status}
               </span>
-              {opp.tier && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-warm-200 text-warm-700 border border-warm-300">
-                  Tier {opp.tier}
+              {opp.compMin != null && opp.compMax != null && (
+                <span className="text-[11px] text-ink-700 font-medium">
+                  ${opp.compMin}K – ${opp.compMax}K
                 </span>
               )}
-            </div>
-            <p className="text-base text-warm-600">{opp.role}</p>
-
-            <div className="flex items-center gap-4 mt-3 text-xs text-warm-500">
-              {opp.location && (
-                <span>{opp.location}{opp.remote ? " · Remote" : ""}</span>
-              )}
-              {opp.compMin != null && opp.compMax != null && (
-                <span>${opp.compMin}K – ${opp.compMax}K</span>
-              )}
               {opp.fitScore != null && (
-                <span className="text-terra">{opp.fitScore}% fit</span>
+                <span className="text-[11px] font-semibold uppercase tracking-label text-terracotta">
+                  {opp.fitScore}% fit
+                </span>
               )}
-              {opp.source && (
-                <span>via {opp.source}</span>
+              {opp.tier && (
+                <span className="text-[10px] font-semibold uppercase tracking-label px-2 py-1 rounded bg-vellum-high text-ink-700">
+                  Tier {opp.tier}
+                </span>
               )}
               {opp.jdLink && (
                 <a
                   href={opp.jdLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-terra hover:text-terra transition-colors"
+                  className="text-[11px] font-semibold uppercase tracking-label text-terracotta hover:text-terracotta-deep underline underline-offset-2 transition-colors"
                 >
-                  View JD →
+                  View JD ↗
                 </a>
               )}
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
               value={opp.status}
               onChange={(e) => handleStatusChange(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-white border border-warm-300 rounded-lg text-warm-900 focus:outline-none focus:border-terra"
+              className="px-3 py-2 text-[11px] font-semibold uppercase tracking-label bg-vellum-lowest text-ink-900 rounded shadow-card focus:outline-none focus:ring-2 focus:ring-terracotta/20 cursor-pointer"
             >
               {["saved", "applied", "interviewing", "offer", "rejected", "withdrawn", "archived"].map(
                 (s) => (
@@ -442,13 +448,13 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             </select>
             <button
               onClick={() => setIsEditing(true)}
-              className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 hover:bg-warm-200 border border-transparent hover:border-warm-300 rounded-lg transition-colors"
+              className="px-3 py-2 text-[11px] font-semibold uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
             >
               Edit
             </button>
             <button
               onClick={handleDeleteOpportunity}
-              className="px-3 py-1.5 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border border-transparent hover:border-red-200 rounded-lg transition-colors"
+              className="px-3 py-2 text-[11px] font-semibold uppercase tracking-label text-ink-600 hover:text-terracotta transition-colors"
             >
               Delete
             </button>
@@ -456,8 +462,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         </div>
         )}
 
-        {/* Tabs */}
-        <div className="flex gap-1 border-b border-warm-300 mb-6">
+        {/* Tabs — minimalist underline */}
+        <div className="flex gap-1 mb-8 overflow-x-auto scrollbar-hide -mx-2 px-2">
           {(
             [
               { key: "overview", label: "Overview" },
@@ -471,19 +477,23 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2.5 text-xs font-medium transition-colors border-b-2 -mb-px ${
+              className={`px-4 py-2.5 text-[11px] font-semibold uppercase tracking-label transition-all whitespace-nowrap relative ${
                 activeTab === tab.key
-                  ? "text-warm-900 border-terra"
-                  : "text-warm-500 border-transparent hover:text-warm-800"
+                  ? "text-terracotta"
+                  : "text-ink-600 hover:text-ink-900"
               }`}
             >
               {tab.label}
-              {"count" in tab && tab.count != null && (
-                <span className="ml-1.5 text-warm-500">{tab.count}</span>
+              {"count" in tab && tab.count != null && tab.count > 0 && (
+                <span className="ml-1.5 text-ink-600 normal-case tracking-normal">{tab.count}</span>
+              )}
+              {activeTab === tab.key && (
+                <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-terracotta rounded-t" />
               )}
             </button>
           ))}
         </div>
+        <div className="h-px bg-vellum-high -mt-8 mb-6" />
 
         {/* Tab content */}
         {activeTab === "overview" && (
@@ -640,13 +650,18 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
         {activeTab === "interviews" && (
           <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-sm font-medium text-warm-700">Interview Timeline</h2>
+            <div className="flex items-end justify-between mb-6 gap-3 flex-wrap">
+              <div>
+                <p className="manuscript-label">Chapter Log</p>
+                <h2 className="manuscript-display text-2xl font-semibold text-ink-900 leading-tight mt-0.5">
+                  Interview Stages
+                </h2>
+              </div>
               <button
                 onClick={() => setShowAddInterview(!showAddInterview)}
-                className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg transition-colors"
+                className="px-4 py-2 text-[11px] font-semibold uppercase tracking-label bg-terracotta hover:bg-terracotta-deep text-vellum rounded shadow-card hover:shadow-lift hover:-translate-y-0.5 transition-all"
               >
-                + Add Interview
+                + Add Stage
               </button>
             </div>
 
@@ -700,48 +715,70 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             )}
 
             {opp.interviews.length === 0 ? (
-              <p className="text-sm text-warm-500 py-8 text-center">No interviews yet. Add one to start tracking.</p>
+              <div className="bg-vellum-low rounded-lg p-12 text-center">
+                <p className="text-base font-serif italic text-ink-700 mb-1">The manuscript awaits its first entry.</p>
+                <p className="text-[11px] uppercase tracking-label text-ink-600">Add an interview stage to begin</p>
+              </div>
             ) : (
-              <div className="space-y-3">
+              <div className="relative pl-20 sm:pl-28 space-y-6">
+                {/* Journal Timeline — sage line + marginalia dates */}
+                <div className="absolute left-[68px] sm:left-[100px] top-2 bottom-2 w-px bg-sage/40" />
                 {opp.interviews.map((interview) => {
                   const isExpanded = expandedInterview === interview.id;
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
+                  const marginDate = interview.dateTime
+                    ? new Date(interview.dateTime)
+                    : null;
 
                   return (
-                    <div key={interview.id} className="bg-white border border-warm-300 rounded-lg overflow-hidden">
+                    <div key={interview.id} className="relative">
+                      {/* Marginalia date */}
+                      <div className="absolute -left-20 sm:-left-28 top-4 w-16 sm:w-24 text-right">
+                        {marginDate ? (
+                          <>
+                            <p className="font-serif italic text-base text-terracotta leading-tight">
+                              {marginDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </p>
+                            <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold mt-0.5">
+                              {interview.status === "completed" ? "Completed" : interview.status === "scheduled" ? "Upcoming" : interview.status}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold">Unscheduled</p>
+                        )}
+                      </div>
+                      {/* Timeline dot */}
+                      <div className="absolute -left-[19px] sm:-left-[27px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
+
+                      <div className="bg-vellum-lowest rounded overflow-hidden shadow-card hover-lift">
                       <button
                         onClick={() => setExpandedInterview(isExpanded ? null : interview.id)}
-                        className="w-full p-4 flex items-center justify-between text-left hover:bg-warm-100 transition-colors"
+                        className="w-full p-4 flex items-center justify-between text-left hover:bg-vellum-low transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-warm-200 flex items-center justify-center text-xs font-medium text-warm-700">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded bg-vellum-high flex items-center justify-center text-xs font-serif font-medium text-ink-900 shrink-0">
                             {interview.roundNumber}
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-warm-900">{interview.round}</p>
+                          <div className="min-w-0">
+                            <p className="text-[15px] font-serif font-medium text-ink-900 leading-tight">{interview.round}</p>
                             {interview.interviewerName && (
-                              <span className="text-xs text-warm-700">
+                              <span className="text-xs text-ink-700 block mt-0.5">
                                 {interview.interviewerName}
-                                {interview.interviewerTitle && ` · ${interview.interviewerTitle}`}
+                                {interview.interviewerTitle && <span className="text-ink-600"> · {interview.interviewerTitle}</span>}
                               </span>
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 shrink-0">
                           {interview.sentiment && (
-                            <span className={`text-xs ${SENTIMENT_COLORS[interview.sentiment] || "text-warm-700"}`}>
+                            <span className={`text-[10px] uppercase tracking-label font-semibold ${SENTIMENT_COLORS[interview.sentiment] || "text-ink-700"}`}>
                               {interview.sentiment}
                             </span>
                           )}
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${intStatus.bg} ${intStatus.text}`}>
+                          <span className={`text-[10px] px-2 py-1 rounded uppercase tracking-label font-semibold ${intStatus.bg} ${intStatus.text}`}>
                             {interview.status}
                           </span>
-                          {interview.dateTime && (
-                            <span className="text-xs text-warm-600">
-                              {new Date(interview.dateTime).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                            </span>
-                          )}
-                          <span className="text-warm-500 text-xs">{isExpanded ? "▲" : "▼"}</span>
+                          <span className="text-ink-600 text-xs">{isExpanded ? "−" : "+"}</span>
                         </div>
                       </button>
 
@@ -817,7 +854,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                             <div className="mt-4 pt-3 border-t border-warm-200">
                               <button
                                 onClick={() => setDebriefingInterview(interview.id)}
-                                className="px-3 py-1.5 text-xs font-medium bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg transition-colors"
+                                className="px-3 py-1.5 text-xs font-medium bg-sage-soft text-sage border border-transparent hover:bg-sage-soft rounded-lg transition-colors"
                               >
                                 + Quick Debrief
                               </button>
@@ -836,7 +873,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                                       <label key={s} className="flex items-center gap-1.5 text-xs cursor-pointer">
                                         <input type="radio" name="sentiment" value={s} defaultChecked={s === (interview.sentiment || "neutral")}
                                           className="text-terra focus:ring-terra" />
-                                        <span className={s === "positive" ? "text-green-700" : s === "negative" ? "text-red-600" : "text-yellow-700"}>
+                                        <span className={s === "positive" ? "text-sage" : s === "negative" ? "text-terracotta" : "text-umber"}>
                                           {s === "positive" ? "Good" : s === "negative" ? "Tough" : "Neutral"}
                                         </span>
                                       </label>
@@ -865,7 +902,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                                   <button type="button" onClick={() => setDebriefingInterview(null)}
                                     className="px-3 py-1.5 text-xs text-warm-600 hover:text-warm-900 transition-colors">Cancel</button>
                                   <button type="submit" disabled={isDebriefSubmitting}
-                                    className="px-4 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white rounded-lg transition-colors">
+                                    className="px-4 py-1.5 text-xs font-medium bg-sage hover:bg-sage disabled:opacity-50 text-white rounded-lg transition-colors">
                                     {isDebriefSubmitting ? "Saving..." : "Save Debrief"}
                                   </button>
                                 </div>
@@ -904,7 +941,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                                 </div>
                               ) : followUpInterviewId === interview.id && followUpError ? (
                                 <div className="space-y-2">
-                                  <p className="text-xs text-red-600">{followUpError}</p>
+                                  <p className="text-xs text-terracotta">{followUpError}</p>
                                   <button
                                     onClick={() => generateFollowUp(interview.id)}
                                     className="px-3 py-1.5 text-xs font-medium text-terra-dark border border-terra/20 hover:bg-terra/10 rounded-lg transition-colors"
@@ -925,6 +962,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                           )}
                         </div>
                       )}
+                      </div>
                     </div>
                   );
                 })}
@@ -935,29 +973,34 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
         {activeTab === "prep" && (
           <div className="space-y-6">
-            {/* AI Prep Generation */}
-            <div className="bg-white border border-warm-300 rounded-lg p-5">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider">AI-Powered Prep</h3>
+            {/* AI Prep Generation — frosted feature card */}
+            <div className="manuscript-glass bg-vellum-lowest/85 rounded-lg p-6 shadow-elevated">
+              <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
+                <div>
+                  <p className="manuscript-label">AI-Powered Preparation</p>
+                  <h3 className="manuscript-display text-xl font-semibold text-ink-900 leading-tight mt-1">
+                    Tailored prep for this chapter
+                  </h3>
+                  <p className="text-sm font-serif italic text-ink-700 mt-2 max-w-lg">
+                    Weaves your <Link href="/profile" className="text-terracotta hover:text-terracotta-deep underline underline-offset-2">profile</Link> — resume, LinkedIn, and prior debriefs — into a brief tuned to this role.
+                  </p>
+                </div>
                 <button
                   onClick={handleGenerateAiPrep}
                   disabled={isGeneratingPrep}
-                  className="px-4 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light disabled:opacity-50 text-white rounded-lg transition-colors flex items-center gap-2"
+                  className="px-5 py-2.5 text-[11px] font-semibold uppercase tracking-label bg-terracotta hover:bg-terracotta-deep disabled:opacity-50 text-vellum rounded shadow-card hover:shadow-lift hover:-translate-y-0.5 transition-all flex items-center gap-2 whitespace-nowrap"
                 >
                   {isGeneratingPrep ? (
                     <>
-                      <span className="inline-block w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Generating...
+                      <span className="inline-block w-3 h-3 border-2 border-vellum/30 border-t-vellum rounded-full animate-spin" />
+                      Composing...
                     </>
-                  ) : aiPrep ? "Regenerate" : "Generate Tailored Prep"}
+                  ) : aiPrep ? "Regenerate" : "Generate Prep"}
                 </button>
               </div>
-              <p className="text-xs text-warm-500 mb-3">
-                Uses your <Link href="/profile" className="text-terra hover:text-terra-light">profile</Link> (resume + LinkedIn) to generate prep tailored to this specific role.
-              </p>
 
               {aiPrepError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-xs text-red-700">
+                <div className="bg-terracotta/10 border border-transparent rounded-lg p-3 text-xs text-terracotta">
                   {aiPrepError}
                   {aiPrepError.includes("profile") && (
                     <Link href="/profile" className="ml-2 text-terra hover:text-terra-light font-medium">Set up profile →</Link>
@@ -1065,7 +1108,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                       {opp.fitScore != null && (
                         <div>
                           <span className="text-warm-500">Fit Score</span>
-                          <p className={`mt-0.5 font-medium ${opp.fitScore >= 80 ? "text-green-700" : opp.fitScore >= 60 ? "text-yellow-700" : "text-red-600"}`}>
+                          <p className={`mt-0.5 font-medium ${opp.fitScore >= 80 ? "text-sage" : opp.fitScore >= 60 ? "text-umber" : "text-terracotta"}`}>
                             {opp.fitScore}%
                           </p>
                         </div>
@@ -1085,9 +1128,9 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
                   {/* Key Gaps to address */}
                   {opp.keyGaps && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-5">
-                      <h3 className="text-xs font-medium text-red-700 uppercase tracking-wider mb-2">Key Gaps to Address</h3>
-                      <div className="text-sm text-red-800 whitespace-pre-wrap">{opp.keyGaps}</div>
+                    <div className="bg-terracotta/10 border border-transparent rounded-lg p-5">
+                      <h3 className="text-xs font-medium text-terracotta uppercase tracking-wider mb-2">Key Gaps to Address</h3>
+                      <div className="text-sm text-terracotta whitespace-pre-wrap">{opp.keyGaps}</div>
                     </div>
                   )}
 
@@ -1178,7 +1221,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             {opp.keyGaps && (
               <div>
                 <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Key Gaps</h3>
-                <div className="bg-warm-800 border border-red-500/20 rounded-lg p-4 text-sm text-warm-800 whitespace-pre-wrap">{opp.keyGaps}</div>
+                <div className="bg-warm-800 border border-transparent rounded-lg p-4 text-sm text-warm-800 whitespace-pre-wrap">{opp.keyGaps}</div>
               </div>
             )}
             {opp.prosConsNotes && (
@@ -1228,8 +1271,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                         )}
                         {contact.warmth && (
                           <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
-                            contact.warmth === "hot" ? "bg-red-500/10 text-red-400 border-red-500/20"
-                            : contact.warmth === "warm" ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
+                            contact.warmth === "hot" ? "bg-terracotta/100/10 text-terracotta border-transparent"
+                            : contact.warmth === "warm" ? "bg-umber-soft0/10 text-umber border-transparent"
                             : "bg-warm-200 text-warm-700 border-warm-300"
                           }`}>{contact.warmth}</span>
                         )}
@@ -1267,7 +1310,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                     <span className="text-warm-500 shrink-0 w-16">{new Date(activity.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                     <span className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] ${
                       activity.type === "interviewed" ? "bg-terra/10 text-terra"
-                      : activity.type === "applied" ? "bg-yellow-500/10 text-yellow-400"
+                      : activity.type === "applied" ? "bg-umber-soft0/10 text-umber"
                       : "bg-warm-200 text-warm-700"
                     }`}>{activity.type}</span>
                     <span className="text-warm-800">{activity.description}</span>

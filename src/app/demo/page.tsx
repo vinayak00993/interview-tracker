@@ -6,10 +6,10 @@ import Link from "next/link";
 const COLUMNS = [
   { status: "saved", label: "Saved", color: "#8a7d6d", bg: "bg-warm-100/40" },
   { status: "applied", label: "Applied", color: "#d4a03c", bg: "bg-amber-50/40" },
-  { status: "interviewing", label: "Interviewing", color: "#b33a3a", bg: "bg-terra/[0.03]" },
-  { status: "offer", label: "Offer", color: "#6b9e5c", bg: "bg-green-50/40" },
-  { status: "rejected", label: "Rejected", color: "#c44848", bg: "bg-red-50/30" },
-  { status: "withdrawn", label: "Withdrawn", color: "#9b7bb8", bg: "bg-purple-50/30" },
+  { status: "interviewing", label: "Interviewing", color: "#b33a3a", bg: "bg-terracotta/[0.03]" },
+  { status: "offer", label: "Offer", color: "#6b9e5c", bg: "bg-sage-soft/40" },
+  { status: "rejected", label: "Rejected", color: "#c44848", bg: "bg-terracotta/10/30" },
+  { status: "withdrawn", label: "Withdrawn", color: "#9b7bb8", bg: "bg-vellum-high/30" },
 ];
 
 const PRIORITY_ICONS: Record<string, string> = {
@@ -134,10 +134,10 @@ export default function DemoPage() {
   return (
     <div className="min-h-screen bg-warm-100">
       {/* Demo banner */}
-      <div className="bg-terra/10 border-b border-terra/20 px-4 py-2.5 text-center">
-        <p className="text-xs text-terra-dark">
+      <div className="bg-terracottacotta/10 border-b border-transparent px-4 py-2.5 text-center">
+        <p className="text-xs text-terracottacotta-deep">
           This is a demo with sample data.{" "}
-          <Link href="/login" className="font-semibold underline underline-offset-2 hover:text-terra">
+          <Link href="/login" className="font-semibold underline underline-offset-2 hover:text-terracotta">
             Sign up free
           </Link>{" "}
           to start tracking your own pipeline.
@@ -145,7 +145,7 @@ export default function DemoPage() {
       </div>
 
       {/* Header */}
-      <header className="border-b border-warm-300/60 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
+      <header className="border-b border-transparent px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between bg-warm-50/80 backdrop-blur-sm sticky top-0 z-10 animate-fade-in">
         <div className="min-w-0">
           <h1 className="text-base sm:text-lg font-semibold text-warm-900 tracking-tight">
             Interview Tracker
@@ -158,7 +158,7 @@ export default function DemoPage() {
           <span className="text-xs sm:text-sm text-warm-700">Demo User</span>
           <Link
             href="/login"
-            className="px-3 py-1.5 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
+            className="px-3 py-1.5 text-xs font-medium bg-terracottacotta hover:bg-terracottacotta-deep text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
           >
             Sign up free
           </Link>
@@ -202,7 +202,7 @@ export default function DemoPage() {
                       <div
                         key={opp.id}
                         onClick={() => setExpandedCard(expandedCard === opp.id ? null : opp.id)}
-                        className={`group bg-white/80 backdrop-blur-sm border border-warm-300/60 border-l-[3px] ${PRIORITY_BORDER[opp.priority] || "border-l-warm-300"} rounded-xl p-3 cursor-pointer shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200`}
+                        className={`group bg-vellum-lowest border-l-[3px] ${PRIORITY_BORDER[opp.priority] || "border-l-warm-300"} rounded-xl p-3 cursor-pointer shadow-card hover:shadow-card-hover hover:border-warm-400/80 hover:-translate-y-0.5 transition-all duration-200`}
                       >
                         <div className="flex items-start gap-2.5">
                           <DemoCompanyAvatar company={opp.company} website={opp.website} />
@@ -215,7 +215,7 @@ export default function DemoPage() {
                                 <span
                                   className={`text-xs shrink-0 ${
                                     opp.priority === "high"
-                                      ? "text-terra"
+                                      ? "text-terracotta"
                                       : opp.priority === "low"
                                       ? "text-warm-400"
                                       : "text-warm-500"
@@ -234,7 +234,7 @@ export default function DemoPage() {
 
                         <div className="flex items-center gap-2 mt-2 flex-wrap">
                           {opp.fitScore != null && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-terra/10 text-terra border border-terra/20">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-terracottacotta/10 text-terracotta border border-transparent">
                               {opp.fitScore}%
                             </span>
                           )}
@@ -275,7 +275,7 @@ export default function DemoPage() {
                                 <p className="text-warm-700">{opp.tier}</p>
                               </div>
                             </div>
-                            <p className="text-[10px] text-terra italic">
+                            <p className="text-[10px] text-terracotta italic">
                               Sign up to see full details, AI prep, and more
                             </p>
                           </div>
@@ -290,7 +290,7 @@ export default function DemoPage() {
         </main>
 
         {/* Right sidebar */}
-        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-warm-300/60 p-4 sm:p-5 space-y-6 shrink-0 bg-warm-50/80 backdrop-blur-sm animate-slide-in-right">
+        <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-transparent p-4 sm:p-5 space-y-6 shrink-0 bg-warm-50/80 backdrop-blur-sm animate-slide-in-right">
           {/* Upcoming Interviews */}
           <div>
             <h2 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-3">
@@ -300,11 +300,11 @@ export default function DemoPage() {
               {DEMO_UPCOMING.map((interview) => (
                 <div
                   key={interview.id}
-                  className="bg-white/80 border border-warm-300/60 rounded-lg p-3 shadow-card"
+                  className="bg-white/80 border border-transparent rounded-lg p-3 shadow-card"
                 >
                   <p className="text-sm text-warm-900 font-medium">{interview.company}</p>
                   <p className="text-xs text-warm-600">{interview.round}</p>
-                  <p className="text-xs text-terra-light mt-1">
+                  <p className="text-xs text-terracottacotta-soft mt-1">
                     {new Date(interview.dateTime).toLocaleDateString("en-US", {
                       weekday: "short",
                       month: "short",
@@ -321,18 +321,18 @@ export default function DemoPage() {
           {/* Overdue Follow-ups */}
           {DEMO_FOLLOWUPS.length > 0 && (
             <div>
-              <h2 className="text-xs font-medium text-terra uppercase tracking-wider mb-3">
+              <h2 className="text-xs font-medium text-terracotta uppercase tracking-wider mb-3">
                 Needs Follow-up
               </h2>
               <div className="space-y-2">
                 {DEMO_FOLLOWUPS.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-terra/5 border border-terra/15 rounded-lg p-3"
+                    className="bg-terracottacotta/5 border border-terra/15 rounded-lg p-3"
                   >
                     <p className="text-sm text-warm-900 font-medium">{item.company}</p>
                     <p className="text-xs text-warm-600">{item.role}</p>
-                    <p className="text-xs text-terra mt-1">
+                    <p className="text-xs text-terracotta mt-1">
                       {item.daysSinceActivity} days since last activity
                     </p>
                   </div>
@@ -367,12 +367,12 @@ export default function DemoPage() {
           </div>
 
           {/* CTA */}
-          <div className="bg-terra/5 border border-terra/20 rounded-xl p-4 text-center">
+          <div className="bg-terracottacotta/5 border border-transparent rounded-xl p-4 text-center">
             <p className="text-sm font-medium text-warm-900 mb-1">Ready to track your pipeline?</p>
             <p className="text-xs text-warm-600 mb-3">AI-powered prep, debrief capture, comp comparison, and more.</p>
             <Link
               href="/login"
-              className="inline-block px-4 py-2 text-xs font-medium bg-terra hover:bg-terra-light text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
+              className="inline-block px-4 py-2 text-xs font-medium bg-terracottacotta hover:bg-terracottacotta-deep text-white rounded-lg shadow-card hover:shadow-glow hover:-translate-y-px transition-all duration-200"
             >
               Get started free
             </Link>
