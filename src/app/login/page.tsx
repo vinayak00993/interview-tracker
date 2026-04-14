@@ -103,12 +103,11 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in-up">
         <div className="text-center mb-10">
-          <p className="manuscript-label">The Curated Manuscript</p>
-          <h1 className="manuscript-display text-4xl font-semibold tracking-tight text-ink-900 mt-2">
+          <h1 className="manuscript-display text-4xl font-semibold tracking-tight text-ink-900">
             Interview Tracker
           </h1>
-          <p className="text-sm font-serif italic text-ink-700 mt-3 animate-fade-in-up-delay-1">
-            {isRegister ? "Begin your archive." : "Return to your manuscript."}
+          <p className="text-sm text-ink-700 mt-3 animate-fade-in-up-delay-1">
+            {isRegister ? "Create your account." : "Welcome back. Sign in to continue."}
           </p>
         </div>
 

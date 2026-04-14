@@ -25,22 +25,29 @@ interface KanbanBoardProps {
   opportunities: Opportunity[];
 }
 
-// Earthen Manuscript column palette — uniform elevated surface for every
-// column so the kanban reads as a single rack; each stage gets a small
-// coloured marker dot in the header so status stays visually identifiable.
+// Earthen Manuscript column palette — each stage gets its own subtle tint
+// so the kanban reads as colour-coded at a glance (same approach as the
+// public /demo page). Cards sit on vellum-lowest, so the tint is always
+// the "canvas" behind the cards, not the card itself.
 const COLUMNS = [
-  { status: "saved",        label: "Saved",        surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-400" },
-  { status: "applied",      label: "Applied",      surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-umber-soft text-umber",        marker: "bg-umber" },
-  { status: "interviewing", label: "Interviewing", surface: "bg-vellum-lowest", accent: "text-terracotta", chip: "bg-terracotta text-vellum",       marker: "bg-terracotta" },
-  { status: "offer",        label: "Offer",        surface: "bg-vellum-lowest", accent: "text-sage",       chip: "bg-sage/15 text-sage",            marker: "bg-sage" },
-  { status: "rejected",     label: "Archived",     surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-[#88726e]" },
-  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-300" },
+  { status: "saved",        label: "Saved",        surface: "bg-[#efe9df]", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-400" },
+  { status: "applied",      label: "Applied",      surface: "bg-[#f3e8d1]", accent: "text-ink-700",    chip: "bg-umber-soft text-umber",        marker: "bg-[#c59a3a]" },
+  { status: "interviewing", label: "Interviewing", surface: "bg-[#ecd9d2]", accent: "text-terracotta", chip: "bg-terracotta text-vellum",       marker: "bg-terracotta" },
+  { status: "offer",        label: "Offer",        surface: "bg-[#dfe6c9]", accent: "text-sage",       chip: "bg-sage/15 text-sage",            marker: "bg-sage" },
+  { status: "rejected",     label: "Archived",     surface: "bg-[#ecdbd6]", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-[#a86656]" },
+  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-[#e6e0d3]", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-300" },
 ];
 
 const PRIORITY_DOT: Record<string, string> = {
   high: "bg-terracotta",
   medium: "bg-umber",
   low: "bg-ink-400",
+};
+
+const PRIORITY_BORDER: Record<string, string> = {
+  high: "border-l-terracotta",
+  medium: "border-l-[#c59a3a]",
+  low: "border-l-ink-300",
 };
 
 // Generate a consistent color from a string — now confined to the Earthen palette
@@ -642,7 +649,9 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                     key={opp.id}
                     draggable
                     onDragStart={(e) => handleDragStart(e, opp.id)}
-                    className={`group bg-vellum-lowest rounded p-3 cursor-grab active:cursor-grabbing shadow-card hover-lift transition-all ${
+                    className={`group bg-vellum-lowest rounded border-l-[3px] ${
+                      PRIORITY_BORDER[opp.priority ?? ""] || "border-l-transparent"
+                    } p-3 cursor-grab active:cursor-grabbing shadow-card hover-lift transition-all ${
                       draggedId === opp.id ? "opacity-40 scale-95 rotate-1" : ""
                     }`}
                   >
