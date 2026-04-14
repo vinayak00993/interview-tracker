@@ -25,16 +25,16 @@ interface KanbanBoardProps {
   opportunities: Opportunity[];
 }
 
-// Earthen Manuscript column palette — tonal shifts only (no colored blocks).
-// All columns live on the same vellum surface; the active stage gets a
-// terracotta header underline + accent. Status is conveyed typographically.
+// Earthen Manuscript column palette — uniform elevated surface for every
+// column so the kanban reads as a single rack; each stage gets a small
+// coloured marker dot in the header so status stays visually identifiable.
 const COLUMNS = [
-  { status: "saved",        label: "Saved",        surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
-  { status: "applied",      label: "Applied",      surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
-  { status: "interviewing", label: "Interviewing", surface: "bg-vellum-lowest",    accent: "text-terracotta", chip: "bg-terracotta text-vellum" },
-  { status: "offer",        label: "Offer",        surface: "bg-vellum-lowest/60", accent: "text-sage",       chip: "bg-sage/15 text-sage" },
-  { status: "rejected",     label: "Archived",     surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
-  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-vellum-lowest/60", accent: "text-ink-600",    chip: "bg-vellum-high text-ink-700" },
+  { status: "saved",        label: "Saved",        surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-400" },
+  { status: "applied",      label: "Applied",      surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-umber-soft text-umber",        marker: "bg-umber" },
+  { status: "interviewing", label: "Interviewing", surface: "bg-vellum-lowest", accent: "text-terracotta", chip: "bg-terracotta text-vellum",       marker: "bg-terracotta" },
+  { status: "offer",        label: "Offer",        surface: "bg-vellum-lowest", accent: "text-sage",       chip: "bg-sage/15 text-sage",            marker: "bg-sage" },
+  { status: "rejected",     label: "Archived",     surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-[#88726e]" },
+  { status: "withdrawn",    label: "Withdrawn",    surface: "bg-vellum-lowest", accent: "text-ink-700",    chip: "bg-vellum-high text-ink-700",     marker: "bg-ink-300" },
 ];
 
 const PRIORITY_DOT: Record<string, string> = {
@@ -611,7 +611,6 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       {/* Kanban columns — tonal shift only */}
       <div className="flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-260px)] overflow-x-auto pb-4 -mx-2 px-2">
         {grouped.map((col) => {
-          const isActive = col.status === "interviewing";
           const isDropTarget = dragOverColumn === col.status;
           return (
             <div
@@ -623,10 +622,13 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, col.status)}
             >
-              {/* Column header — label + chip. Active column gets terracotta underline. */}
-              <div className={`px-4 pt-4 pb-3 flex items-center justify-between ${isActive ? "border-b-2 border-terracotta" : ""}`}>
-                <span className={`text-[11px] font-semibold uppercase tracking-label ${col.accent}`}>
-                  {col.label}
+              {/* Column header — marker dot + label + count chip. */}
+              <div className="px-4 pt-4 pb-3 flex items-center justify-between">
+                <span className="flex items-center gap-2 min-w-0">
+                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${col.marker}`} aria-hidden="true" />
+                  <span className={`text-[11px] font-semibold uppercase tracking-label truncate ${col.accent}`}>
+                    {col.label}
+                  </span>
                 </span>
                 <span className={`min-w-[22px] h-5 px-1.5 rounded text-[10px] font-semibold flex items-center justify-center ${col.chip}`}>
                   {col.items.length}
