@@ -3,7 +3,7 @@
  * are present in the running container. Redacts secrets. Delete this file
  * once the OAuth invalid_client bug is fixed.
  *
- * Usage: curl https://www.unlaidoff.com/api/_debug/env-check
+ * Usage: curl https://www.unlaidoff.com/api/debug/env-check
  */
 import { NextResponse } from "next/server";
 
