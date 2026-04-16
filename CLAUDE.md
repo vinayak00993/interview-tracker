@@ -35,6 +35,8 @@ TURSO_TOKEN=...                          # Turso auth token
 NEXTAUTH_SECRET=...                      # Session encryption
 NEXTAUTH_URL=http://localhost:3000       # Auth callback base
 ANTHROPIC_API_KEY=sk-ant-...             # Claude API for AI features
+GOOGLE_CLIENT_ID=...apps.googleusercontent.com  # Google OAuth client ID
+GOOGLE_CLIENT_SECRET=...                 # Google OAuth client secret
 ```
 
 ## Data Model (Prisma schema in `/prisma/schema.prisma`)

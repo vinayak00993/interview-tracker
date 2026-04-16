@@ -24,11 +24,19 @@ async function createSchema() {
     `CREATE TABLE IF NOT EXISTS User (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
-      passwordHash TEXT NOT NULL,
+      passwordHash TEXT,
       name TEXT,
+      image TEXT,
+      googleId TEXT,
+      googleAccessToken TEXT,
+      googleRefreshToken TEXT,
+      googleTokenExpiresAt TEXT,
+      googleScopes TEXT,
+      calendarConnected INTEGER NOT NULL DEFAULT 0,
       createdAt TEXT NOT NULL DEFAULT (datetime('now')),
       updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_user_google_id ON User(googleId) WHERE googleId IS NOT NULL`,
     `CREATE TABLE IF NOT EXISTS Opportunity (
       id TEXT PRIMARY KEY,
       userId TEXT NOT NULL REFERENCES User(id) ON DELETE CASCADE,

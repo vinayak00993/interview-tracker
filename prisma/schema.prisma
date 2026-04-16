@@ -9,16 +9,26 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String
-  name          String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  opportunities Opportunity[]
-  contacts      Contact[]
-  activities    Activity[]
-  documents     Document[]
+  id                  String         @id @default(cuid())
+  email               String         @unique
+  passwordHash        String?        // nullable — Google-auth users have no password
+  name                String?
+  image               String?        // avatar URL from Google
+
+  // Google OAuth
+  googleId            String?        @unique
+  googleAccessToken   String?
+  googleRefreshToken  String?
+  googleTokenExpiresAt DateTime?
+  googleScopes        String?        // space-delimited list of granted scopes
+  calendarConnected   Boolean        @default(false)
+
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  opportunities       Opportunity[]
+  contacts            Contact[]
+  activities          Activity[]
+  documents           Document[]
 }
 
 model Opportunity {

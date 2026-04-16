@@ -13,8 +13,15 @@ const IS_TURSO = !!(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOK
 export interface User {
   id: string;
   email: string;
-  passwordHash: string;
+  passwordHash: string | null;
   name: string | null;
+  image: string | null;
+  googleId: string | null;
+  googleAccessToken: string | null;
+  googleRefreshToken: string | null;
+  googleTokenExpiresAt: string | null;
+  googleScopes: string | null;
+  calendarConnected: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -269,9 +276,37 @@ async function ensureWebsiteColumn() {
   }
 }
 
+// Google OAuth columns — added April 2026. Each ALTER is wrapped so
+// re-running on an already-migrated DB is a no-op.
+async function ensureGoogleAuthColumns() {
+  const statements = [
+    "ALTER TABLE User ADD COLUMN image TEXT",
+    "ALTER TABLE User ADD COLUMN googleId TEXT",
+    "ALTER TABLE User ADD COLUMN googleAccessToken TEXT",
+    "ALTER TABLE User ADD COLUMN googleRefreshToken TEXT",
+    "ALTER TABLE User ADD COLUMN googleTokenExpiresAt TEXT",
+    "ALTER TABLE User ADD COLUMN googleScopes TEXT",
+    "ALTER TABLE User ADD COLUMN calendarConnected INTEGER NOT NULL DEFAULT 0",
+  ];
+  for (const sql of statements) {
+    try {
+      await db.execute(sql);
+    } catch {
+      // Column already exists
+    }
+  }
+  // Unique index on googleId (partial — SQLite supports this via WHERE)
+  try {
+    await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_user_google_id ON User(googleId) WHERE googleId IS NOT NULL");
+  } catch {
+    // Index already exists
+  }
+}
+
 // Run migrations on startup
 ensureUserProfileTable();
 ensureWebsiteColumn();
+ensureGoogleAuthColumns();
 
 // ── User queries ──
 
@@ -303,6 +338,123 @@ export async function createUser(
 
   const result = await db.execute("SELECT id, email, name, createdAt, updatedAt FROM User WHERE id = ?", [id]);
   return result.rows[0] as unknown as Omit<User, "passwordHash">;
+}
+
+// ── Google OAuth user queries ──
+
+export async function findUserByGoogleId(googleId: string): Promise<User | undefined> {
+  const result = await db.execute("SELECT * FROM User WHERE googleId = ?", [googleId]);
+  return rowToObj<User>(result.rows[0]);
+}
+
+/**
+ * Create a user from a Google OAuth profile. No password — login is
+ * via Google only unless they later set one.
+ */
+export async function createGoogleUser(params: {
+  googleId: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  expiresAt: number | null; // unix seconds
+  scopes: string | null;
+}): Promise<User> {
+  const id = crypto.randomUUID();
+  const expiresAtStr = params.expiresAt ? new Date(params.expiresAt * 1000).toISOString() : null;
+  const hasCalendar = params.scopes?.includes("calendar") ? 1 : 0;
+
+  await db.execute(
+    `INSERT INTO User (id, email, passwordHash, name, image, googleId,
+       googleAccessToken, googleRefreshToken, googleTokenExpiresAt,
+       googleScopes, calendarConnected, createdAt, updatedAt)
+     VALUES (?, ?, NULL, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+    [
+      id,
+      params.email,
+      params.name,
+      params.image,
+      params.googleId,
+      params.accessToken,
+      params.refreshToken,
+      expiresAtStr,
+      params.scopes,
+      hasCalendar,
+    ]
+  );
+
+  const result = await db.execute("SELECT * FROM User WHERE id = ?", [id]);
+  return rowToObj<User>(result.rows[0])!;
+}
+
+/**
+ * Link a Google account to an existing email-password user. Called
+ * when a user signs in with Google using an email that already has
+ * a credentials account.
+ */
+export async function linkGoogleToUser(
+  userId: string,
+  params: {
+    googleId: string;
+    name: string | null;
+    image: string | null;
+    accessToken: string | null;
+    refreshToken: string | null;
+    expiresAt: number | null;
+    scopes: string | null;
+  }
+): Promise<void> {
+  const expiresAtStr = params.expiresAt ? new Date(params.expiresAt * 1000).toISOString() : null;
+  const hasCalendar = params.scopes?.includes("calendar") ? 1 : 0;
+
+  await db.execute(
+    `UPDATE User SET
+       googleId = ?,
+       name = COALESCE(name, ?),
+       image = COALESCE(image, ?),
+       googleAccessToken = ?,
+       googleRefreshToken = COALESCE(?, googleRefreshToken),
+       googleTokenExpiresAt = ?,
+       googleScopes = ?,
+       calendarConnected = ?,
+       updatedAt = datetime('now')
+     WHERE id = ?`,
+    [
+      params.googleId,
+      params.name,
+      params.image,
+      params.accessToken,
+      params.refreshToken,
+      expiresAtStr,
+      params.scopes,
+      hasCalendar,
+      userId,
+    ]
+  );
+}
+
+/**
+ * Update tokens after a refresh-token exchange.
+ */
+export async function updateGoogleTokens(
+  userId: string,
+  params: {
+    accessToken: string;
+    refreshToken?: string | null;
+    expiresAt: number; // unix seconds
+  }
+): Promise<void> {
+  const expiresAtStr = new Date(params.expiresAt * 1000).toISOString();
+  await db.execute(
+    `UPDATE User SET
+       googleAccessToken = ?,
+       googleRefreshToken = COALESCE(?, googleRefreshToken),
+       googleTokenExpiresAt = ?,
+       updatedAt = datetime('now')
+     WHERE id = ?`,
+    [params.accessToken, params.refreshToken ?? null, expiresAtStr, userId]
+  );
 }
 
 // ── Opportunity queries ──
