@@ -24,7 +24,7 @@ A personal interview intelligence platform that handles:
 - **Styling**: Tailwind CSS (warm palette: terra/ecru/reds)
 - **Resume Parsing**: mammoth (.docx), plaintext (.txt)
 - **Deployment**: Railway (hosting) + Turso (SQLite cloud)
-- **Live URL**: https://laidoff.up.railway.app
+- **Live URL**: https://interviewtracker.up.railway.app
 
 ## Environment Variables
 
