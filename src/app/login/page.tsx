@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
@@ -103,6 +104,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm animate-fade-in-up">
         <div className="text-center mb-10">
+          <div className="flex justify-center mb-4">
+            <Logo size={40} />
+          </div>
           <h1 className="manuscript-display text-4xl font-semibold tracking-tight text-ink-900">
             Interview Tracker
           </h1>

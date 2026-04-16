@@ -5,6 +5,7 @@ import { findOpportunities, findUpcomingInterviews, findRecentActivities, findOv
 import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
 import LogoutButton from "./LogoutButton";
+import { Logo } from "@/components/Logo";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -31,7 +32,8 @@ export default async function DashboardPage() {
       {/* Header — editorial masthead */}
       <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
-          <div className="min-w-0 flex items-center gap-3 sm:gap-5">
+          <div className="min-w-0 flex items-center gap-3 sm:gap-4">
+            <Logo size={26} className="shrink-0" />
             <div className="min-w-0">
               <h1 className="manuscript-display text-xl sm:text-2xl lg:text-[1.75rem] font-semibold text-ink-900 leading-tight truncate">
                 The Pipeline
