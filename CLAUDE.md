@@ -94,6 +94,9 @@ GOOGLE_CLIENT_SECRET=...                 # Google OAuth client secret
 - [ ] Coach/advisor read-only view
 - [ ] Docker containerization
 
+### Known Design Debt
+- [ ] **Logo is a placeholder.** The current serif-I-on-terracotta mark in `src/components/Logo.tsx` + `src/app/icon.svg` + `src/app/apple-icon.svg` was shipped quickly to replace the default Next.js globe favicon. It's not the final brand — revisit before any public launch.
+
 ## Design Direction
 
 Warm, premium personal tool — think Linear meets Notion, not a generic CRUD app.

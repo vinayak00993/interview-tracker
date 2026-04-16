@@ -2,6 +2,14 @@
  * Interview Tracker brand mark — a serif capital "I" in vellum carved out
  * of a terracotta rounded square. Scales cleanly from 16px (favicon) to
  * 180px (apple-touch-icon) and anywhere in between.
+ *
+ * TODO(design): this is a PLACEHOLDER mark — shipped quickly to replace
+ * the default Next.js globe favicon. It's not the final brand. Revisit
+ * before any proper launch. Candidates for a real mark:
+ *   - a custom wordmark (the "I.T." monogram in a serif, kerned)
+ *   - an abstract pipeline/stages glyph
+ *   - anything NOT a naive block-letter I
+ * If you change this, also update: src/app/icon.svg, src/app/apple-icon.svg.
  */
 export function Logo({ size = 24, className = "" }: { size?: number; className?: string }) {
   return (
