@@ -25,13 +25,12 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased min-h-screen animate-fade-in flex flex-col bg-vellum text-ink-900 selection:bg-terracotta/15 selection:text-terracotta-deep">
         {children}
-        <footer className="mt-auto py-5 text-center">
-          <a
-            href="/faq"
-            className="text-[10px] font-medium uppercase tracking-label text-ink-600 hover:text-terracotta transition-colors"
-          >
-            FAQ
-          </a>
+        <footer className="mt-auto py-5 flex items-center justify-center gap-5 text-[10px] font-medium uppercase tracking-label text-ink-600">
+          <a href="/faq" className="hover:text-terracotta transition-colors">FAQ</a>
+          <span className="text-ink-400" aria-hidden="true">·</span>
+          <a href="/privacy" className="hover:text-terracotta transition-colors">Privacy</a>
+          <span className="text-ink-400" aria-hidden="true">·</span>
+          <a href="/terms" className="hover:text-terracotta transition-colors">Terms</a>
         </footer>
       </body>
     </html>
