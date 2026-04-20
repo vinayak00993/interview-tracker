@@ -111,6 +111,35 @@ export interface Document {
   updatedAt: string;
 }
 
+export interface Offer {
+  id: string;
+  opportunityId: string;
+  baseComp: number | null;
+  signOnBonus: number | null;
+  annualBonus: number | null;
+  bonusPercent: number | null;
+  equityType: string | null;
+  equityValue: number | null;
+  equityShares: number | null;
+  vestYears: number | null;
+  vestCliff: number | null;
+  vestSchedule: string | null;
+  ptoDays: number | null;
+  healthcare: string | null;
+  remotePolicy: string | null;
+  startDate: string | null;
+  expiryDate: string | null;
+  location: string | null;
+  title: string | null;
+  level: string | null;
+  benefits: string | null;
+  rawText: string | null;
+  sourceType: string | null;
+  aiSummary: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Unified query interface ──
 
 interface QueryResult {
@@ -303,10 +332,47 @@ async function ensureGoogleAuthColumns() {
   }
 }
 
+// Offer table — added April 2026.
+async function ensureOfferTable() {
+  try {
+    await db.execute(`CREATE TABLE IF NOT EXISTS Offer (
+      id TEXT PRIMARY KEY,
+      opportunityId TEXT NOT NULL UNIQUE REFERENCES Opportunity(id) ON DELETE CASCADE,
+      baseComp INTEGER,
+      signOnBonus INTEGER,
+      annualBonus INTEGER,
+      bonusPercent REAL,
+      equityType TEXT,
+      equityValue INTEGER,
+      equityShares INTEGER,
+      vestYears INTEGER,
+      vestCliff INTEGER,
+      vestSchedule TEXT,
+      ptoDays INTEGER,
+      healthcare TEXT,
+      remotePolicy TEXT,
+      startDate TEXT,
+      expiryDate TEXT,
+      location TEXT,
+      title TEXT,
+      level TEXT,
+      benefits TEXT,
+      rawText TEXT,
+      sourceType TEXT,
+      aiSummary TEXT,
+      createdAt TEXT NOT NULL DEFAULT (datetime('now')),
+      updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
+    )`);
+  } catch {
+    // Table may already exist
+  }
+}
+
 // Run migrations on startup
 ensureUserProfileTable();
 ensureWebsiteColumn();
 ensureGoogleAuthColumns();
+ensureOfferTable();
 
 // ── User queries ──
 
@@ -821,4 +887,63 @@ export async function findOverdueFollowups(userId: string) {
     daysSinceActivity: Math.round(row.daysSinceActivity),
     lastActivity: row.lastActivity || row.updatedAt,
   }));
+}
+
+// ── Offer queries ──
+
+export async function findOfferByOpportunity(opportunityId: string): Promise<Offer | undefined> {
+  const result = await db.execute("SELECT * FROM Offer WHERE opportunityId = ?", [opportunityId]);
+  return rowToObj<Offer>(result.rows[0]);
+}
+
+/**
+ * Find all offers for a user. Joins through Opportunity so we can
+ * include company/role inline without a second query.
+ */
+export async function findOffersForUser(userId: string): Promise<(Offer & { company: string; role: string })[]> {
+  const result = await db.execute(
+    `SELECT o.*, op.company, op.role
+     FROM Offer o
+     JOIN Opportunity op ON op.id = o.opportunityId
+     WHERE op.userId = ?
+     ORDER BY o.createdAt DESC`,
+    [userId]
+  );
+  return result.rows as unknown as (Offer & { company: string; role: string })[];
+}
+
+export async function upsertOffer(
+  opportunityId: string,
+  data: Partial<Omit<Offer, "id" | "opportunityId" | "createdAt" | "updatedAt">>
+): Promise<Offer> {
+  const existing = await findOfferByOpportunity(opportunityId);
+
+  if (existing) {
+    const fields = Object.keys(data);
+    if (fields.length > 0) {
+      const setClause = fields.map((f) => `${f} = ?`).join(", ");
+      const values = fields.map((f) => (data as Record<string, unknown>)[f]);
+      await db.execute(
+        `UPDATE Offer SET ${setClause}, updatedAt = datetime('now') WHERE id = ?`,
+        [...values, existing.id]
+      );
+    }
+    const result = await db.execute("SELECT * FROM Offer WHERE id = ?", [existing.id]);
+    return rowToObj<Offer>(result.rows[0])!;
+  }
+
+  const id = crypto.randomUUID();
+  const cols = ["id", "opportunityId", ...Object.keys(data)];
+  const placeholders = cols.map(() => "?").join(", ");
+  const values = [id, opportunityId, ...Object.values(data)];
+  await db.execute(
+    `INSERT INTO Offer (${cols.join(", ")}) VALUES (${placeholders})`,
+    values
+  );
+  const result = await db.execute("SELECT * FROM Offer WHERE id = ?", [id]);
+  return rowToObj<Offer>(result.rows[0])!;
+}
+
+export async function deleteOffer(opportunityId: string): Promise<void> {
+  await db.execute("DELETE FROM Offer WHERE opportunityId = ?", [opportunityId]);
 }

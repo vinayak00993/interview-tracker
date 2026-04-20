@@ -56,6 +56,12 @@ export default async function DashboardPage() {
               >
                 Compensation
               </Link>
+              <Link
+                href="/dashboard/offers"
+                className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
+              >
+                Offers
+              </Link>
               <a
                 href="/api/export?format=csv"
                 className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"

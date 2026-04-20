@@ -71,9 +71,51 @@ model Opportunity {
   activities  Activity[]
   opportunityContacts OpportunityContact[]
   documentsSent       OpportunityDocument[]
+  offer       Offer?
 
   @@index([userId, status])
   @@index([userId, company])
+}
+
+model Offer {
+  id              String      @id @default(cuid())
+  opportunityId   String      @unique
+  opportunity     Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  // Comp — all in thousands USD where numeric
+  baseComp        Int?        // annual base in $K
+  signOnBonus     Int?        // one-time, $K
+  annualBonus     Int?        // target annual bonus $K
+  bonusPercent    Float?      // target bonus as % of base
+
+  // Equity
+  equityType      String?     // RSU, ISO, NSO, options, none
+  equityValue     Int?        // total grant $K (at current valuation)
+  equityShares    Int?        // raw share count if provided
+  vestYears       Int?        // total vest length
+  vestCliff       Int?        // cliff in months
+  vestSchedule    String?     // "25/25/25/25" or "monthly after 1yr cliff"
+
+  // Benefits & role
+  ptoDays         Int?        // annual PTO days (or -1 for unlimited)
+  healthcare      String?     // short description
+  remotePolicy    String?     // remote/hybrid/onsite + details
+  startDate       String?     // ISO date or "flexible"
+  expiryDate      String?     // offer expiry — ISO date
+  location        String?     // work location
+  title           String?     // offered title (may differ from role)
+  level           String?     // IC5, L5, Senior II, etc.
+  benefits        String?     // freeform notes (401k match, parental leave, etc.)
+
+  // Source content
+  rawText         String?     // original offer letter text
+  sourceType      String?     // email, pdf, docx, manual
+
+  // AI outputs
+  aiSummary       String?     // short natural-language summary
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model Interview {
