@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 type Offer = {
   id: string;
@@ -224,10 +225,29 @@ export default function OfferComparison({
         )}
 
         {advice && (
-          <div className="bg-vellum-lowest rounded-lg p-6 shadow-card">
-            <h2 className="manuscript-label mb-3">The Advisor</h2>
-            <div className="prose prose-sm max-w-none text-ink-800 font-serif leading-relaxed whitespace-pre-wrap">
-              {advice}
+          <div className="bg-vellum-lowest rounded-lg p-6 shadow-elevated">
+            <div className="flex items-center gap-3 mb-5 pb-4 border-b border-vellum-high">
+              <div className="w-8 h-8 rounded bg-terracotta/10 flex items-center justify-center text-terracotta text-sm">✦</div>
+              <div>
+                <p className="manuscript-label">The Advisor</p>
+                <p className="text-[11px] text-ink-600 font-serif italic">Claude Sonnet 4.5</p>
+              </div>
+            </div>
+            <div className="text-ink-800 leading-relaxed">
+              <ReactMarkdown
+                components={{
+                  h2: ({ children }) => <h2 className="font-serif text-xl font-semibold text-ink-900 mt-7 mb-3 first:mt-0">{children}</h2>,
+                  h3: ({ children }) => <h3 className="font-serif text-base font-semibold text-ink-900 mt-5 mb-2">{children}</h3>,
+                  p: ({ children }) => <p className="text-sm text-ink-800 leading-relaxed my-3">{children}</p>,
+                  ul: ({ children }) => <ul className="my-3 space-y-1.5 pl-5 list-disc marker:text-ink-400">{children}</ul>,
+                  ol: ({ children }) => <ol className="my-3 space-y-1.5 pl-5 list-decimal marker:text-ink-400">{children}</ol>,
+                  li: ({ children }) => <li className="text-sm text-ink-800 leading-relaxed">{children}</li>,
+                  strong: ({ children }) => <strong className="font-semibold text-terracotta">{children}</strong>,
+                  em: ({ children }) => <em className="italic text-ink-700">{children}</em>,
+                }}
+              >
+                {advice}
+              </ReactMarkdown>
             </div>
           </div>
         )}
