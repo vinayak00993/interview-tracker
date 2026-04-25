@@ -122,6 +122,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [debriefingInterview, setDebriefingInterview] = useState<string | null>(null);
   const [isDebriefSubmitting, setIsDebriefSubmitting] = useState(false);
+  const [editingInterview, setEditingInterview] = useState<string | null>(null);
+  const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   const [aiPrep, setAiPrep] = useState<string | null>(null);
   const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
   const [aiPrepError, setAiPrepError] = useState<string | null>(null);
@@ -205,6 +207,47 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
       console.error("Failed to save debrief:", err);
     }
     setIsDebriefSubmitting(false);
+  };
+
+  const handleEditInterview = async (e: React.FormEvent<HTMLFormElement>, interviewId: string) => {
+    e.preventDefault();
+    setIsEditSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+    const data: Record<string, unknown> = {};
+    formData.forEach((value, key) => {
+      if (value === "") {
+        data[key] = null;
+      } else if (key === "roundNumber" || key === "durationMin") {
+        data[key] = parseInt(value as string, 10);
+      } else {
+        data[key] = value;
+      }
+    });
+
+    try {
+      const res = await fetch(`/api/interviews/${interviewId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (res.ok) {
+        setEditingInterview(null);
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Failed to update interview:", err);
+    }
+    setIsEditSubmitting(false);
+  };
+
+  const handleDeleteInterview = async (interviewId: string) => {
+    if (!confirm("Delete this interview stage? This cannot be undone.")) return;
+    try {
+      const res = await fetch(`/api/interviews/${interviewId}`, { method: "DELETE" });
+      if (res.ok) router.refresh();
+    } catch (err) {
+      console.error("Failed to delete interview:", err);
+    }
   };
 
   const handleGenerateAiPrep = async () => {
@@ -720,9 +763,9 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <p className="text-[11px] uppercase tracking-label text-ink-600">Add an interview stage to begin</p>
               </div>
             ) : (
-              <div className="relative pl-20 sm:pl-28 space-y-6">
+              <div className="relative pl-24 sm:pl-32 space-y-6">
                 {/* Journal Timeline — sage line + marginalia dates */}
-                <div className="absolute left-[68px] sm:left-[100px] top-2 bottom-2 w-px bg-sage/40" />
+                <div className="absolute left-[84px] sm:left-[116px] top-2 bottom-2 w-px bg-sage/40" />
                 {opp.interviews.map((interview) => {
                   const isExpanded = expandedInterview === interview.id;
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
@@ -733,22 +776,22 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   return (
                     <div key={interview.id} className="relative">
                       {/* Marginalia date */}
-                      <div className="absolute -left-20 sm:-left-28 top-4 w-16 sm:w-24 text-right">
+                      <div className="absolute -left-24 sm:-left-32 top-4 w-20 sm:w-28 text-right">
                         {marginDate ? (
                           <>
-                            <p className="font-serif italic text-base text-terracotta leading-tight">
+                            <p className="font-serif italic text-base text-terracotta leading-tight whitespace-nowrap">
                               {marginDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                             </p>
-                            <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold mt-0.5">
+                            <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold mt-0.5 whitespace-nowrap">
                               {interview.status === "completed" ? "Completed" : interview.status === "scheduled" ? "Upcoming" : interview.status}
                             </p>
                           </>
                         ) : (
-                          <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold">Unscheduled</p>
+                          <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold whitespace-nowrap">TBD</p>
                         )}
                       </div>
-                      {/* Timeline dot */}
-                      <div className="absolute -left-[19px] sm:-left-[27px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
+                      {/* Timeline dot — centered on the sage line which sits 12px left of card edge */}
+                      <div className="absolute -left-[17px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
 
                       <div className="bg-vellum-lowest rounded overflow-hidden shadow-card hover-lift">
                       <button
@@ -782,8 +825,23 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                         </div>
                       </button>
 
-                      {isExpanded && (
+                      {isExpanded && editingInterview !== interview.id && (
                         <div className="px-4 pb-4 border-t border-warm-300">
+                          <div className="flex items-center gap-3 pt-3 mb-1">
+                            <button
+                              onClick={() => setEditingInterview(interview.id)}
+                              className="text-[10px] uppercase tracking-label text-ink-600 hover:text-terracotta font-semibold transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <span className="text-ink-400">·</span>
+                            <button
+                              onClick={() => handleDeleteInterview(interview.id)}
+                              className="text-[10px] uppercase tracking-label text-ink-600 hover:text-terracotta font-semibold transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
                           <div className="grid grid-cols-2 gap-6 pt-4">
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-3 text-xs">
@@ -960,6 +1018,81 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                               )}
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* Edit form */}
+                      {isExpanded && editingInterview === interview.id && (
+                        <div className="px-4 pb-4 pt-4 border-t border-vellum-high">
+                          <h4 className="text-[10px] uppercase tracking-label text-ink-600 font-semibold mb-3">Edit Stage</h4>
+                          <form
+                            onSubmit={(e) => handleEditInterview(e, interview.id)}
+                            className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                          >
+                            <FormInput name="round" label="Round Name" required defaultValue={interview.round} />
+                            <FormInput name="roundNumber" label="Round #" type="number" defaultValue={String(interview.roundNumber)} />
+                            <FormInput
+                              name="dateTime"
+                              label="Date & Time"
+                              type="datetime-local"
+                              defaultValue={interview.dateTime ? new Date(interview.dateTime).toISOString().slice(0, 16) : ""}
+                            />
+                            <FormInput
+                              name="durationMin"
+                              label="Duration (min)"
+                              type="number"
+                              defaultValue={interview.durationMin ? String(interview.durationMin) : ""}
+                            />
+                            <FormSelect
+                              name="format"
+                              label="Format"
+                              options={["video", "phone", "onsite", "async"]}
+                              defaultValue={interview.format || "video"}
+                            />
+                            <FormSelect
+                              name="status"
+                              label="Status"
+                              options={["scheduled", "completed", "cancelled", "rescheduled"]}
+                              defaultValue={interview.status || "scheduled"}
+                            />
+                            <FormInput name="interviewerName" label="Interviewer Name" defaultValue={interview.interviewerName || ""} />
+                            <FormInput name="interviewerTitle" label="Interviewer Title" defaultValue={interview.interviewerTitle || ""} />
+                            <FormInput name="interviewerLinkedIn" label="Interviewer LinkedIn" defaultValue={interview.interviewerLinkedIn || ""} />
+                            <div className="col-span-1 sm:col-span-3">
+                              <label className="block text-xs font-medium text-ink-600 mb-1">Prep Notes</label>
+                              <textarea
+                                name="prepNotes"
+                                rows={3}
+                                defaultValue={interview.prepNotes || ""}
+                                className="w-full px-3 py-2 bg-vellum-low rounded text-ink-900 text-sm focus:outline-none resize-y"
+                              />
+                            </div>
+                            <div className="col-span-1 sm:col-span-3">
+                              <label className="block text-xs font-medium text-ink-600 mb-1">Questions to Ask</label>
+                              <textarea
+                                name="questionsToAsk"
+                                rows={2}
+                                defaultValue={interview.questionsToAsk || ""}
+                                className="w-full px-3 py-2 bg-vellum-low rounded text-ink-900 text-sm focus:outline-none resize-y"
+                              />
+                            </div>
+                            <div className="col-span-1 sm:col-span-3 flex gap-2 justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setEditingInterview(null)}
+                                className="px-3 py-1.5 text-[11px] uppercase tracking-label text-ink-600 hover:text-ink-900 font-semibold transition-colors"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                type="submit"
+                                disabled={isEditSubmitting}
+                                className="px-4 py-1.5 text-[11px] font-semibold uppercase tracking-label bg-terracotta hover:bg-terracotta-deep disabled:opacity-50 text-vellum rounded transition-colors"
+                              >
+                                {isEditSubmitting ? "Saving..." : "Save Changes"}
+                              </button>
+                            </div>
+                          </form>
                         </div>
                       )}
                       </div>
