@@ -763,9 +763,9 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <p className="text-[11px] uppercase tracking-label text-ink-600">Add an interview stage to begin</p>
               </div>
             ) : (
-              <div className="relative pl-24 sm:pl-32 space-y-6">
+              <div className="relative pl-32 sm:pl-40 space-y-6">
                 {/* Journal Timeline — sage line + marginalia dates */}
-                <div className="absolute left-[84px] sm:left-[116px] top-2 bottom-2 w-px bg-sage/40" />
+                <div className="absolute left-[112px] sm:left-[144px] top-2 bottom-2 w-px bg-sage/40" />
                 {opp.interviews.map((interview) => {
                   const isExpanded = expandedInterview === interview.id;
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
@@ -775,8 +775,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
                   return (
                     <div key={interview.id} className="relative">
-                      {/* Marginalia date */}
-                      <div className="absolute -left-24 sm:-left-32 top-4 w-20 sm:w-28 text-right">
+                      {/* Marginalia date — sits left of the line with breathing room */}
+                      <div className="absolute -left-32 sm:-left-40 top-4 w-24 sm:w-32 pr-3 text-right">
                         {marginDate ? (
                           <>
                             <p className="font-serif italic text-base text-terracotta leading-tight whitespace-nowrap">
@@ -790,8 +790,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                           <p className="text-[9px] uppercase tracking-label text-ink-600 font-semibold whitespace-nowrap">TBD</p>
                         )}
                       </div>
-                      {/* Timeline dot — centered on the sage line which sits 12px left of card edge */}
-                      <div className="absolute -left-[17px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
+                      {/* Timeline dot — centered on the sage line which sits 16px left of card edge */}
+                      <div className="absolute -left-[21px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
 
                       <div className="bg-vellum-lowest rounded overflow-hidden shadow-card hover-lift">
                       <button
