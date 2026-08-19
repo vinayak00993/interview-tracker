@@ -1,11 +1,12 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { findOpportunities, findUpcomingInterviews, findRecentActivities, findOverdueFollowups } from "@/lib/db";
+import { findOpportunities, findUpcomingInterviews, findRecentActivities, findOverdueFollowups, getOnboardingStatus } from "@/lib/db";
 import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
 import LogoutButton from "./LogoutButton";
 import { Logo } from "@/components/Logo";
+import OnboardingGuide from "@/components/OnboardingGuide";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -13,12 +14,18 @@ export default async function DashboardPage() {
 
   const userId = (session.user as any).id;
 
-  const [opportunities, upcomingInterviews, recentActivity, overdueFollowups] = await Promise.all([
+  const [opportunities, upcomingInterviews, recentActivity, overdueFollowups, onboarding] = await Promise.all([
     findOpportunities(userId),
     findUpcomingInterviews(userId),
     findRecentActivities(userId),
     findOverdueFollowups(userId),
+    getOnboardingStatus(userId),
   ]);
+
+  // Oldest opportunity — the natural target for "log an interview" onboarding links
+  const firstOpportunityId = opportunities.length
+    ? opportunities[opportunities.length - 1].id
+    : null;
 
   const stats = {
     total: opportunities.length,
@@ -74,6 +81,12 @@ export default async function DashboardPage() {
               >
                 Profile
               </Link>
+              <Link
+                href="/guide"
+                className="px-3 py-1.5 text-[11px] font-medium uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high rounded transition-all"
+              >
+                Guide
+              </Link>
             </div>
             <div className="flex items-center gap-2 pl-2 sm:pl-3 sm:border-l sm:border-vellum-high">
               <span className="hidden sm:inline text-xs text-ink-700 font-medium truncate max-w-[140px]">
@@ -98,11 +111,19 @@ export default async function DashboardPage() {
         <Link href="/profile" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
           Profile
         </Link>
+        <Link href="/guide" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
+          Guide
+        </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row pb-20 lg:pb-0">
         {/* Main content — Kanban */}
         <main className="flex-1 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 overflow-x-auto animate-fade-in-up">
+          <OnboardingGuide
+            status={onboarding}
+            firstOpportunityId={firstOpportunityId}
+            userName={session.user?.name ?? null}
+          />
           <KanbanBoard opportunities={opportunities} />
         </main>
 

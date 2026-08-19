@@ -125,6 +125,13 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
     setLocalOpps(opportunities);
   }, [opportunities]);
   const [showAddForm, setShowAddForm] = useState(false);
+
+  // Onboarding checklist / tour buttons open the add form via this event
+  useEffect(() => {
+    const openForm = () => setShowAddForm(true);
+    window.addEventListener("open-add-opportunity", openForm);
+    return () => window.removeEventListener("open-add-opportunity", openForm);
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [jdUrl, setJdUrl] = useState("");
   const [isFetchingJd, setIsFetchingJd] = useState(false);

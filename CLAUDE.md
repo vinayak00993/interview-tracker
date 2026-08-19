@@ -78,6 +78,7 @@ GOOGLE_CLIENT_SECRET=...                 # Google OAuth client secret
 - [x] Comp comparison visualization (horizontal bar chart across pipeline)
 - [x] Interview debrief capture with sentiment tracking
 - [x] Screenshot OCR via Claude Vision (Haiku)
+- [x] New-user onboarding (welcome tour, getting-started checklist, `/guide` reference page)
 - [ ] Follow-up reminders and cadence tracking
 - [ ] Status change audit trail
 - [ ] Data export (CSV, JSON)

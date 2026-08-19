@@ -332,6 +332,16 @@ async function ensureGoogleAuthColumns() {
   }
 }
 
+// Onboarding dismissal — added August 2026. Tracks when a user hides
+// the getting-started checklist so it stays hidden across devices.
+async function ensureOnboardingColumn() {
+  try {
+    await db.execute("ALTER TABLE User ADD COLUMN onboardingDismissedAt TEXT");
+  } catch {
+    // Column already exists
+  }
+}
+
 // Offer table — added April 2026.
 async function ensureOfferTable() {
   try {
@@ -373,6 +383,7 @@ ensureUserProfileTable();
 ensureWebsiteColumn();
 ensureGoogleAuthColumns();
 ensureOfferTable();
+ensureOnboardingColumn();
 
 // ── User queries ──
 
@@ -946,4 +957,55 @@ export async function upsertOffer(
 
 export async function deleteOffer(opportunityId: string): Promise<void> {
   await db.execute("DELETE FROM Offer WHERE opportunityId = ?", [opportunityId]);
+}
+
+// ── Onboarding ──
+
+export interface OnboardingStatus {
+  dismissed: boolean;
+  hasOpportunity: boolean;
+  hasResume: boolean;
+  hasInterview: boolean;
+  hasPrep: boolean;
+  hasDebrief: boolean;
+}
+
+/**
+ * Onboarding checklist state is derived from the user's actual data —
+ * no per-step flags to keep in sync. Only the dismissal is stored.
+ */
+export async function getOnboardingStatus(userId: string): Promise<OnboardingStatus> {
+  const [userResult, oppResult, profileResult, interviewResult] = await Promise.all([
+    db.execute("SELECT onboardingDismissedAt FROM User WHERE id = ?", [userId]),
+    db.execute("SELECT COUNT(*) as count FROM Opportunity WHERE userId = ?", [userId]),
+    db.execute("SELECT resumeText FROM UserProfile WHERE userId = ?", [userId]),
+    db.execute(
+      `SELECT COUNT(*) as count,
+         SUM(CASE WHEN i.prepNotes IS NOT NULL AND i.prepNotes != '' THEN 1 ELSE 0 END) as withPrep,
+         SUM(CASE WHEN i.debriefNotes IS NOT NULL AND i.debriefNotes != '' THEN 1 ELSE 0 END) as withDebrief
+       FROM Interview i
+       JOIN Opportunity o ON o.id = i.opportunityId
+       WHERE o.userId = ?`,
+      [userId]
+    ),
+  ]);
+
+  const resumeText = profileResult.rows[0]?.resumeText as string | null | undefined;
+  const interviewRow: any = interviewResult.rows[0] || {};
+
+  return {
+    dismissed: !!userResult.rows[0]?.onboardingDismissedAt,
+    hasOpportunity: Number(oppResult.rows[0]?.count ?? 0) > 0,
+    hasResume: !!(resumeText && resumeText.trim().length > 0),
+    hasInterview: Number(interviewRow.count ?? 0) > 0,
+    hasPrep: Number(interviewRow.withPrep ?? 0) > 0,
+    hasDebrief: Number(interviewRow.withDebrief ?? 0) > 0,
+  };
+}
+
+export async function setOnboardingDismissed(userId: string, dismissed: boolean): Promise<void> {
+  await db.execute(
+    `UPDATE User SET onboardingDismissedAt = ${dismissed ? "datetime('now')" : "NULL"}, updatedAt = datetime('now') WHERE id = ?`,
+    [userId]
+  );
 }

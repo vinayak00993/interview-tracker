@@ -23,6 +23,9 @@ model User {
   googleScopes        String?        // space-delimited list of granted scopes
   calendarConnected   Boolean        @default(false)
 
+  // Onboarding
+  onboardingDismissedAt DateTime?    // when the getting-started checklist was hidden
+
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   opportunities       Opportunity[]

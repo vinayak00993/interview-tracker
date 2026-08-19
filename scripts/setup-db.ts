@@ -33,6 +33,7 @@ async function createSchema() {
       googleTokenExpiresAt TEXT,
       googleScopes TEXT,
       calendarConnected INTEGER NOT NULL DEFAULT 0,
+      onboardingDismissedAt TEXT,
       createdAt TEXT NOT NULL DEFAULT (datetime('now')),
       updatedAt TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
