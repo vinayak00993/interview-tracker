@@ -13,11 +13,9 @@ export default async function ProfilePage() {
   const profile = await findUserProfile(userId);
 
   return (
-    <div className="app-shell">
-      <div className="app-shell-scroll">
-        <ProfileForm profile={profile || null} />
-      </div>
+    <>
+      <ProfileForm profile={profile || null} />
       <MobileTabBar />
-    </div>
+    </>
   );
 }
