@@ -34,21 +34,21 @@ export async function POST() {
   const offersSummary = offers
     .map((o, i) => {
       const total = (o.baseComp || 0) + (o.annualBonus || 0) + (o.equityValue || 0) / (o.vestYears || 4);
-      return `## Offer ${i + 1}: ${o.company} — ${o.title || o.role}
+      return `## Offer ${i + 1}: ${o.company} - ${o.title || o.role}
 - Base: ${o.baseComp ? `$${o.baseComp}K` : "?"}
 - Annual bonus: ${o.annualBonus ? `$${o.annualBonus}K` : o.bonusPercent ? `${o.bonusPercent}% of base` : "?"}
 - Sign-on: ${o.signOnBonus ? `$${o.signOnBonus}K` : "none"}
 - Equity: ${o.equityType || "?"}, ${o.equityValue ? `$${o.equityValue}K` : "?"} over ${o.vestYears || "?"} years (cliff: ${o.vestCliff || "?"}mo)
 - Est. annualized comp: ~$${Math.round(total)}K
 - Level / title: ${o.level || "?"} / ${o.title || "?"}
-- Location / remote: ${o.location || "?"} — ${o.remotePolicy || "?"}
+- Location / remote: ${o.location || "?"} / ${o.remotePolicy || "?"}
 - PTO: ${o.ptoDays === -1 ? "unlimited" : o.ptoDays ? `${o.ptoDays} days` : "?"}
 - Benefits: ${o.benefits || "not specified"}
 - Start: ${o.startDate || "flexible"} | Expires: ${o.expiryDate || "?"}`;
     })
     .join("\n\n");
 
-  const systemPrompt = `You are a senior career advisor helping a candidate choose between multiple job offers. You reason clearly about compensation structure, career growth, risk, and fit. You NEVER invent numbers — only use what's provided. You're direct and practical, not saccharine.
+  const systemPrompt = `You are a senior career advisor helping a candidate choose between multiple job offers. You reason clearly about compensation structure, career growth, risk, and fit. You NEVER invent numbers, only use what's provided. You're direct and practical, not saccharine. Write in plain, natural prose. Do not use em dashes or en dashes anywhere; use commas, periods, or hyphens instead.
 
 Produce a Markdown response with these sections:
 

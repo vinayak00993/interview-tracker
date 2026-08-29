@@ -197,7 +197,7 @@ export default function LoginPage() {
           >
             {loading
               ? (isRegister ? "Creating..." : "Signing in...")
-              : (isRegister ? "Begin Archive" : "Sign In")}
+              : (isRegister ? "Create Account" : "Sign In")}
           </button>
 
           <p className="text-center text-xs text-ink-600">

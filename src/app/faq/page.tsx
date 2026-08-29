@@ -6,7 +6,7 @@ import Link from "next/link";
 const faqs = [
   {
     q: "Is my data private? Can my employer see it?",
-    a: "Completely private. Your job search data is tied to your account and never shared with anyone — not employers, not recruiters, not third parties. We don't sell data, period.",
+    a: "Completely private. Your job search data is tied to your account and never shared with anyone. Not employers, not recruiters, not third parties. We don't sell data, period.",
   },
   {
     q: "Where is my data stored?",
@@ -14,11 +14,11 @@ const faqs = [
   },
   {
     q: "What does AI prep actually do?",
-    a: "When you add your resume and LinkedIn summary to your profile, the AI uses that context to generate tailored prep for each specific role — likely interview questions, talking points, gaps to address, and company research prompts. It's not generic; it's built around your background and the job description.",
+    a: "When you add your resume and LinkedIn summary to your profile, the AI uses that context to generate prep for each specific role: likely interview questions, talking points, gaps to address, and company research prompts. It's built around your background and the job description, not generic advice.",
   },
   {
     q: "What's the fit score?",
-    a: "You set it — it's your own gut-check rating (0–100) of how well you match a role. Think of it as a quick signal for prioritization, not an automated score.",
+    a: "You set it yourself. It's your own gut check rating from 0 to 100 of how well you match a role. Think of it as a quick signal for prioritizing, not an automated score.",
   },
   {
     q: "What's the difference between Tier and Priority?",
@@ -26,11 +26,11 @@ const faqs = [
   },
   {
     q: "Does it work on mobile?",
-    a: "Yes — the interface is responsive. It's best on desktop for adding detailed notes, but you can check status, log activity, and review prep on your phone.",
+    a: "Yes, the interface is responsive. Desktop is best for adding detailed notes, but you can check status, log activity, and review prep on your phone.",
   },
   {
     q: "How do I get the most out of it?",
-    a: "Fill in your profile first (resume text + LinkedIn about section) — that's what unlocks the AI features. Then add your target roles and run AI prep before each interview round.",
+    a: "Fill in your profile first (resume text and LinkedIn about section). That's what unlocks the AI features. Then add your target roles and run AI prep before each interview round.",
   },
   { q: "Is it free?", a: "Yes." },
 ];

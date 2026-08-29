@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Interview Tracker",
-  description: "The curated manuscript of your job search.",
+  description: "Track opportunities, prep for interviews, and compare offers in one place.",
   appleWebApp: {
     capable: true,
     title: "Interview Tracker",

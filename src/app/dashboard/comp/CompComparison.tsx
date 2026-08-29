@@ -56,7 +56,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
         {/* Summary stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <StatCard label="Opportunities" value={String(withComp.length)} sub={`of ${opportunities.length} total`} />
-          <StatCard label="Avg Range" value={`$${avgMin}K – $${avgMax}K`} />
+          <StatCard label="Avg Range" value={`$${avgMin}K - $${avgMax}K`} />
           <StatCard label="Highest Max" value={`$${highestMax}K`} accent />
           <StatCard label="Lowest Min" value={`$${lowestMin}K`} />
         </div>
@@ -120,7 +120,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                         className="absolute top-0 bottom-0 flex items-center text-[10px] font-medium text-ink-700 pl-1"
                         style={{ left: `${minPct + rangePct + 1}%` }}
                       >
-                        ${opp.compMin}K – ${opp.compMax}K
+                        ${opp.compMin}K - ${opp.compMax}K
                       </div>
                     )}
                   </div>
@@ -156,7 +156,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                   href={`/opportunities/${opp.id}`}
                   className="text-xs text-ink-700 hover:text-terracotta py-1 transition-colors"
                 >
-                  {opp.company} — {opp.role}
+                  {opp.company} - {opp.role}
                 </Link>
               ))}
             </div>
