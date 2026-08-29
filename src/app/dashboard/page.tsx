@@ -109,7 +109,7 @@ export default async function DashboardPage() {
             </h2>
             {upcomingInterviews.length === 0 ? (
               <p className="text-sm text-ink-600 italic font-serif">
-                No interviews on the calendar.
+                No upcoming interviews.
               </p>
             ) : (
               <div className="space-y-2">
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
                     <p className="text-sm text-ink-900 font-serif font-medium leading-tight">{item.company}</p>
                     <p className="text-[11px] text-ink-600 mt-0.5">{item.role}</p>
                     <p className="text-[10px] uppercase tracking-label text-terracotta mt-1.5 font-medium">
-                      {item.daysSinceActivity} days silent
+                      Last activity {item.daysSinceActivity} days ago
                     </p>
                   </Link>
                 ))}
@@ -167,7 +167,7 @@ export default async function DashboardPage() {
 
           {/* Recent Activity */}
           <div>
-            <h2 className="manuscript-label mb-3">Marginalia</h2>
+            <h2 className="manuscript-label mb-3">Recent Activity</h2>
             <div className="space-y-2.5">
               {recentActivity.map((activity: any) => (
                 <div

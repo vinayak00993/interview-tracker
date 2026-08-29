@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Privacy Policy — Interview Tracker",
+  title: "Privacy Policy | Interview Tracker",
   description: "How Interview Tracker handles your data.",
 };
 
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
               We do <strong>not</strong> sell your data, share it with third parties for
               advertising, or use it to train AI models. Google user data is not transferred
               to any third party other than the AI provider (Anthropic) that powers prep
-              generation — and in that case, only the specific opportunity context
+              generation. Even then, only the specific opportunity context
               (company, role, JD) plus your uploaded resume text is sent, never raw
               calendar events.
             </p>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
             <h2 className="text-base font-serif font-semibold text-ink-900 mb-2">Your controls</h2>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li>Export all your data at any time from the dashboard (CSV or JSON).</li>
-              <li>Delete your account and all associated data at any time — email support@interviewtracker.app.</li>
+              <li>Delete your account and all associated data at any time by emailing support@interviewtracker.app.</li>
               <li>Disconnect your Google account and revoke calendar access from your{" "}
                 <a
                   href="https://myaccount.google.com/permissions"

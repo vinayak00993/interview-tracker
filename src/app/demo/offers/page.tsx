@@ -83,7 +83,7 @@ const DEMO_OFFERS: DemoOffer[] = [
     expiryDate: "Apr 30, 2026",
     location: "Remote",
     benefits: "$5K WFH setup, $4K learning, 20wk parental leave, 401k 5% match, FSA/HSA",
-    aiSummary: "Highest cash comp and fully remote. Late-stage private — more liquid but less upside.",
+    aiSummary: "Highest cash comp and fully remote. Late-stage private, so more liquid but less upside.",
     wins: ["Highest cash ($285K base)", "Fully remote", "Best healthcare + 401k", "Biggest sign-on"],
     losses: ["Smallest equity grant", "IPO timing uncertain", "Late-stage means limited upside"],
   },
@@ -124,16 +124,16 @@ Stripe leads on year-one cash ($450K). Ramp leads on equity grant size ($550K to
 
 ## Questions to ask before deciding
 
-1. **Anthropic** — What's the current 409A and how has it tracked over the last 4 rounds? Expected IPO window?
-2. **Stripe** — Are the RSUs double-trigger (IPO + time) or single-trigger? What if IPO slips 2+ years?
-3. **Ramp** — Is 4-day negotiable down to 3? What's the promo timeline to the next level?
-4. **All three** — Severance policy and change-of-control clause on equity?
+1. **Anthropic**: What's the current 409A and how has it tracked over the last 4 rounds? Expected IPO window?
+2. **Stripe**: Are the RSUs double-trigger (IPO + time) or single-trigger? What if IPO slips 2+ years?
+3. **Ramp**: Is 4-day negotiable down to 3? What's the promo timeline to the next level?
+4. **All three**: Severance policy and change-of-control clause on equity?
 
 ## Negotiation levers
 
-- **Anthropic** — push base to $260K citing Stripe's $285K. Equity is their strongest card; let them lead there.
-- **Stripe** — ask for an additional $150K RSU grant citing Ramp's larger equity package.
-- **Ramp** — push to 3-day in-office and ask for 401k match. Use Anthropic's equity trajectory as leverage.
+- **Anthropic**: push base to $260K citing Stripe's $285K. Equity is their strongest card; let them lead there.
+- **Stripe**: ask for an additional $150K RSU grant citing Ramp's larger equity package.
+- **Ramp**: push to 3-day in-office and ask for 401k match. Use Anthropic's equity trajectory as leverage.
 
 ## Final recommendation
 
@@ -141,7 +141,7 @@ If your top priorities are **equity upside + category positioning** → **Anthro
 If they're **cash + remote + short-term stability** → **Stripe.**
 Ramp is competitive on comp; it's the in-office burden that weakens it.
 
-The numbers are close enough that **fit, manager, and trajectory** should be the tie-breaker — not comp.`;
+The numbers are close enough that **fit, manager, and trajectory** should be the tie-breaker, not comp.`;
 
 function CompanyLogo({ offer, size = 48 }: { offer: DemoOffer; size?: number }) {
   const domain = new URL(offer.website).hostname;
@@ -225,7 +225,7 @@ export default function DemoOffersPage() {
         {/* Hero */}
         <div className="flex items-end justify-between mb-10 gap-3 flex-wrap">
           <div>
-            <p className="manuscript-label">The Decision</p>
+            <p className="manuscript-label">Offers</p>
             <h1 className="manuscript-display text-3xl sm:text-4xl font-semibold text-ink-900 mt-1 leading-tight">
               Three offers on the table
             </h1>
@@ -392,8 +392,8 @@ export default function DemoOffersPage() {
             <div className="flex items-center gap-3 mb-5 pb-4 border-b border-vellum-high">
               <div className="w-8 h-8 rounded bg-terracotta/10 flex items-center justify-center text-terracotta text-sm">✦</div>
               <div>
-                <p className="manuscript-label">The Advisor</p>
-                <p className="text-[11px] text-ink-600 font-serif italic">Claude Sonnet 4.5 — considering your resume, offers, and market data</p>
+                <p className="manuscript-label">AI Advisor</p>
+                <p className="text-[11px] text-ink-600 font-serif italic">Claude Sonnet 4.5, using your resume, offers, and market data</p>
               </div>
             </div>
             <div className="text-ink-800 leading-relaxed">

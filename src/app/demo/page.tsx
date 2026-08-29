@@ -100,17 +100,17 @@ const DEMO_OPPS = [
 ];
 
 const DEMO_UPCOMING = [
-  { id: "u1", company: "Stripe", round: "Hiring Manager — VP Partnerships", dateTime: new Date(Date.now() + 2 * 86400000).toISOString() },
+  { id: "u1", company: "Stripe", round: "Hiring Manager, VP Partnerships", dateTime: new Date(Date.now() + 2 * 86400000).toISOString() },
   { id: "u2", company: "Figma", round: "Case Study Presentation", dateTime: new Date(Date.now() + 5 * 86400000).toISOString() },
 ];
 
 const DEMO_ACTIVITY = [
   { id: "a1", description: "Completed panel interview with Stripe partnerships team", company: "Stripe", role: "Head of Strategic Partnerships", date: new Date(Date.now() - 1 * 86400000).toISOString() },
-  { id: "a2", description: "Received offer from Ramp — $320K base + equity", company: "Ramp", role: "Director of Strategic Partnerships", date: new Date(Date.now() - 2 * 86400000).toISOString() },
+  { id: "a2", description: "Received offer from Ramp: $320K base plus equity", company: "Ramp", role: "Director of Strategic Partnerships", date: new Date(Date.now() - 2 * 86400000).toISOString() },
   { id: "a3", description: "Applied with tailored resume and cover letter", company: "Notion", role: "Strategic Partnerships Lead", date: new Date(Date.now() - 3 * 86400000).toISOString() },
-  { id: "a4", description: "Completed recruiter screen — strong culture fit signal", company: "Figma", role: "Director of Business Development", date: new Date(Date.now() - 4 * 86400000).toISOString() },
+  { id: "a4", description: "Completed recruiter screen, strong culture fit signal", company: "Figma", role: "Director of Business Development", date: new Date(Date.now() - 4 * 86400000).toISOString() },
   { id: "a5", description: "AI-generated interview prep reviewed and customized", company: "Stripe", role: "Head of Strategic Partnerships", date: new Date(Date.now() - 5 * 86400000).toISOString() },
-  { id: "a6", description: "Rejected after final round — feedback: wanted more SaaS experience", company: "Plaid", role: "Partner Development Manager", date: new Date(Date.now() - 7 * 86400000).toISOString() },
+  { id: "a6", description: "Rejected after final round. Feedback: wanted more SaaS experience", company: "Plaid", role: "Partner Development Manager", date: new Date(Date.now() - 7 * 86400000).toISOString() },
 ];
 
 const DEMO_FOLLOWUPS = [
@@ -252,7 +252,7 @@ export default function DemoPage() {
 
                         {opp.compMin != null && opp.compMax != null && (
                           <p className="text-[10px] text-warm-500 mt-1.5">
-                            ${opp.compMin}K – ${opp.compMax}K
+                            ${opp.compMin}K - ${opp.compMax}K
                           </p>
                         )}
 
@@ -358,7 +358,7 @@ export default function DemoPage() {
                   <div>
                     <span className="text-warm-800">{activity.description}</span>
                     <span className="text-warm-500 block">
-                      {activity.company} — {activity.role}
+                      {activity.company} - {activity.role}
                     </span>
                   </div>
                 </div>

@@ -104,17 +104,17 @@ export default function ProfileForm({ profile }: { profile: Profile | null }) {
             ← The Pipeline
           </Link>
           <span className="text-ink-400">/</span>
-          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">The Author</span>
+          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">Profile</span>
         </div>
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10 animate-fade-in-up">
         <div className="mb-8">
-          <p className="manuscript-label">About the Author</p>
+          <p className="manuscript-label">Account</p>
           <h2 className="manuscript-display text-3xl font-semibold text-ink-900 mt-1">Your Profile</h2>
           <p className="text-sm font-serif italic text-ink-700 mt-3 max-w-lg">
-            Upload your resume and add LinkedIn detail. This data tailors every piece of AI prep we generate for you.
+            Upload your resume and add your LinkedIn details. The AI uses this to tailor prep for each role.
           </p>
         </div>
 

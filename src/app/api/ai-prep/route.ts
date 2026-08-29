@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "AI prep not configured — ANTHROPIC_API_KEY missing" }, { status: 500 });
+      return NextResponse.json({ error: "AI prep is not configured. ANTHROPIC_API_KEY is missing." }, { status: 500 });
     }
 
     const userId = (session.user as any).id;
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     if (!profile?.resumeText && !profile?.linkedInAbout) {
       return NextResponse.json({
-        error: "Set up your profile first — upload your resume or paste your LinkedIn about section.",
+        error: "Set up your profile first. Upload your resume or paste your LinkedIn about section.",
       }, { status: 400 });
     }
 
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       `Company: ${opp.company}`,
       `Role: ${opp.role}`,
       opp.location ? `Location: ${opp.location}${opp.remote ? " (Remote)" : ""}` : "",
-      opp.compMin && opp.compMax ? `Comp: $${opp.compMin}K – $${opp.compMax}K` : "",
+      opp.compMin && opp.compMax ? `Comp: $${opp.compMin}K - $${opp.compMax}K` : "",
       opp.fitScore ? `Fit Score: ${opp.fitScore}%` : "",
       opp.jdLink ? `JD Link: ${opp.jdLink}` : "",
       opp.notes ? `\n## Notes\n${opp.notes}` : "",
@@ -99,7 +99,7 @@ ${jdContent ? `\n## Job Description Content\n${jdContent}` : ""}
 Generate the following sections in markdown format:
 
 ## Tailored Talking Points
-3-5 specific talking points that map the candidate's experience directly to what this role requires. Be specific — reference actual projects, companies, and achievements from their resume.
+3-5 specific talking points that map the candidate's experience directly to what this role requires. Be specific and reference actual projects, companies, and achievements from their resume.
 
 ## Gap Analysis
 Honestly assess 2-3 gaps between the candidate's background and the role requirements. For each gap, suggest how to address it in conversation (reframe, bridge experience, acknowledge and show willingness to learn).
@@ -113,7 +113,7 @@ Honestly assess 2-3 gaps between the candidate's background and the role require
 ## Key Research Points
 3-4 things the candidate should research about the company before interviewing.
 
-Be direct and specific — no generic advice. Every point should reference the candidate's actual experience or the specific role.`,
+Be direct and specific, no generic advice. Every point should reference the candidate's actual experience or the specific role. Write in plain, natural prose. Do not use em dashes or en dashes anywhere; use commas, periods, or hyphens instead.`,
       }],
     });
 

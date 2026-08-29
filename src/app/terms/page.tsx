@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Terms of Service — Interview Tracker",
+  title: "Terms of Service | Interview Tracker",
   description: "Terms of use for Interview Tracker.",
 };
 
@@ -53,8 +53,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-base font-serif font-semibold text-ink-900 mb-2">Your content</h2>
             <p>
-              Everything you put into Interview Tracker — your opportunities, notes,
-              resume, interview debriefs — remains yours. We claim no ownership.
+              Everything you put into Interview Tracker (your opportunities, notes,
+              resume, and interview debriefs) remains yours. We claim no ownership.
               Exporting or deleting your data is always available.
             </p>
           </section>
@@ -64,7 +64,7 @@ export default function TermsPage() {
             <p>
               The service is provided &quot;as is&quot; with no warranty of uptime,
               completeness, or fitness for purpose. AI-generated content is a
-              suggestion, not advice — double-check before acting on it in a
+              suggestion, not advice. Double check it before acting on it in a
               real interview.
             </p>
           </section>

@@ -97,12 +97,12 @@ export default function OfferComparison({
       <div className="max-w-6xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-12">
         <div className="flex items-end justify-between mb-8 gap-3 flex-wrap">
           <div>
-            <p className="manuscript-label">The Decision</p>
+            <p className="manuscript-label">Offers</p>
             <h1 className="manuscript-display text-3xl sm:text-4xl font-semibold text-ink-900 mt-1 leading-tight">
               Offer Comparison
             </h1>
             <p className="text-sm font-serif italic text-ink-700 mt-2 max-w-xl">
-              Add offer letters to compare side-by-side. The advisor considers your resume,
+              Add offer letters to compare side by side. The advisor looks at your resume,
               the offers, and market context to help you decide.
             </p>
           </div>
@@ -198,27 +198,27 @@ export default function OfferComparison({
                 </tr>
               </thead>
               <tbody className="text-ink-800">
-                <Row label="Base" offers={offers} render={(o) => o.baseComp ? `$${o.baseComp}K` : "—"} />
+                <Row label="Base" offers={offers} render={(o) => o.baseComp ? `$${o.baseComp}K` : "-"} />
                 <Row label="Annual bonus" offers={offers} render={(o) =>
-                  o.annualBonus ? `$${o.annualBonus}K` : o.bonusPercent ? `${o.bonusPercent}%` : "—"
+                  o.annualBonus ? `$${o.annualBonus}K` : o.bonusPercent ? `${o.bonusPercent}%` : "-"
                 } />
-                <Row label="Sign-on" offers={offers} render={(o) => o.signOnBonus ? `$${o.signOnBonus}K` : "—"} />
+                <Row label="Sign-on" offers={offers} render={(o) => o.signOnBonus ? `$${o.signOnBonus}K` : "-"} />
                 <Row label="Equity" offers={offers} render={(o) =>
-                  o.equityValue ? `${o.equityType || "?"} $${o.equityValue}K` : "—"
+                  o.equityValue ? `${o.equityType || "?"} $${o.equityValue}K` : "-"
                 } />
                 <Row label="Vest" offers={offers} render={(o) =>
-                  o.vestYears ? `${o.vestYears}yr${o.vestCliff ? ` (${o.vestCliff}mo cliff)` : ""}` : "—"
+                  o.vestYears ? `${o.vestYears}yr${o.vestCliff ? ` (${o.vestCliff}mo cliff)` : ""}` : "-"
                 } />
-                <Row label="Level" offers={offers} render={(o) => o.level || "—"} />
-                <Row label="Location" offers={offers} render={(o) => o.location || "—"} />
-                <Row label="Remote" offers={offers} render={(o) => o.remotePolicy || "—"} />
+                <Row label="Level" offers={offers} render={(o) => o.level || "-"} />
+                <Row label="Location" offers={offers} render={(o) => o.location || "-"} />
+                <Row label="Remote" offers={offers} render={(o) => o.remotePolicy || "-"} />
                 <Row label="PTO" offers={offers} render={(o) =>
-                  o.ptoDays === -1 ? "unlimited" : o.ptoDays ? `${o.ptoDays} days` : "—"
+                  o.ptoDays === -1 ? "unlimited" : o.ptoDays ? `${o.ptoDays} days` : "-"
                 } />
-                <Row label="Start" offers={offers} render={(o) => o.startDate || "—"} />
-                <Row label="Expires" offers={offers} render={(o) => o.expiryDate || "—"} />
-                <Row label="Benefits" offers={offers} render={(o) => o.benefits || "—"} multiline />
-                <Row label="Summary" offers={offers} render={(o) => o.aiSummary || "—"} multiline />
+                <Row label="Start" offers={offers} render={(o) => o.startDate || "-"} />
+                <Row label="Expires" offers={offers} render={(o) => o.expiryDate || "-"} />
+                <Row label="Benefits" offers={offers} render={(o) => o.benefits || "-"} multiline />
+                <Row label="Summary" offers={offers} render={(o) => o.aiSummary || "-"} multiline />
               </tbody>
             </table>
           </div>
@@ -229,7 +229,7 @@ export default function OfferComparison({
             <div className="flex items-center gap-3 mb-5 pb-4 border-b border-vellum-high">
               <div className="w-8 h-8 rounded bg-terracotta/10 flex items-center justify-center text-terracotta text-sm">✦</div>
               <div>
-                <p className="manuscript-label">The Advisor</p>
+                <p className="manuscript-label">AI Advisor</p>
                 <p className="text-[11px] text-ink-600 font-serif italic">Claude Sonnet 4.5</p>
               </div>
             </div>
@@ -367,7 +367,7 @@ function AddOfferForm({
             <option value="">Select...</option>
             {eligibleOpps.map((o) => (
               <option key={o.id} value={o.id}>
-                {o.company} — {o.role}
+                {o.company} - {o.role}
               </option>
             ))}
           </select>

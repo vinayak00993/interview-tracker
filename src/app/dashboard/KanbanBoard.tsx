@@ -418,16 +418,16 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
       {/* Toolbar — editorial section heading */}
       <div className="flex items-end justify-between mb-5 gap-3 flex-wrap">
         <div>
-          <p className="manuscript-label">The Archive</p>
+          <p className="manuscript-label">Pipeline</p>
           <h2 className="manuscript-display text-2xl sm:text-[1.75rem] font-semibold text-ink-900 leading-tight mt-0.5">
-            Active Pursuits
+            Opportunities
           </h2>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="px-4 py-2 text-[11px] font-semibold uppercase tracking-label bg-terracotta hover:bg-terracotta-deep text-vellum rounded shadow-card hover:shadow-lift hover:-translate-y-0.5 transition-all"
         >
-          + New Entry
+          + Add Opportunity
         </button>
       </div>
 
@@ -495,8 +495,8 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         <div className="mb-6 manuscript-glass bg-vellum-lowest/85 rounded-lg p-6 shadow-elevated animate-scale-in">
           <div className="flex items-center justify-between mb-5">
             <div>
-              <p className="manuscript-label">New Entry</p>
-              <h3 className="manuscript-display text-lg font-semibold text-ink-900 mt-0.5">Document your next chapter</h3>
+              <p className="manuscript-label">New Opportunity</p>
+              <h3 className="manuscript-display text-lg font-semibold text-ink-900 mt-0.5">Add a role you&apos;re tracking</h3>
             </div>
             <button
               type="button"
@@ -635,12 +635,12 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
               </label>
             </div>
             <div className="col-span-1 sm:col-span-3">
-              <label className="manuscript-label block mb-1.5">Initial Thoughts</label>
+              <label className="manuscript-label block mb-1.5">Notes</label>
               <textarea
                 name="notes"
                 rows={2}
                 className="w-full px-3 py-2 bg-vellum-low text-ink-900 text-sm focus:outline-none focus:bg-vellum-lowest border-b border-outlineSoft focus:border-terracotta transition-all resize-none rounded-t"
-                placeholder="Why this role — and why now?"
+                placeholder="Why are you interested in this role?"
               />
             </div>
             <div className="col-span-1 sm:col-span-3 flex gap-3 justify-end pt-2">
@@ -812,7 +812,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
 
                 {col.items.length === 0 && (
                   <div className="text-[11px] font-serif italic text-ink-600 px-2 py-4 text-center">
-                    —
+                    Empty
                   </div>
                 )}
               </div>
@@ -950,7 +950,7 @@ function PipelineCardContent({
 
       {showComp && opp.compMin != null && opp.compMax != null && (
         <p className="text-[11px] text-ink-700 mt-2 font-medium">
-          ${opp.compMin}K – ${opp.compMax}K
+          ${opp.compMin}K - ${opp.compMax}K
         </p>
       )}
 
@@ -1020,7 +1020,7 @@ function Select({
         defaultValue={defaultValue}
         className="w-full px-0 py-1.5 bg-transparent text-ink-900 text-sm font-body focus:outline-none border-b border-outlineSoft focus:border-terracotta transition-colors cursor-pointer"
       >
-        <option value="">—</option>
+        <option value="">Select...</option>
         {options.map((opt) => (
           <option key={opt} value={opt}>
             {opt.charAt(0).toUpperCase() + opt.slice(1)}

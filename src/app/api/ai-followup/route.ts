@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "AI features not configured — ANTHROPIC_API_KEY missing" }, { status: 500 });
+      return NextResponse.json({ error: "AI features are not configured. ANTHROPIC_API_KEY is missing." }, { status: 500 });
     }
 
     const userId = (session.user as any).id;
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       max_tokens: 1000,
       messages: [{
         role: "user",
-        content: `Generate a professional follow-up/thank-you email after a job interview.
+        content: `Generate a professional follow-up/thank-you email after a job interview. Write it in plain, natural prose that sounds like a real person. Do not use em dashes or en dashes; use commas, periods, or hyphens instead.
 
 ## Context
 - Candidate name: ${candidateName}

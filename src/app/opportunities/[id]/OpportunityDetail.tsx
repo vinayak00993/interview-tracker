@@ -273,7 +273,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   const handleDeleteOpportunity = async () => {
-    if (!confirm(`Delete ${opp.company} — ${opp.role}? This cannot be undone.`)) return;
+    if (!confirm(`Delete ${opp.company} (${opp.role})? This cannot be undone.`)) return;
     try {
       const res = await fetch(`/api/opportunities/${opp.id}`, { method: "DELETE" });
       if (res.ok) router.push("/dashboard");
@@ -371,7 +371,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         {/* Header section */}
         {isEditing ? (
           <div className="mb-8 bg-vellum-lowest rounded-lg p-6 shadow-card">
-            <p className="manuscript-label mb-1">Archive Entry</p>
+            <p className="manuscript-label mb-1">Opportunity</p>
             <h2 className="manuscript-display text-xl font-semibold text-ink-900 mb-5">Edit Opportunity</h2>
             <form onSubmit={handleEditSave} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <FormInput name="company" label="Company" required defaultValue={opp.company} />
@@ -451,7 +451,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
               </span>
               {opp.compMin != null && opp.compMax != null && (
                 <span className="text-[11px] text-ink-700 font-medium">
-                  ${opp.compMin}K – ${opp.compMax}K
+                  ${opp.compMin}K - ${opp.compMax}K
                 </span>
               )}
               {opp.fitScore != null && (
@@ -554,7 +554,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <p className="text-[10px] font-medium text-warm-500 uppercase tracking-wider mb-1">Compensation</p>
                 {opp.compMin != null && opp.compMax != null ? (
                   <>
-                    <p className="text-sm font-semibold text-warm-900">${opp.compMin}K – ${opp.compMax}K</p>
+                    <p className="text-sm font-semibold text-warm-900">${opp.compMin}K - ${opp.compMax}K</p>
                     <p className="text-xs text-warm-600 mt-1">Base range</p>
                   </>
                 ) : (
@@ -646,7 +646,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-warm-600">Source</span>
-                      <span className="text-warm-900">{opp.source || "—"}</span>
+                      <span className="text-warm-900">{opp.source || "-"}</span>
                     </div>
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-warm-600">Added</span>
@@ -697,7 +697,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
           <div>
             <div className="flex items-end justify-between mb-6 gap-3 flex-wrap">
               <div>
-                <p className="manuscript-label">Chapter Log</p>
+                <p className="manuscript-label">Interviews</p>
                 <h2 className="manuscript-display text-2xl font-semibold text-ink-900 leading-tight mt-0.5">
                   Interview Stages
                 </h2>
@@ -761,8 +761,8 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
 
             {opp.interviews.length === 0 ? (
               <div className="bg-vellum-low rounded-lg p-12 text-center">
-                <p className="text-base font-serif italic text-ink-700 mb-1">The manuscript awaits its first entry.</p>
-                <p className="text-[11px] uppercase tracking-label text-ink-600">Add an interview stage to begin</p>
+                <p className="text-base font-serif italic text-ink-700 mb-1">No interviews yet.</p>
+                <p className="text-[11px] uppercase tracking-label text-ink-600">Add your first round to get started</p>
               </div>
             ) : (
               <div className="relative sm:pl-40 space-y-4 sm:space-y-6">
@@ -1118,12 +1118,12 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             <div className="manuscript-glass bg-vellum-lowest/85 rounded-lg p-6 shadow-elevated">
               <div className="flex items-start justify-between gap-4 mb-4 flex-wrap">
                 <div>
-                  <p className="manuscript-label">AI-Powered Preparation</p>
+                  <p className="manuscript-label">AI Prep</p>
                   <h3 className="manuscript-display text-xl font-semibold text-ink-900 leading-tight mt-1">
-                    Tailored prep for this chapter
+                    Prep for this interview
                   </h3>
                   <p className="text-sm font-serif italic text-ink-700 mt-2 max-w-lg">
-                    Weaves your <Link href="/profile" className="text-terracotta hover:text-terracotta-deep underline underline-offset-2">profile</Link> — resume, LinkedIn, and prior debriefs — into a brief tuned to this role.
+                    Uses your <Link href="/profile" className="text-terracotta hover:text-terracotta-deep underline underline-offset-2">profile</Link> (resume, LinkedIn, and past debriefs) to build prep notes for this specific role.
                   </p>
                 </div>
                 <button
@@ -1134,7 +1134,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   {isGeneratingPrep ? (
                     <>
                       <span className="inline-block w-3 h-3 border-2 border-vellum/30 border-t-vellum rounded-full animate-spin" />
-                      Composing...
+                      Generating...
                     </>
                   ) : aiPrep ? "Regenerate" : "Generate Prep"}
                 </button>
@@ -1243,7 +1243,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                       {opp.compMin != null && opp.compMax != null && (
                         <div>
                           <span className="text-warm-500">Comp Range</span>
-                          <p className="text-warm-800 mt-0.5">${opp.compMin}K – ${opp.compMax}K</p>
+                          <p className="text-warm-800 mt-0.5">${opp.compMin}K - ${opp.compMax}K</p>
                         </div>
                       )}
                       {opp.fitScore != null && (
@@ -1278,7 +1278,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   {/* Prep Notes for the next interview */}
                   {nextInterview?.prepNotes && (
                     <div className="bg-white border border-warm-300 rounded-lg p-5">
-                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Prep Notes — {nextInterview.round}</h3>
+                      <h3 className="text-xs font-medium text-warm-600 uppercase tracking-wider mb-2">Prep Notes: {nextInterview.round}</h3>
                       <div className="text-sm text-warm-800 whitespace-pre-wrap">{nextInterview.prepNotes}</div>
                     </div>
                   )}
