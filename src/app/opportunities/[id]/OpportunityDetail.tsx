@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ReactMarkdown from "react-markdown";
+import MobileTabBar from "@/components/MobileTabBar";
 
 const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   saved:        { bg: "bg-vellum-high",     text: "text-ink-700",         border: "border-transparent" },
@@ -349,7 +350,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-vellum pb-20 lg:pb-0">
+    <div className="min-h-screen bg-vellum pb-24 md:pb-0">
       {/* Top bar — editorial masthead */}
       <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 flex items-center gap-4">
@@ -763,9 +764,10 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                 <p className="text-[11px] uppercase tracking-label text-ink-600">Add an interview stage to begin</p>
               </div>
             ) : (
-              <div className="relative pl-32 sm:pl-40 space-y-6">
-                {/* Journal Timeline — sage line + marginalia dates */}
-                <div className="absolute left-[112px] sm:left-[144px] top-2 bottom-2 w-px bg-sage/40" />
+              <div className="relative sm:pl-40 space-y-4 sm:space-y-6">
+                {/* Journal Timeline — sage line + marginalia dates (sm+ only;
+                    phones get the date inline in the card header instead) */}
+                <div className="hidden sm:block absolute sm:left-[144px] top-2 bottom-2 w-px bg-sage/40" />
                 {opp.interviews.map((interview) => {
                   const isExpanded = expandedInterview === interview.id;
                   const intStatus = INTERVIEW_STATUS_COLORS[interview.status] || INTERVIEW_STATUS_COLORS.scheduled;
@@ -776,7 +778,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                   return (
                     <div key={interview.id} className="relative">
                       {/* Marginalia date — sits left of the line with breathing room */}
-                      <div className="absolute -left-32 sm:-left-40 top-4 w-24 sm:w-32 pr-3 text-right">
+                      <div className="hidden sm:block absolute sm:-left-40 top-4 sm:w-32 pr-3 text-right">
                         {marginDate ? (
                           <>
                             <p className="font-serif italic text-base text-terracotta leading-tight whitespace-nowrap">
@@ -791,7 +793,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                         )}
                       </div>
                       {/* Timeline dot — centered on the sage line which sits 16px left of card edge */}
-                      <div className="absolute -left-[21px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
+                      <div className="hidden sm:block absolute -left-[21px] top-5 w-2.5 h-2.5 rounded-full bg-terracotta ring-4 ring-vellum" />
 
                       <div className="bg-vellum-lowest rounded overflow-hidden shadow-card hover-lift">
                       <button
@@ -810,6 +812,11 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                                 {interview.interviewerTitle && <span className="text-ink-600"> · {interview.interviewerTitle}</span>}
                               </span>
                             )}
+                            <span className="sm:hidden block text-[10px] uppercase tracking-label text-terracotta font-semibold mt-1">
+                              {marginDate
+                                ? marginDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+                                : "TBD"}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
@@ -842,7 +849,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                               Delete
                             </button>
                           </div>
-                          <div className="grid grid-cols-2 gap-6 pt-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4">
                             <div className="space-y-4">
                               <div className="grid grid-cols-2 gap-3 text-xs">
                                 {interview.dateTime && (
@@ -1182,7 +1189,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
                           </span>
                         )}
                       </div>
-                      <div className="grid grid-cols-3 gap-3 text-xs">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
                         <div>
                           <span className="text-warm-500">Format</span>
                           <p className="text-warm-800 mt-0.5">{nextInterview.format}</p>
@@ -1390,7 +1397,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
             {opp.opportunityContacts.length === 0 ? (
               <p className="text-sm text-warm-500 py-8 text-center">No contacts linked to this opportunity.</p>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {opp.opportunityContacts.map(({ id, role, contact }) => (
                   <div key={id} className="bg-white border border-warm-300 rounded-lg p-4">
                     <div className="flex items-start justify-between">
@@ -1454,6 +1461,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
           </div>
         )}
       </div>
+      <MobileTabBar />
     </div>
   );
 }

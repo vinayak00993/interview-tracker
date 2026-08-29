@@ -1,9 +1,24 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Interview Tracker",
   description: "The curated manuscript of your job search.",
+  appleWebApp: {
+    capable: true,
+    title: "Interview Tracker",
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: false },
+};
+
+// viewportFit: "cover" is required for env(safe-area-inset-*) to resolve on
+// notched iPhones — without it the bottom tab bar sits under the home indicator.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#fcf9f4",
 };
 
 export default function RootLayout({

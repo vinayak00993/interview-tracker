@@ -6,6 +6,7 @@ import Link from "next/link";
 import KanbanBoard from "./KanbanBoard";
 import LogoutButton from "./LogoutButton";
 import { Logo } from "@/components/Logo";
+import MobileTabBar from "@/components/MobileTabBar";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -87,22 +88,9 @@ export default async function DashboardPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      {/* Mobile secondary nav */}
-      <div className="md:hidden flex items-center gap-1 px-4 py-2 bg-vellum-low overflow-x-auto">
-        <Link href="/dashboard/comp" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
-          Compensation
-        </Link>
-        <a href="/api/export?format=csv" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
-          Export
-        </a>
-        <Link href="/profile" className="px-3 py-1.5 text-[10px] font-medium uppercase tracking-label text-ink-700 whitespace-nowrap">
-          Profile
-        </Link>
-      </div>
-
-      <div className="flex flex-col lg:flex-row pb-20 lg:pb-0">
+      <div className="flex flex-col lg:flex-row pb-24 md:pb-0">
         {/* Main content — Kanban */}
-        <main className="flex-1 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 overflow-x-auto animate-fade-in-up">
+        <main className="flex-1 min-w-0 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 animate-fade-in-up">
           <KanbanBoard opportunities={opportunities} />
         </main>
 
@@ -208,23 +196,7 @@ export default async function DashboardPage() {
         </aside>
       </div>
 
-      {/* Mobile bottom nav */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-30 manuscript-glass safe-bottom border-t border-vellum-high/60">
-        <div className="flex items-center justify-around py-2">
-          <Link href="/dashboard" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-terracotta">
-            <span className="text-base">◪</span>
-            <span className="text-[9px] uppercase tracking-label font-semibold">Pipeline</span>
-          </Link>
-          <Link href="/dashboard/comp" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-ink-700">
-            <span className="text-base">$</span>
-            <span className="text-[9px] uppercase tracking-label font-semibold">Comp</span>
-          </Link>
-          <Link href="/profile" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-ink-700">
-            <span className="text-base">✎</span>
-            <span className="text-[9px] uppercase tracking-label font-semibold">Profile</span>
-          </Link>
-        </div>
-      </nav>
+      <MobileTabBar />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { findOffersForUser, findOpportunities } from "@/lib/db";
 import OfferComparison from "./OfferComparison";
+import MobileTabBar from "@/components/MobileTabBar";
 
 export default async function OffersPage() {
   const session = await getServerSession(authOptions);
@@ -19,5 +20,12 @@ export default async function OffersPage() {
     .filter((o) => ["offer", "interviewing"].includes(o.status))
     .filter((o) => !offers.find((off) => off.opportunityId === o.id));
 
-  return <OfferComparison offers={offers} eligibleOpps={eligibleOpps} />;
+  return (
+    <>
+      <div className="pb-24 md:pb-0">
+        <OfferComparison offers={offers} eligibleOpps={eligibleOpps} />
+      </div>
+      <MobileTabBar />
+    </>
+  );
 }

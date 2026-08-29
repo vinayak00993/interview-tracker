@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { findUserProfile } from "@/lib/db";
 import ProfileForm from "./ProfileForm";
+import MobileTabBar from "@/components/MobileTabBar";
 
 export default async function ProfilePage() {
   const session = await getServerSession(authOptions);
@@ -11,5 +12,12 @@ export default async function ProfilePage() {
   const userId = (session.user as any).id;
   const profile = await findUserProfile(userId);
 
-  return <ProfileForm profile={profile || null} />;
+  return (
+    <>
+      <div className="pb-24 md:pb-0">
+        <ProfileForm profile={profile || null} />
+      </div>
+      <MobileTabBar />
+    </>
+  );
 }

@@ -54,7 +54,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
 
       <div className="max-w-4xl mx-auto px-6 py-8">
         {/* Summary stats */}
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8">
           <StatCard label="Opportunities" value={String(withComp.length)} sub={`of ${opportunities.length} total`} />
           <StatCard label="Avg Range" value={`$${avgMin}K – $${avgMax}K`} />
           <StatCard label="Highest Max" value={`$${highestMax}K`} accent />
@@ -70,7 +70,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
         ) : (
           <div className="space-y-3">
             {/* Scale labels */}
-            <div className="flex items-center justify-between text-[10px] text-ink-600 pl-48 pr-2 mb-1">
+            <div className="hidden sm:flex items-center justify-between text-[10px] text-ink-600 pl-48 pr-2 mb-1">
               <span>$0K</span>
               <span>${Math.round(globalMax / 4)}K</span>
               <span>${Math.round(globalMax / 2)}K</span>
@@ -87,10 +87,10 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                 <Link
                   key={opp.id}
                   href={`/opportunities/${opp.id}`}
-                  className="flex items-center gap-3 group hover:bg-vellum-high/50 rounded-lg py-2 px-2 -mx-2 transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 group hover:bg-vellum-high/50 rounded-lg py-2 px-2 -mx-2 transition-colors"
                 >
-                  {/* Label */}
-                  <div className="w-44 shrink-0 text-right pr-2">
+                  {/* Label — above the bar on phones, right-aligned gutter on sm+ */}
+                  <div className="w-full sm:w-44 shrink-0 text-left sm:text-right sm:pr-2">
                     <p className="text-xs font-medium text-ink-900 truncate group-hover:text-terracotta transition-colors">
                       {opp.company}
                     </p>
@@ -98,7 +98,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                   </div>
 
                   {/* Bar */}
-                  <div className="flex-1 relative h-8">
+                  <div className="w-full sm:w-auto sm:flex-1 relative h-8">
                     {/* Background track */}
                     <div className="absolute inset-0 bg-vellum-high rounded" />
                     {/* Range bar */}
@@ -126,7 +126,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
                   </div>
 
                   {/* Status + meta */}
-                  <div className="w-24 shrink-0 text-right">
+                  <div className="hidden sm:block w-24 shrink-0 text-right">
                     <span className={`text-[10px] ${colors.text}`}>{opp.status}</span>
                     {opp.tier && (
                       <span className="text-[10px] text-ink-600 ml-1.5">T{opp.tier}</span>
@@ -149,7 +149,7 @@ export default function CompComparison({ opportunities }: { opportunities: Oppor
             <h3 className="text-xs font-medium text-ink-600 uppercase tracking-wider mb-3">
               Missing Comp Data ({withoutComp.length})
             </h3>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {withoutComp.map((opp) => (
                 <Link
                   key={opp.id}
