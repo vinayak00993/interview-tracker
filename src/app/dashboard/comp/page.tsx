@@ -13,11 +13,11 @@ export default async function CompPage() {
   const opportunities = await findOpportunities(userId);
 
   return (
-    <>
-      <div className="pb-24 md:pb-0">
+    <div className="app-shell">
+      <div className="app-shell-scroll">
         <CompComparison opportunities={opportunities} />
       </div>
       <MobileTabBar />
-    </>
+    </div>
   );
 }

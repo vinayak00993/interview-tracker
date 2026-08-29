@@ -63,7 +63,7 @@ export default function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 manuscript-glass safe-bottom border-t border-vellum-high/60"
+      className="md:hidden shrink-0 manuscript-glass safe-bottom border-t border-vellum-high/60"
     >
       <div className="flex items-stretch">
         {TABS.map((tab) => {

@@ -350,7 +350,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-vellum pb-24 md:pb-0">
+    <div className="app-shell min-h-screen bg-vellum">
       {/* Top bar — editorial masthead */}
       <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 flex items-center gap-4">
@@ -366,7 +366,7 @@ export default function OpportunityDetail({ opportunity: opp }: Props) {
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10 animate-fade-in-up">
+      <div className="app-shell-scroll w-full max-w-5xl mx-auto px-4 sm:px-10 lg:px-16 py-8 sm:py-10 animate-fade-in-up">
         {/* Header section */}
         {isEditing ? (
           <div className="mb-8 bg-vellum-lowest rounded-lg p-6 shadow-card">

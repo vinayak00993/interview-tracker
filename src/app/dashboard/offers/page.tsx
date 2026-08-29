@@ -21,11 +21,11 @@ export default async function OffersPage() {
     .filter((o) => !offers.find((off) => off.opportunityId === o.id));
 
   return (
-    <>
-      <div className="pb-24 md:pb-0">
+    <div className="app-shell">
+      <div className="app-shell-scroll">
         <OfferComparison offers={offers} eligibleOpps={eligibleOpps} />
       </div>
       <MobileTabBar />
-    </>
+    </div>
   );
 }
