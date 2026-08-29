@@ -33,6 +33,10 @@ module.exports = {
           '0%': { opacity: '0', transform: 'scale(0.97)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        'sheet-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
         'shimmer': {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
@@ -48,6 +52,7 @@ module.exports = {
         'fade-in-up-delay-5': 'fade-in-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.25s both',
         'slide-in-right': 'slide-in-right 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
         'scale-in': 'scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        'sheet-up': 'sheet-up 0.28s cubic-bezier(0.32, 0.72, 0, 1)',
       },
       boxShadow: {
         // Warm terracotta-tinted shadows — "ambient tonal depth"

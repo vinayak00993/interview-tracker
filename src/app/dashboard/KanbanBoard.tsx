@@ -121,9 +121,26 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<string | null>(null);
 
+  // Mobile pipeline: which stage is in view, and which card has the move sheet open
+  const [mobileCol, setMobileCol] = useState(0);
+  const [moveSheetOpp, setMoveSheetOpp] = useState<Opportunity | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const chipRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const programmaticScroll = useRef(false);
+
   useEffect(() => {
     setLocalOpps(opportunities);
   }, [opportunities]);
+
+  // Lock background scroll while the move sheet is open
+  useEffect(() => {
+    if (!moveSheetOpp) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [moveSheetOpp]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [jdUrl, setJdUrl] = useState("");
@@ -179,24 +196,17 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
     setDragOverColumn(null);
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent, newStatus: string) => {
-      e.preventDefault();
-      setDragOverColumn(null);
-      const id = e.dataTransfer.getData("text/plain");
-      if (!id) return;
-
+  // Shared by desktop drag-and-drop and the mobile move sheet:
+  // optimistic status change with rollback on failure.
+  const moveOpportunity = useCallback(
+    (id: string, newStatus: string) => {
       const opp = localOpps.find((o) => o.id === id);
-      if (!opp || opp.status === newStatus) {
-        setDraggedId(null);
-        return;
-      }
+      if (!opp || opp.status === newStatus) return;
 
       const previousStatus = opp.status;
       setLocalOpps((prev) =>
         prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
       );
-      setDraggedId(null);
 
       fetch(`/api/opportunities/${id}/status`, {
         method: "PATCH",
@@ -218,6 +228,44 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
     },
     [localOpps]
   );
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent, newStatus: string) => {
+      e.preventDefault();
+      setDragOverColumn(null);
+      setDraggedId(null);
+      const id = e.dataTransfer.getData("text/plain");
+      if (id) moveOpportunity(id, newStatus);
+    },
+    [moveOpportunity]
+  );
+
+  const scrollToCol = useCallback((index: number) => {
+    setMobileCol(index);
+    const el = carouselRef.current;
+    if (!el) return;
+    programmaticScroll.current = true;
+    el.scrollTo({ left: index * el.clientWidth, behavior: "smooth" });
+    window.setTimeout(() => {
+      programmaticScroll.current = false;
+    }, 450);
+  }, []);
+
+  const handleCarouselScroll = useCallback(() => {
+    if (programmaticScroll.current) return;
+    const el = carouselRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    setMobileCol((prev) => {
+      if (index === prev) return prev;
+      chipRefs.current[index]?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      });
+      return index;
+    });
+  }, []);
 
   const handleFetchJd = async () => {
     if (!jdUrl.trim()) return;
@@ -385,13 +433,13 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
 
       {/* Search & filter bar */}
       <div className="flex flex-wrap items-center gap-2 mb-6 bg-vellum-low rounded px-3 py-2">
-        <div className="relative flex-1 min-w-[180px] max-w-sm">
+        <div className="relative flex-1 min-w-full sm:min-w-[180px] sm:max-w-sm">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search company, role, or location..."
-            className="w-full pl-8 pr-3 py-1.5 bg-transparent text-ink-900 text-xs focus:outline-none focus:bg-vellum-lowest rounded border-b border-transparent focus:border-terracotta transition-all placeholder:text-ink-600"
+            className="w-full pl-8 pr-3 py-2 sm:py-1.5 bg-transparent text-ink-900 text-xs focus:outline-none focus:bg-vellum-lowest rounded border-b border-transparent focus:border-terracotta transition-all placeholder:text-ink-600"
           />
           <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -522,7 +570,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); removeScreenshot(i); }}
-                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-terracotta text-vellum rounded-full text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-terracotta text-vellum rounded-full text-xs flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                       >
                         ×
                       </button>
@@ -615,8 +663,109 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
         </div>
       )}
 
-      {/* Kanban columns — tonal shift only */}
-      <div className="flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-260px)] overflow-x-auto pb-4 -mx-2 px-2">
+      {/* Mobile pipeline — one stage at a time; swipe between stages or tap a chip.
+          Drag-and-drop doesn't exist on touch, so each card gets a move button
+          that opens a bottom sheet instead. */}
+      <div className="md:hidden">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-3">
+          {grouped.map((col, i) => (
+            <button
+              key={col.status}
+              ref={(el) => {
+                chipRefs.current[i] = el;
+              }}
+              type="button"
+              onClick={() => scrollToCol(i)}
+              className={`shrink-0 flex items-center gap-1.5 pl-3.5 pr-2.5 py-2 rounded-full text-[11px] font-semibold uppercase tracking-label transition-colors ${
+                i === mobileCol
+                  ? "bg-terracotta text-vellum"
+                  : "bg-vellum-low text-ink-700 active:bg-vellum-mid"
+              }`}
+            >
+              {col.label}
+              <span
+                className={`min-w-[20px] h-[18px] px-1 rounded-full text-[10px] flex items-center justify-center ${
+                  i === mobileCol ? "bg-vellum/25" : "bg-vellum-high text-ink-600"
+                }`}
+              >
+                {col.items.length}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <div
+          ref={carouselRef}
+          onScroll={handleCarouselScroll}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide overscroll-x-contain -mx-4"
+        >
+          {grouped.map((col) => (
+            <div key={col.status} className="w-full shrink-0 snap-center px-4">
+              <div className={`rounded-lg ${col.surface} p-3 min-h-[45vh]`}>
+                <div className="space-y-2.5">
+                  {col.items.map((opp) => (
+                    <div
+                      key={opp.id}
+                      className={`relative bg-vellum-lowest rounded border-l-[3px] ${
+                        PRIORITY_BORDER[opp.priority ?? ""] || "border-l-transparent"
+                      } shadow-card`}
+                    >
+                      <Link
+                        href={`/opportunities/${opp.id}`}
+                        className="block p-3.5 pr-12 rounded active:bg-vellum-low transition-colors"
+                      >
+                        <PipelineCardContent opp={opp} showComp={showComp} hidePriorityDot />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={() => setMoveSheetOpp(opp)}
+                        aria-label={`Move ${opp.company} to another stage`}
+                        className="absolute top-1.5 right-1.5 w-10 h-10 flex items-center justify-center rounded-full text-ink-600 active:bg-vellum-mid transition-colors"
+                      >
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+
+                  {col.items.length === 0 && (
+                    <div className="text-sm font-serif italic text-ink-600 px-2 py-10 text-center">
+                      Nothing here yet.
+                    </div>
+                  )}
+                </div>
+
+                {col.status === "saved" && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(true)}
+                    className="w-full mt-2.5 py-3 text-[11px] font-semibold uppercase tracking-label text-terracotta active:bg-terracotta/10 rounded transition-colors flex items-center justify-center gap-2"
+                  >
+                    <span>+</span>
+                    <span>Add Opportunity</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Position dots */}
+        <div className="flex items-center justify-center gap-1.5 mt-3">
+          {grouped.map((col, i) => (
+            <span
+              key={col.status}
+              className={`rounded-full transition-all ${
+                i === mobileCol ? "w-4 h-1.5 bg-terracotta" : "w-1.5 h-1.5 bg-vellum-highest"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop kanban columns — tonal shift only */}
+      <div className="hidden md:flex gap-3 sm:gap-4 min-h-[50vh] sm:min-h-[calc(100vh-260px)] overflow-x-auto pb-4 -mx-2 px-2">
         {grouped.map((col) => {
           const isDropTarget = dragOverColumn === col.status;
           return (
@@ -656,82 +805,7 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
                     }`}
                   >
                     <Link href={`/opportunities/${opp.id}`} className="block">
-                      <div className="flex items-start gap-2.5">
-                        <CompanyAvatar company={opp.company} website={opp.website} />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-1.5">
-                            <div className="min-w-0">
-                              <p className="text-[10px] uppercase tracking-label text-ink-600 font-semibold truncate">
-                                {opp.company}
-                              </p>
-                              <h3 className="text-[15px] font-serif font-medium text-ink-900 leading-tight mt-0.5 line-clamp-2">
-                                {opp.role}
-                              </h3>
-                            </div>
-                            {opp.priority && (
-                              <span
-                                className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${PRIORITY_DOT[opp.priority] || "bg-ink-400"}`}
-                                title={`${opp.priority} priority`}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {showComp && opp.compMin != null && opp.compMax != null && (
-                        <p className="text-[11px] text-ink-700 mt-2 font-medium">
-                          ${opp.compMin}K – ${opp.compMax}K
-                        </p>
-                      )}
-
-                      {opp.location && (
-                        <p className="text-[11px] text-ink-600 mt-0.5 truncate">
-                          {opp.location}{opp.remote && " · Remote"}
-                        </p>
-                      )}
-
-                      {(() => {
-                        const chips: React.ReactNode[] = [];
-                        if (opp.fitScore != null) {
-                          chips.push(
-                            <span key="fit" className="text-[10px] font-semibold uppercase tracking-label text-terracotta">
-                              {opp.fitScore}% fit
-                            </span>
-                          );
-                        }
-                        if (opp.tier != null) {
-                          chips.push(
-                            <span key="tier" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
-                              T{opp.tier}
-                            </span>
-                          );
-                        }
-                        if (opp.source === "referral") {
-                          chips.push(
-                            <span key="ref" className="text-[10px] font-semibold uppercase tracking-label text-sage">
-                              Referral
-                            </span>
-                          );
-                        }
-                        if (opp._count.interviews > 0) {
-                          chips.push(
-                            <span key="int" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
-                              {opp._count.interviews} int.
-                            </span>
-                          );
-                        }
-                        if (chips.length === 0) return null;
-                        return (
-                          <div className="flex items-center gap-x-2 gap-y-1 mt-2 flex-wrap">
-                            {chips.map((chip, i) => (
-                              <span key={i} className="flex items-center gap-x-2">
-                                {i > 0 && <span className="text-ink-400 text-[10px]">·</span>}
-                                {chip}
-                              </span>
-                            ))}
-                          </div>
-                        );
-                      })()}
+                      <PipelineCardContent opp={opp} showComp={showComp} />
                     </Link>
                   </div>
                 ))}
@@ -758,7 +832,145 @@ export default function KanbanBoard({ opportunities }: KanbanBoardProps) {
           );
         })}
       </div>
+
+      {/* Mobile move sheet */}
+      {moveSheetOpp && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Move to stage">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={() => setMoveSheetOpp(null)}
+            className="absolute inset-0 w-full bg-ink-900/40 animate-fade-in"
+          />
+          <div className="absolute bottom-0 left-0 right-0 bg-vellum rounded-t-xl shadow-elevated animate-sheet-up px-4 pt-3 pb-6 safe-bottom">
+            <div className="w-9 h-1 rounded-full bg-vellum-highest mx-auto mb-4" aria-hidden="true" />
+            <p className="manuscript-label">Move to stage</p>
+            <p className="font-serif text-lg text-ink-900 leading-snug mt-1 mb-3 truncate">
+              {moveSheetOpp.company} · {moveSheetOpp.role}
+            </p>
+            <div className="space-y-0.5">
+              {COLUMNS.map((col, i) => {
+                const isCurrent = col.status === moveSheetOpp.status;
+                return (
+                  <button
+                    key={col.status}
+                    type="button"
+                    disabled={isCurrent}
+                    onClick={() => {
+                      moveOpportunity(moveSheetOpp.id, col.status);
+                      setMoveSheetOpp(null);
+                      scrollToCol(i);
+                    }}
+                    className={`w-full flex items-center gap-3 px-3 py-3.5 rounded-lg text-left transition-colors ${
+                      isCurrent ? "bg-vellum-low" : "active:bg-vellum-mid"
+                    }`}
+                  >
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${col.marker}`} aria-hidden="true" />
+                    <span className="text-[15px] font-medium text-ink-900">{col.label}</span>
+                    {isCurrent && (
+                      <span className="ml-auto text-[10px] uppercase tracking-label text-ink-600 font-semibold">
+                        Current
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Card body shared by the desktop drag cards and the mobile swipe columns.
+// hidePriorityDot leaves room for the mobile move button in the top-right corner.
+function PipelineCardContent({
+  opp,
+  showComp,
+  hidePriorityDot = false,
+}: {
+  opp: Opportunity;
+  showComp: boolean;
+  hidePriorityDot?: boolean;
+}) {
+  const chips: React.ReactNode[] = [];
+  if (opp.fitScore != null) {
+    chips.push(
+      <span key="fit" className="text-[10px] font-semibold uppercase tracking-label text-terracotta">
+        {opp.fitScore}% fit
+      </span>
+    );
+  }
+  if (opp.tier != null) {
+    chips.push(
+      <span key="tier" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
+        T{opp.tier}
+      </span>
+    );
+  }
+  if (opp.source === "referral") {
+    chips.push(
+      <span key="ref" className="text-[10px] font-semibold uppercase tracking-label text-sage">
+        Referral
+      </span>
+    );
+  }
+  if (opp._count.interviews > 0) {
+    chips.push(
+      <span key="int" className="text-[10px] font-semibold uppercase tracking-label text-ink-600">
+        {opp._count.interviews} int.
+      </span>
+    );
+  }
+
+  return (
+    <>
+      <div className="flex items-start gap-2.5">
+        <CompanyAvatar company={opp.company} website={opp.website} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase tracking-label text-ink-600 font-semibold truncate">
+                {opp.company}
+              </p>
+              <h3 className="text-[15px] font-serif font-medium text-ink-900 leading-tight mt-0.5 line-clamp-2">
+                {opp.role}
+              </h3>
+            </div>
+            {!hidePriorityDot && opp.priority && (
+              <span
+                className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${PRIORITY_DOT[opp.priority] || "bg-ink-400"}`}
+                title={`${opp.priority} priority`}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showComp && opp.compMin != null && opp.compMax != null && (
+        <p className="text-[11px] text-ink-700 mt-2 font-medium">
+          ${opp.compMin}K – ${opp.compMax}K
+        </p>
+      )}
+
+      {opp.location && (
+        <p className="text-[11px] text-ink-600 mt-0.5 truncate">
+          {opp.location}{opp.remote && " · Remote"}
+        </p>
+      )}
+
+      {chips.length > 0 && (
+        <div className="flex items-center gap-x-2 gap-y-1 mt-2 flex-wrap">
+          {chips.map((chip, i) => (
+            <span key={i} className="flex items-center gap-x-2">
+              {i > 0 && <span className="text-ink-400 text-[10px]">·</span>}
+              {chip}
+            </span>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
 
