@@ -12,12 +12,14 @@ export const metadata: Metadata = {
   formatDetection: { telephone: false },
 };
 
-// viewportFit: "cover" is required for env(safe-area-inset-*) to resolve on
-// notched iPhones — without it the bottom tab bar sits under the home indicator.
+// Deliberately NOT viewport-fit=cover: on iOS Safari it extends the page
+// canvas behind the status bar and the bottom URL pill while sticky/fixed
+// bars stay anchored to the safe layout viewport, so content bleeds out
+// above the header and below the tab bar. With the default fit, Safari
+// clips the page to the safe region and keeps fixed bars above its chrome.
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
   themeColor: "#fcf9f4",
 };
 
