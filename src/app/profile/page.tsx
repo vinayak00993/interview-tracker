@@ -13,11 +13,11 @@ export default async function ProfilePage() {
   const profile = await findUserProfile(userId);
 
   return (
-    <>
-      <div className="pb-24 md:pb-0">
+    <div className="app-shell">
+      <div className="app-shell-scroll">
         <ProfileForm profile={profile || null} />
       </div>
       <MobileTabBar />
-    </>
+    </div>
   );
 }

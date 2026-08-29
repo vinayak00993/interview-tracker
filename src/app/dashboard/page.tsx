@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-vellum">
+    <div className="app-shell min-h-screen bg-vellum">
       {/* Header — editorial masthead */}
       <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      <div className="flex flex-col lg:flex-row pb-24 md:pb-0">
+      <div className="app-shell-scroll flex flex-col lg:flex-row">
         {/* Main content — Kanban */}
         <main className="flex-1 min-w-0 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 animate-fade-in-up">
           <KanbanBoard opportunities={opportunities} />
