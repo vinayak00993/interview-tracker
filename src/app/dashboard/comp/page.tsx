@@ -13,11 +13,9 @@ export default async function CompPage() {
   const opportunities = await findOpportunities(userId);
 
   return (
-    <div className="app-shell">
-      <div className="app-shell-scroll">
-        <CompComparison opportunities={opportunities} />
-      </div>
+    <>
+      <CompComparison opportunities={opportunities} />
       <MobileTabBar />
-    </div>
+    </>
   );
 }

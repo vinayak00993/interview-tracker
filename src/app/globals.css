@@ -204,38 +204,6 @@ input:focus, textarea:focus, select:focus {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
-
-/* App shell — on phones the app pages pin the masthead and tab bar as shell
-   edges and scroll content in an inner container. The document itself never
-   scrolls, so iOS Safari can't paint cards behind the translucent status bar
-   above the header or in the URL-pill strip below the tab bar (it shows the
-   plain body background there instead). Desktop (md+) keeps document scroll —
-   these rules are scoped to phones and inert elsewhere.
-   Kept outside @layer so the height/min-height here beats utility classes
-   like min-h-screen on the same elements. */
-@media (max-width: 767px) {
-  body:has(.app-shell) {
-    overflow: hidden;
-  }
-  body:has(.app-shell) > footer {
-    display: none;
-  }
-  .app-shell {
-    display: flex;
-    flex-direction: column;
-    height: 100vh; /* fallback for pre-dvh Safari */
-    height: 100dvh;
-    min-height: 0;
-  }
-  .app-shell-scroll {
-    flex: 1 1 0%;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
-  }
-}
-
 /* Lighter frosted glass on phones — blur(20px) under a sticky header makes
    scrolling stutter on mid-range mobile GPUs */
 @media (max-width: 767px) {

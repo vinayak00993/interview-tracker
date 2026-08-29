@@ -29,9 +29,10 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="app-shell min-h-screen bg-vellum">
-      {/* Header — editorial masthead */}
-      <header className="manuscript-glass sticky top-0 z-20 animate-fade-in">
+    <div className="min-h-screen bg-vellum">
+      {/* Header — editorial masthead. Scrolls with the page on phones;
+          pinned only from md up where Safari's chrome isn't in play. */}
+      <header className="manuscript-glass md:sticky md:top-0 z-20 animate-fade-in">
         <div className="px-4 sm:px-10 lg:px-16 py-4 sm:py-5 flex items-center justify-between">
           <div className="min-w-0 flex items-center gap-3 sm:gap-4">
             <Logo size={26} className="shrink-0" />
@@ -88,7 +89,7 @@ export default async function DashboardPage() {
         <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
       </header>
 
-      <div className="app-shell-scroll flex flex-col lg:flex-row">
+      <div className="flex flex-col lg:flex-row">
         {/* Main content — Kanban */}
         <main className="flex-1 min-w-0 px-4 sm:px-10 lg:px-16 py-6 sm:py-8 animate-fade-in-up">
           <KanbanBoard opportunities={opportunities} />
