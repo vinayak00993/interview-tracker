@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { OpportunityDetail } from "@/lib/data/opportunities";
-import { ALL_STATUSES, stageFor, formatComp } from "@/lib/pipeline";
+import { ALL_STATUSES, stageFor, formatComp, formatLocation } from "@/lib/pipeline";
 import { changeStatusAction, deleteOpportunityAction } from "@/lib/actions/opportunities";
 import { Badge, Button, ErrorText } from "@/components/ui";
 import { CompanyAvatar } from "@/components/CompanyAvatar";
@@ -43,12 +43,7 @@ export function OpportunityHeader({ opportunity: opp }: { opportunity: Opportuni
             <h1 className="manuscript-display text-3xl sm:text-4xl lg:text-[2.75rem] font-semibold text-ink-900 leading-[1.05] tracking-tight mt-1">{opp.role}</h1>
             <p className="text-lg font-serif italic text-ink-700 mt-2">
               at <span className="text-ink-900 not-italic font-medium">{opp.company}</span>
-              {opp.location && (
-                <span className="text-ink-600">
-                  {" "}· {opp.location}
-                  {opp.remote ? " · Remote" : ""}
-                </span>
-              )}
+              {(opp.location || opp.remote) && <span className="text-ink-600"> · {formatLocation(opp.location, opp.remote)}</span>}
             </p>
             <div className="flex items-center gap-3 mt-4 flex-wrap">
               <Badge className={stage.badge}>{stage.label}</Badge>

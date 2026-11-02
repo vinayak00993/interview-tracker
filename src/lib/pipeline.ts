@@ -86,3 +86,11 @@ export function formatComp(min: number | null, max: number | null): string | nul
   if (max != null) return `Up to $${max}K`;
   return null;
 }
+
+/** "Austin, TX · Remote", without doubling up when the location already says remote. */
+export function formatLocation(location: string | null | undefined, remote: boolean): string {
+  const loc = (location ?? "").trim();
+  if (!remote) return loc;
+  if (!loc) return "Remote";
+  return /remote/i.test(loc) ? loc : `${loc} · Remote`;
+}

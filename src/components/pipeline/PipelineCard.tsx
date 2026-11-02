@@ -1,5 +1,5 @@
 import { CompanyAvatar } from "@/components/CompanyAvatar";
-import { PRIORITY_DOT } from "@/lib/pipeline";
+import { PRIORITY_DOT, formatLocation } from "@/lib/pipeline";
 
 export interface PipelineCardData {
   id: string;
@@ -50,12 +50,7 @@ export function PipelineCardContent({ opp, showComp, hidePriorityDot = false }: 
         </p>
       )}
 
-      {opp.location && (
-        <p className="text-[11px] text-ink-600 mt-0.5 truncate">
-          {opp.location}
-          {opp.remote && " · Remote"}
-        </p>
-      )}
+      {(opp.location || opp.remote) && <p className="text-[11px] text-ink-600 mt-0.5 truncate">{formatLocation(opp.location, opp.remote)}</p>}
 
       {chips.length > 0 && (
         <div className="flex items-center gap-x-2 gap-y-1 mt-2 flex-wrap">
