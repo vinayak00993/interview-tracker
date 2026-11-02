@@ -1,3 +1,14 @@
+// Interview Tracker schema.
+//
+// Conventions that keep this file compatible with the production Turso
+// database (created by scripts/migrate.mjs, not by Prisma Migrate):
+//   - Timestamps are ISO 8601 strings stored in TEXT columns. Prisma's
+//     SQLite DateTime mapping writes integers, which would not read back
+//     cleanly next to the text values already in production.
+//   - Booleans are INTEGER 0/1 columns.
+//   - Any change here must be mirrored as an idempotent statement in
+//     scripts/migrate.mjs, which runs on every deploy and on `npm run db:setup`.
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["driverAdapters"]
@@ -9,113 +20,117 @@ datasource db {
 }
 
 model User {
-  id                  String         @id @default(cuid())
-  email               String         @unique
-  passwordHash        String?        // nullable — Google-auth users have no password
-  name                String?
-  image               String?        // avatar URL from Google
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String? // null for Google-only accounts
+  name         String?
+  image        String? // avatar URL from Google
+  googleId     String? @unique
 
-  // Google OAuth
-  googleId            String?        @unique
-  googleAccessToken   String?
-  googleRefreshToken  String?
-  googleTokenExpiresAt DateTime?
-  googleScopes        String?        // space-delimited list of granted scopes
-  calendarConnected   Boolean        @default(false)
+  createdAt String
+  updatedAt String
 
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
-  opportunities       Opportunity[]
-  contacts            Contact[]
-  activities          Activity[]
-  documents           Document[]
+  opportunities Opportunity[]
+  contacts      Contact[]
+  activities    Activity[]
+  documents     Document[]
+  profile       UserProfile?
+}
+
+model UserProfile {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resumeText    String?
+  linkedInAbout String?
+  linkedInUrl   String?
+  createdAt     String
+  updatedAt     String
 }
 
 model Opportunity {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Core fields
-  company     String
-  role        String
-  jdLink      String?
-  website     String?       // company website URL for logo matching
-  compMin     Int?          // in thousands (e.g., 176 = $176K)
-  compMax     Int?          // in thousands
-  location    String?
-  remote      Boolean       @default(false)
+  company  String
+  role     String
+  jdLink   String?
+  jdText   String? // cached plain-text job description, filled by the JD parser
+  website  String? // company website for logo matching
+  compMin  Int? // in thousands USD
+  compMax  Int?
+  location String?
+  remote   Boolean @default(false)
 
   // Assessment
-  fitScore    Int?          // 0-100
-  totalScore  Float?        // computed weighted score 0-100
-  priority    String        @default("medium") // high, medium, low
-  tier        Int?          // 1, 2, 3
+  fitScore   Int? // 0-100, user supplied
+  totalScore Float?
+  priority   String @default("medium") // high | medium | low
+  tier       Int? // 1-3
 
   // Status tracking
-  status      String        @default("saved") // saved, applied, interviewing, offer, rejected, withdrawn, archived
-  appliedDate DateTime?
-  source      String?       // referral, direct, recruiter, job_board
+  status      String  @default("saved") // saved | applied | interviewing | offer | rejected | withdrawn | archived
+  appliedDate String?
+  source      String? // referral | direct | recruiter | job_board
+  followUpAt  String? // explicit reminder date; the sidebar also infers stale ones
 
   // Notes
-  notes       String?       // general notes, markdown supported
-  prosConsNotes String?     // structured pros/cons
-  keyGaps     String?       // known gaps to address
+  notes         String?
+  prosConsNotes String?
+  keyGaps       String?
 
-  // Timestamps
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt String
+  updatedAt String
 
-  // Relations
-  interviews  Interview[]
-  activities  Activity[]
+  interviews          Interview[]
+  activities          Activity[]
   opportunityContacts OpportunityContact[]
   documentsSent       OpportunityDocument[]
-  offer       Offer?
+  offer               Offer?
+  preps               InterviewPrep[]
 
   @@index([userId, status])
   @@index([userId, company])
 }
 
 model Offer {
-  id              String      @id @default(cuid())
-  opportunityId   String      @unique
-  opportunity     Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  opportunityId String      @unique
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
 
-  // Comp — all in thousands USD where numeric
-  baseComp        Int?        // annual base in $K
-  signOnBonus     Int?        // one-time, $K
-  annualBonus     Int?        // target annual bonus $K
-  bonusPercent    Float?      // target bonus as % of base
+  // Comp, all in thousands USD where numeric
+  baseComp     Int?
+  signOnBonus  Int?
+  annualBonus  Int?
+  bonusPercent Float?
 
   // Equity
-  equityType      String?     // RSU, ISO, NSO, options, none
-  equityValue     Int?        // total grant $K (at current valuation)
-  equityShares    Int?        // raw share count if provided
-  vestYears       Int?        // total vest length
-  vestCliff       Int?        // cliff in months
-  vestSchedule    String?     // "25/25/25/25" or "monthly after 1yr cliff"
+  equityType   String?
+  equityValue  Int?
+  equityShares Int?
+  vestYears    Int?
+  vestCliff    Int?
+  vestSchedule String?
 
-  // Benefits & role
-  ptoDays         Int?        // annual PTO days (or -1 for unlimited)
-  healthcare      String?     // short description
-  remotePolicy    String?     // remote/hybrid/onsite + details
-  startDate       String?     // ISO date or "flexible"
-  expiryDate      String?     // offer expiry — ISO date
-  location        String?     // work location
-  title           String?     // offered title (may differ from role)
-  level           String?     // IC5, L5, Senior II, etc.
-  benefits        String?     // freeform notes (401k match, parental leave, etc.)
+  // Benefits and role
+  ptoDays      Int?
+  healthcare   String?
+  remotePolicy String?
+  startDate    String?
+  expiryDate   String?
+  location     String?
+  title        String?
+  level        String?
+  benefits     String?
 
-  // Source content
-  rawText         String?     // original offer letter text
-  sourceType      String?     // email, pdf, docx, manual
+  rawText    String?
+  sourceType String?
+  aiSummary  String?
 
-  // AI outputs
-  aiSummary       String?     // short natural-language summary
-
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  createdAt String
+  updatedAt String
 }
 
 model Interview {
@@ -123,60 +138,90 @@ model Interview {
   opportunityId String
   opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
 
-  // Event details
-  round         String      // "Recruiter Screen", "Hiring Manager", "Panel", "Technical", "Final"
-  roundNumber   Int         @default(1)
-  dateTime      DateTime?
-  durationMin   Int?        // expected duration in minutes
-  format        String      @default("video") // phone, video, onsite, async
+  round       String
+  roundNumber Int     @default(1)
+  dateTime    String?
+  durationMin Int?
+  format      String  @default("video") // phone | video | onsite | async
 
-  // People
-  interviewerName  String?
-  interviewerTitle String?
+  interviewerName     String?
+  interviewerTitle    String?
   interviewerLinkedIn String?
 
-  // Prep and follow-up
-  prepNotes     String?     // markdown: what to prepare, key talking points
-  debriefNotes  String?     // markdown: how it went, questions asked, vibe
-  questionsAsked String?    // questions they asked you
-  questionsToAsk String?    // questions you want to ask them
+  prepNotes      String?
+  debriefNotes   String?
+  questionsAsked String?
+  questionsToAsk String?
 
-  // Outcome
-  status        String      @default("scheduled") // scheduled, completed, cancelled, rescheduled
-  sentiment     String?     // positive, neutral, negative
-  nextSteps     String?     // what they said happens next
+  status    String  @default("scheduled") // scheduled | completed | cancelled | rescheduled
+  sentiment String? // positive | neutral | negative
+  nextSteps String?
 
-  // Timestamps
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  createdAt String
+  updatedAt String
+
+  preps     InterviewPrep[]
+  followUps FollowUpDraft[]
 
   @@index([opportunityId])
 }
 
+/// A generated prep sheet. Stored as structured JSON so later rounds can
+/// read the gaps and questions flagged in earlier rounds.
+model InterviewPrep {
+  id            String      @id @default(cuid())
+  opportunityId String
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  interviewId   String?
+  interview     Interview?  @relation(fields: [interviewId], references: [id], onDelete: SetNull)
+
+  content       String // JSON matching PrepSheet in src/lib/ai/prep.ts
+  model         String
+  promptVersion Int    @default(1)
+  inputTokens   Int?
+  outputTokens  Int?
+
+  createdAt String
+
+  @@index([opportunityId])
+}
+
+/// A generated follow-up email draft tied to an interview round.
+model FollowUpDraft {
+  id          String    @id @default(cuid())
+  interviewId String
+  interview   Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  subject String
+  body    String
+  model   String
+  sentAt  String?
+
+  createdAt String
+
+  @@index([interviewId])
+}
+
 model Contact {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Info
-  name        String
-  title       String?
-  company     String?
-  email       String?
-  phone       String?
-  linkedIn    String?
+  name     String
+  title    String?
+  company  String?
+  email    String?
+  phone    String?
+  linkedIn String?
 
-  // Relationship
-  type        String      @default("other") // recruiter, hiring_manager, referral, peer, mentor, other
-  warmth      String?     // cold, warm, hot — how strong is the connection
-  notes       String?
+  type   String  @default("other") // recruiter | hiring_manager | referral | peer | mentor | other
+  warmth String? // cold | warm | hot
+  notes  String?
 
-  // Tracking
-  lastContactedAt DateTime?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  lastContactedAt String?
+  createdAt       String
+  updatedAt       String
 
-  // Relations
   opportunityContacts OpportunityContact[]
 
   @@index([userId])
@@ -188,7 +233,7 @@ model OpportunityContact {
   opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
   contactId     String
   contact       Contact     @relation(fields: [contactId], references: [id], onDelete: Cascade)
-  role          String?     // their role in this specific opportunity: "recruiter", "hiring_manager", "referral"
+  role          String? // their role in this opportunity
 
   @@unique([opportunityId, contactId])
 }
@@ -200,36 +245,31 @@ model Activity {
   opportunityId String?
   opportunity   Opportunity? @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
 
-  // Event
-  type          String       // applied, emailed, interviewed, followed_up, researched, offer_received, rejected, withdrew, note
-  description   String
-  date          DateTime     @default(now())
+  type        String // applied | emailed | interviewed | followed_up | researched | offer_received | rejected | withdrew | note | status_change
+  description String
+  date        String
 
-  // Timestamps
-  createdAt     DateTime     @default(now())
+  createdAt String
 
   @@index([userId, date])
   @@index([opportunityId])
 }
 
 model Document {
-  id          String      @id @default(cuid())
-  userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  // Doc info
-  type        String      // resume, cover_letter, portfolio, references, other
-  name        String      // "Resume v3 - AI Companies", "Anthropic Cover Letter"
-  version     String?     // "v1", "v2", "final"
-  notes       String?     // what's different about this version
-  filePath    String?     // local file path if stored
+  type     String // resume | cover_letter | portfolio | references | other
+  name     String
+  version  String?
+  notes    String?
+  filePath String?
 
-  // Timestamps
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt String
+  updatedAt String
 
-  // Relations
-  sentTo      OpportunityDocument[]
+  sentTo OpportunityDocument[]
 
   @@index([userId])
 }
@@ -240,7 +280,15 @@ model OpportunityDocument {
   opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
   documentId    String
   document      Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  sentAt        DateTime    @default(now())
+  sentAt        String
 
   @@unique([opportunityId, documentId])
+}
+
+/// Fixed-window counters for login rate limiting. Lives in the database so
+/// the limit holds across server instances and restarts.
+model RateLimit {
+  key     String @id
+  count   Int
+  resetAt String
 }

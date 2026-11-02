@@ -1,62 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { findOpportunityById, updateOpportunity, deleteOpportunity } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { withAuth, parseJson, jsonError } from "@/lib/api";
+import { getOpportunity, updateOpportunity, deleteOpportunity } from "@/lib/data/opportunities";
+import { opportunityUpdateSchema } from "@/lib/validation";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const userId = (session.user as any).id;
+type Ctx = { params: { id: string } };
 
-    const opportunity = await findOpportunityById(params.id, userId);
-    if (!opportunity) return NextResponse.json({ error: "Not found" }, { status: 404 });
+export const GET = withAuth<Ctx>(async (_req, { params }, userId) => {
+  const opp = await getOpportunity(params.id, userId);
+  if (!opp) return jsonError("Not found", 404);
+  return NextResponse.json(opp);
+});
 
-    return NextResponse.json(opportunity);
-  } catch (error) {
-    console.error("GET /api/opportunities/[id] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+export const PUT = withAuth<Ctx>(async (req, { params }, userId) => {
+  const parsed = await parseJson(req, opportunityUpdateSchema);
+  if (!parsed.ok) return parsed.response;
+  const updated = await updateOpportunity(params.id, userId, parsed.data);
+  if (!updated) return jsonError("Not found", 404);
+  return NextResponse.json(updated);
+});
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const userId = (session.user as any).id;
-
-    const body = await req.json();
-    const result = await updateOpportunity(params.id, userId, body);
-    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("PUT /api/opportunities/[id] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const userId = (session.user as any).id;
-
-    const deleted = await deleteOpportunity(params.id, userId);
-    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    return NextResponse.json({ message: "Deleted" });
-  } catch (error) {
-    console.error("DELETE /api/opportunities/[id] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+export const DELETE = withAuth<Ctx>(async (_req, { params }, userId) => {
+  const deleted = await deleteOpportunity(params.id, userId);
+  if (!deleted) return jsonError("Not found", 404);
+  return NextResponse.json({ ok: true });
+});

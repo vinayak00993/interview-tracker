@@ -4,51 +4,53 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "build": "prisma generate && next build",
+    "start": "node scripts/migrate.mjs && next start",
+    "postinstall": "prisma generate",
     "lint": "next lint",
-    "db:push": "prisma db push",
-    "db:seed": "prisma db seed",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:migrate": "node scripts/migrate.mjs",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:setup": "node scripts/migrate.mjs && tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma db push --force-reset && prisma db seed",
-    "db:setup": "tsx scripts/setup-db.ts"
+    "db:reset": "rm -f prisma/dev.db prisma/dev.db-wal prisma/dev.db-shm && node scripts/migrate.mjs && tsx prisma/seed.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
-    "@auth/prisma-adapter": "^2.0.0",
     "@libsql/client": "^0.17.2",
-    "@prisma/adapter-better-sqlite3": "^7.5.0",
-    "@prisma/adapter-libsql": "^7.5.0",
+    "@prisma/adapter-libsql": "^6.19.2",
     "@prisma/client": "^6.19.2",
     "bcryptjs": "^2.4.3",
-    "better-sqlite3": "^12.8.0",
-    "date-fns": "^3.6.0",
-    "lucide-react": "^0.400.0",
     "mammoth": "^1.12.0",
     "next": "^14.2.35",
     "next-auth": "^4.24.7",
-    "pdf-parse": "^2.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-hot-toast": "^2.4.1",
     "react-markdown": "^10.1.0",
-    "tesseract.js": "^7.0.0",
-    "zod": "^3.23.0"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.0.0",
-    "@types/pdf-parse": "^1.1.5",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.35",
     "postcss": "^8.4.47",
     "prisma": "^6.19.2",
     "tailwindcss": "^3.4.13",
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.9"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

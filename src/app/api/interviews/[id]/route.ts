@@ -1,43 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import { updateInterview, deleteInterview } from "@/lib/db";
+import { NextResponse } from "next/server";
+import { withAuth, parseJson, jsonError } from "@/lib/api";
+import { getInterview, updateInterview, deleteInterview } from "@/lib/data/interviews";
+import { interviewUpdateSchema } from "@/lib/validation";
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const userId = (session.user as any).id;
+type Ctx = { params: { id: string } };
 
-    const body = await req.json();
-    const result = await updateInterview(params.id, userId, body);
-    if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
+export const GET = withAuth<Ctx>(async (_req, { params }, userId) => {
+  const interview = await getInterview(params.id, userId);
+  if (!interview) return jsonError("Not found", 404);
+  return NextResponse.json(interview);
+});
 
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("PUT /api/interviews/[id] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+export const PUT = withAuth<Ctx>(async (req, { params }, userId) => {
+  const parsed = await parseJson(req, interviewUpdateSchema);
+  if (!parsed.ok) return parsed.response;
+  const updated = await updateInterview(params.id, userId, parsed.data);
+  if (!updated) return jsonError("Not found", 404);
+  return NextResponse.json(updated);
+});
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const userId = (session.user as any).id;
-
-    const deleted = await deleteInterview(params.id, userId);
-    if (!deleted) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    return NextResponse.json({ message: "Deleted" });
-  } catch (error) {
-    console.error("DELETE /api/interviews/[id] error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
-  }
-}
+export const DELETE = withAuth<Ctx>(async (_req, { params }, userId) => {
+  const ok = await deleteInterview(params.id, userId);
+  if (!ok) return jsonError("Not found", 404);
+  return NextResponse.json({ ok: true });
+});

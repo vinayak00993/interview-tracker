@@ -101,38 +101,6 @@ module.exports = {
         },
         outlineSoft: '#dbc1bc',   // outline-variant
 
-        // ==== Legacy warm/terra palette — kept so existing classes still compile ====
-        warm: {
-          50: "#fcf9f4",
-          100: "#f6f3ee",
-          200: "#f0ede8",
-          300: "#e5e2dd",
-          400: "#b8a990",
-          500: "#88726e",
-          600: "#55433f",
-          700: "#55433f",
-          800: "#31302d",
-          900: "#1c1c19",
-        },
-        terra: {
-          DEFAULT: "#843728",
-          light: "#a24e3d",
-          dark: "#792f21",
-          bg: "#fdf2f2",
-        },
-        pipeline: {
-          saved:        { DEFAULT: "#88726e", light: "#a8968f", bg: "#ebe8e3" },
-          applied:      { DEFAULT: "#b98a3c", light: "#d4a366", bg: "#f5ecd9" },
-          interviewing: { DEFAULT: "#843728", light: "#a24e3d", bg: "#f6e8e4" },
-          offer:        { DEFAULT: "#4c513e", light: "#6b705c", bg: "#e4e8d0" },
-          rejected:     { DEFAULT: "#a24e3d", light: "#b86d5e", bg: "#f0d8d2" },
-          withdrawn:    { DEFAULT: "#7a6e85", light: "#958aa1", bg: "#e5e0ea" },
-        },
-        sentiment: {
-          positive: "#4c513e",
-          neutral:  "#b98a3c",
-          negative: "#a24e3d",
-        },
       },
       borderRadius: {
         // Roundedness: 1 — small, structured

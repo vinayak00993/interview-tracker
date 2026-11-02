@@ -1,13 +1,23 @@
-import { NextAuthOptions } from "next-auth";
+import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import bcrypt from "bcryptjs";
 import {
   findUserByEmail,
   findUserByGoogleId,
   createGoogleUser,
   linkGoogleToUser,
-} from "./db";
+  verifyPassword,
+} from "@/lib/data/users";
+import { consumeRateLimit, resetRateLimit } from "@/lib/data/rate-limit";
+
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+
+function clientIp(headers: Record<string, string | string[] | undefined> | undefined): string {
+  const forwarded = headers?.["x-forwarded-for"];
+  const value = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+  return value?.split(",")[0]?.trim() || "unknown";
+}
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,43 +27,28 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        // Rate limit per IP and per account so a single address cannot
+        // hammer one login and a botnet cannot spray one account.
+        const ip = clientIp(req?.headers as Record<string, string | undefined> | undefined);
+        const email = credentials.email.toLowerCase().trim();
+        const [byIp, byEmail] = await Promise.all([
+          consumeRateLimit(`login:ip:${ip}`, LOGIN_MAX_ATTEMPTS * 4, LOGIN_WINDOW_MS),
+          consumeRateLimit(`login:email:${email}`, LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_MS),
+        ]);
+        if (!byIp.allowed || !byEmail.allowed) {
+          throw new Error("Too many login attempts. Try again in 15 minutes.");
+        }
+
         try {
-          if (!credentials?.email || !credentials?.password) {
-            console.error("[auth] Missing credentials");
-            return null;
-          }
-
-          console.log("[auth] Looking up user:", credentials.email);
-          const user = await findUserByEmail(credentials.email);
-          if (!user) {
-            console.error("[auth] User not found:", credentials.email);
-            return null;
-          }
-
-          if (!user.passwordHash) {
-            console.error("[auth] User has no password — Google-only account:", credentials.email);
-            return null;
-          }
-
-          console.log("[auth] User found, checking password");
-          const isValid = await bcrypt.compare(
-            credentials.password,
-            user.passwordHash
-          );
-          if (!isValid) {
-            console.error("[auth] Invalid password");
-            return null;
-          }
-
-          console.log("[auth] Login successful for:", user.email);
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          };
+          const user = await findUserByEmail(email);
+          if (!user || !(await verifyPassword(user, credentials.password))) return null;
+          await resetRateLimit(`login:email:${email}`);
+          return { id: user.id, email: user.email, name: user.name, image: user.image };
         } catch (error) {
-          console.error("[auth] Authorize error:", error);
+          console.error("[auth] authorize failed:", error instanceof Error ? error.message : error);
           return null;
         }
       },
@@ -62,130 +57,58 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-      authorization: {
-        params: {
-          // offline = returns a refresh_token so we can call the Calendar
-          // API later without the user being present. prompt=consent forces
-          // Google to re-issue the refresh token on every sign-in, which we
-          // want while developing / swapping scopes.
-          access_type: "offline",
-          prompt: "consent",
-          scope: [
-            "openid",
-            "email",
-            "profile",
-            "https://www.googleapis.com/auth/calendar.events.readonly",
-          ].join(" "),
-        },
-      },
+      // Identity only. No calendar or offline scopes: we do not store
+      // Google tokens, so we do not ask for anything we cannot use.
+      authorization: { params: { scope: "openid email profile" } },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
-    /**
-     * Runs AFTER Google successfully authenticates and BEFORE the JWT
-     * is issued. Here we:
-     *   - Look up an existing User by googleId → reuse
-     *   - Else look up by email → link Google to the existing account
-     *   - Else create a new Google-only user
-     * Then we stash the DB user id back on the `user` object so the
-     * `jwt` callback can pick it up.
-     */
     async signIn({ user, account, profile }) {
-      if (account?.provider !== "google") {
-        return true; // Credentials provider — already handled in authorize()
-      }
-
+      if (account?.provider !== "google") return true;
       try {
         const googleId = account.providerAccountId;
         const email = user.email;
-        if (!email || !googleId) {
-          console.error("[auth] Google signIn missing email or googleId");
-          return false;
-        }
+        if (!email || !googleId) return false;
+        const image = user.image ?? (profile as { picture?: string } | undefined)?.picture ?? null;
+        const identity = { googleId, name: user.name ?? null, image };
 
-        const scopes = (account.scope as string | undefined) ?? null;
-        const accessToken = (account.access_token as string | undefined) ?? null;
-        const refreshToken = (account.refresh_token as string | undefined) ?? null;
-        const expiresAt = (account.expires_at as number | undefined) ?? null;
-        const image = (user.image as string | undefined) ?? ((profile as { picture?: string } | undefined)?.picture ?? null);
-
-        // 1. Already have a googleId match → just refresh tokens
         const byGoogle = await findUserByGoogleId(googleId);
         if (byGoogle) {
-          await linkGoogleToUser(byGoogle.id, {
-            googleId,
-            name: user.name ?? null,
-            image: image ?? null,
-            accessToken,
-            refreshToken,
-            expiresAt,
-            scopes,
-          });
           (user as { dbId?: string }).dbId = byGoogle.id;
           return true;
         }
-
-        // 2. Existing email-password account → link Google to it
         const byEmail = await findUserByEmail(email);
         if (byEmail) {
-          await linkGoogleToUser(byEmail.id, {
-            googleId,
-            name: user.name ?? null,
-            image: image ?? null,
-            accessToken,
-            refreshToken,
-            expiresAt,
-            scopes,
-          });
+          await linkGoogleToUser(byEmail.id, identity);
           (user as { dbId?: string }).dbId = byEmail.id;
           return true;
         }
-
-        // 3. Brand new — create Google-only user
-        const created = await createGoogleUser({
-          googleId,
-          email,
-          name: user.name ?? null,
-          image: image ?? null,
-          accessToken,
-          refreshToken,
-          expiresAt,
-          scopes,
-        });
+        const created = await createGoogleUser({ ...identity, email });
         (user as { dbId?: string }).dbId = created.id;
         return true;
       } catch (error) {
-        console.error("[auth] Google signIn error:", error);
+        console.error("[auth] Google sign-in failed:", error instanceof Error ? error.message : error);
         return false;
       }
     },
 
     async jwt({ token, user, account }) {
-      // First sign-in — stash DB id on the token
       if (user) {
         const dbId = (user as { dbId?: string; id?: string }).dbId ?? (user as { id?: string }).id;
         if (dbId) token.id = dbId;
       }
-      // Carry the provider through so the client can show
-      // "connected as google" hints
-      if (account?.provider) {
-        token.provider = account.provider;
-      }
+      if (account?.provider) token.provider = account.provider;
       return token;
     },
 
     async session({ session, token }) {
       if (session.user) {
-        (session.user as { id?: string }).id = token.id as string | undefined;
-        (session.user as { provider?: string }).provider = token.provider as string | undefined;
+        session.user.id = token.id as string;
+        session.user.provider = token.provider;
       }
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 };

@@ -1,50 +1,23 @@
 import { NextResponse } from "next/server";
-import { createUser } from "@/lib/db";
+import { createUser, EmailExistsError } from "@/lib/data/users";
+import { consumeRateLimit } from "@/lib/data/rate-limit";
+import { registerSchema } from "@/lib/validation";
+import { jsonError, parseJson } from "@/lib/api";
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const limit = await consumeRateLimit(`register:${ip}`, 10, 60 * 60 * 1000);
+  if (!limit.allowed) return jsonError("Too many sign-ups from this address. Try again later.", 429);
+
+  const parsed = await parseJson(req, registerSchema);
+  if (!parsed.ok) return parsed.response;
+
   try {
-    const body = await request.json();
-    const { email, password, name } = body;
-
-    // Validation
-    if (!email || typeof email !== "string" || !email.includes("@")) {
-      return NextResponse.json(
-        { error: "Valid email is required" },
-        { status: 400 }
-      );
-    }
-
-    if (!password || typeof password !== "string" || password.length < 8) {
-      return NextResponse.json(
-        { error: "Password must be at least 8 characters" },
-        { status: 400 }
-      );
-    }
-
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Name is required" },
-        { status: 400 }
-      );
-    }
-
-    const user = await createUser(email.toLowerCase().trim(), password, name.trim());
-
-    return NextResponse.json(
-      { id: user.id, email: user.email, name: user.name },
-      { status: 201 }
-    );
-  } catch (error: any) {
-    if (error.message === "EMAIL_EXISTS") {
-      return NextResponse.json(
-        { error: "An account with this email already exists" },
-        { status: 409 }
-      );
-    }
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "Registration failed" },
-      { status: 500 }
-    );
+    const user = await createUser(parsed.data.email, parsed.data.password, parsed.data.name);
+    return NextResponse.json({ id: user.id, email: user.email, name: user.name }, { status: 201 });
+  } catch (error) {
+    if (error instanceof EmailExistsError) return jsonError("An account with this email already exists", 409);
+    console.error("[api] register failed:", error);
+    return jsonError("Registration failed", 500);
   }
 }

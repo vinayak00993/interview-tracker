@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // Prevent webpack from bundling native/binary packages
-    serverComponentsExternalPackages: ["better-sqlite3", "@libsql/client", "libsql", "mammoth"],
+    // Native and engine-backed packages must not be bundled by webpack.
+    serverComponentsExternalPackages: ["@libsql/client", "libsql", "@prisma/client", "@prisma/adapter-libsql", "mammoth"],
   },
 };
 

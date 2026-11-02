@@ -22,8 +22,6 @@
   --sage: #4c513e;
   --umber: #695c4c;
 
-  /* Legacy aliases so older inline styles still compute */
-  --bg-primary-legacy: #fcf9f4;
 }
 
 html, body {
@@ -73,14 +71,10 @@ body::before {
   background-size: 200px 200px;
 }
 
-/* Deliberate, heavy easing */
-*, *::before, *::after {
-  transition-property: color, background-color, border-color, box-shadow, opacity;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
-}
-
-[draggable="true"], input, textarea, select, a, button {
+/* Deliberate, heavy easing on interactive elements only. A global
+   transition rule made every re-render animate colour changes, which
+   cost frames on long boards. */
+[draggable="true"], input, textarea, select, a, button, summary, [role="button"] {
   transition-property: color, background-color, border-color, box-shadow, opacity, transform;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 240ms;
