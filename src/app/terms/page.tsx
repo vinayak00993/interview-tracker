@@ -1,34 +1,15 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { PublicShell, PublicArticle } from "@/components/marketing/PublicShell";
 
-export const metadata = {
-  title: "Terms of Service | Interview Tracker",
+export const metadata: Metadata = {
+  title: "Terms of Service",
   description: "Terms of use for Interview Tracker.",
 };
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-vellum">
-      <header className="manuscript-glass sticky top-0 z-20">
-        <div className="px-4 sm:px-10 lg:px-16 py-4 flex items-center gap-4">
-          <Link
-            href="/"
-            className="text-[11px] font-semibold uppercase tracking-label text-ink-700 hover:text-terracotta hover:bg-vellum-high px-3 py-1.5 rounded transition-all"
-          >
-            ← Home
-          </Link>
-          <span className="text-ink-400">/</span>
-          <span className="text-[11px] font-semibold uppercase tracking-label text-ink-600">Terms</span>
-        </div>
-        <div className="h-px bg-gradient-to-r from-transparent via-vellum-high to-transparent" />
-      </header>
-
-      <div className="max-w-2xl mx-auto px-4 sm:px-10 lg:px-16 py-12 sm:py-16">
-        <p className="manuscript-label">Terms of Service</p>
-        <h1 className="manuscript-display text-3xl sm:text-4xl font-semibold text-ink-900 mt-1 leading-tight">
-          Terms of Service
-        </h1>
-        <p className="text-sm text-ink-600 mt-3">Last updated: April 16, 2026</p>
-
+    <PublicShell crumb="Terms">
+      <PublicArticle eyebrow="Terms of Service" title="Terms of Service" intro={<p className="text-sm text-ink-600">Last updated: April 16, 2026</p>}>
         <div className="mt-10 space-y-8 text-sm text-ink-800 leading-relaxed">
           <section>
             <h2 className="text-base font-serif font-semibold text-ink-900 mb-2">The short version</h2>
@@ -85,7 +66,7 @@ export default function TermsPage() {
             </p>
           </section>
         </div>
-      </div>
-    </div>
+      </PublicArticle>
+    </PublicShell>
   );
 }
